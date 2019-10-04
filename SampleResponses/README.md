@@ -1,0 +1,2 @@
+# Sample Responses
+> RESTlet Responses
