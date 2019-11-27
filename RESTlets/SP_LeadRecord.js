@@ -63,6 +63,10 @@ define(['N/record', 'N/error'],
                     } else {
                         rec.setCurrentSublistValue({ sublistId: 'addressbook', fieldId: 'defaultshipping', value: false });
                     }
+                    if (addr.label === 'Billing & Shipping Address') {
+                        rec.setCurrentSublistValue({ sublistId: 'addressbook', fieldId: 'defaultbilling', value: true });
+                        rec.setCurrentSublistValue({ sublistId: 'addressbook', fieldId: 'defaultshipping', value: true });
+                    }
                     var address = rec.getCurrentSublistSubrecord({ sublistId: 'addressbook', fieldId: 'addressbookaddress' });
                     address.setValue({ fieldId: 'addressee', value: addr.companyname });
                     address.setValue({ fieldId: 'addr1', value: addr.addr1 });
