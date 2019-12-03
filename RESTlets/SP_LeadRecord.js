@@ -3,7 +3,7 @@
  *@NScriptType Restlet
  */
 define(['N/record', 'N/error'],
-    function(record, error) {
+    function (record, error) {
         /**
          * Validates arguments
          * @param {array} args - the record type and optional record id
@@ -46,11 +46,12 @@ define(['N/record', 'N/error'],
                 if (context.hasOwnProperty(fldName))
                     if (fldName !== 'recordtype')
                         rec.setValue(fldName, context[fldName]);
-            
-            // Add address
+
+            // Add address & contacts
             if (context.recordtype === 'lead') {
+                // address
                 var leadAddress = context.addressbook;
-                leadAddress.forEach(function(addr){
+                leadAddress.forEach(function (addr) {
                     rec.selectNewLine({ sublistId: 'addressbook' });
                     rec.setCurrentSublistValue({ sublistId: 'addressbook', fieldId: 'label', value: addr.label });
                     if (addr.label === 'Billing Address') {
@@ -77,6 +78,14 @@ define(['N/record', 'N/error'],
                     address.setValue({ fieldId: 'zip', value: addr.zip });
                     rec.commitLine({ sublistId: 'addressbook' });
                 });
+                // contact
+                rec.selectNewLine({ sublistId: 'contact' });
+                rec.setCurrentSublistValue({ sublistId: 'contact', fieldId: 'firstname', value: context.billingfirstname });
+                rec.setCurrentSublistValue({ sublistId: 'contact', fieldId: 'lastname', value: context.billinglastname });
+                rec.setCurrentSublistValue({ sublistId: 'contact', fieldId: 'email', value: context.email });
+                rec.setCurrentSublistValue({ sublistId: 'contact', fieldId: 'phone', value: context.billingphone });
+                rec.setCurrentSublistValue({ sublistId: 'contact', fieldId: 'title', value: context.billingtitle });
+                rec.commitLine({ sublistId: 'contact' });
             }
 
             var recordId = rec.save();
