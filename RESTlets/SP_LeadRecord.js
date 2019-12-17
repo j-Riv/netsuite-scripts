@@ -105,6 +105,7 @@ define(['N/record', 'N/error'],
             rec.save();
             return JSON.stringify(rec);
         }
+        
         return {
             get: _get,
             delete: _delete,
