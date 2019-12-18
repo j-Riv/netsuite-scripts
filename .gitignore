@@ -28,6 +28,7 @@ Temporary Items
 # Specific
 Saved/*
 node_modules
+.env
 
 # LocalDataTransfer
 # exclude directories
