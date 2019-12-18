@@ -28,3 +28,10 @@ Temporary Items
 # Specific
 Saved/*
 node_modules
+
+# LocalDataTransfer
+# exclude directories
+CsvDataTransfer/attachments/*
+!CsvDataTransfer/attachments/README.md
+CsvDataTransfer/csv/*
+!CsvDataTransfer/csv/README.md

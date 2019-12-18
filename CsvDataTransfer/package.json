@@ -1,0 +1,14 @@
+{
+    "name": "netsuite-data-transfer",
+    "version": "0.1.0",
+    "description": "NetSuite CSV Data Transfer",
+    "author": "Jose A. Rivera <jose.alfredo.rivera@gmail.com>",
+    "dependencies": {
+        "crypto": "^1.0.1",
+        "csvtojson": "^2.0.10",
+        "dotenv": "^8.2.0",
+        "node-fetch": "^2.6.0",
+        "oauth-1.0a": "^2.2.6",
+        "pdf-to-base64": "^1.0.2"
+    }
+}
