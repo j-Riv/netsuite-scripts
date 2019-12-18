@@ -65,3 +65,9 @@ Resources:
 - [NetSuite Token-based Authenication](https://medium.com/@morrisdev/netsuite-token-based-authentication-tba-342c7df56386)
 - [Postman Setup](https://leacc.com.ph/2019/07/02/using-postman-to-test-your-first-netsuite-restlet/)
 - [NetSuite RESTlet](https://community.boomi.com/s/article/howtocallanetsuiterestletwebservice)
+> NetSuite
+- [N/record Module](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=section_4267255811.html)
+  - [record.Type](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=section_4273205732.html)
+  - [record.create](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=section_4267258059.html)
+  - [record.attach](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=section_4267284169.html)
+- [N/file Module](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=section_4205693274.html)
