@@ -1,17 +1,15 @@
 # NETSUITE
-> (SuiteScript 2.0)
+> SuiteScript 2.0
 
 Future home for SuiteScripts & RESTlets
 
-Contents:
+### Contents:
 - [SuiteScripts](/SuiteScripts)
 - [RESTlets](/RESTlets)
 - [Sample Responses](/SampleResponses)
+- [CSV Data Transfer - Used for Migration from Zoho](/CsvDataTransfer)
 
-# Setup
-You can view our NetSuite Scripts Repo [here](https://github.com/SuavecitoInc/netsuite-scripts).
-
-Documentation:
+### Documentation:
 - [RESTlets](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=chapter_N2970114.html)
 - [SuiteScript](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=set_1502135122.html)
 - [SuiteScript 2.0](https://5657911.app.netsuite.com/app/help/helpcenter.nl?topic=DOC_SS2_API)
