@@ -1,10 +1,11 @@
-function calculateTotalWeight(type) {
-
+function calculateTotalWeight() {
+  // get record
   var record = nlapiLoadRecord(nlapiGetRecordType(), nlapiGetRecordId());
-
+  // get line count
   var lines = record.getLineItemCount('item');
   var totalWeight = 0;
-
+  var totalItems = 0;
+  
   for (var i = 1; i < lines + 1; i++) {
     // get weight unit (lb, oz, kg, g)
     var unit = record.getLineItemValue('item', 'custcol_sp_item_weight_units', i);
@@ -24,10 +25,16 @@ function calculateTotalWeight(type) {
       weight = weight * 1;
     }
 
+    // calculate line weight
     var lineWeight = weight * quantity;
-
+    // calculate total weight
     totalWeight = totalWeight + lineWeight;
+    // calculate total item count
+    totalItems = Number(totalItems) + Number(quantity);
   }
+  // set fields
   record.setFieldValue('custbody_sp_total_items_weight', totalWeight);
+  record.setFieldValue('custbody_sp_total_items', totalItems);
+  // save record
   nlapiSubmitRecord(record);
 }
