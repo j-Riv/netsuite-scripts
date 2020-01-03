@@ -5,7 +5,7 @@
  */
 define(['N/record'], function (record) {
   function calculateTotalWeight(context) {
-    // get redcord
+    // get record
     var currentRecord = record.load({
       type: context.newRecord.type,
       id: context.newRecord.id
