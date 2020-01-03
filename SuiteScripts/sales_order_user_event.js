@@ -39,7 +39,7 @@ define(['N/record'], function (record) {
       // calculate total weight
       totalWeight = parseFloat(totalWeight) + parseFloat(lineWeight);
       // calculate total item count
-      totalItems = Number(totalItems) + Number(quantity);
+      totalItems = parseInt(totalItems) + parseInt(quantity);
     }
     // set fields
     currentRecord.setValue({ fieldId: 'custbody_sp_total_items_weight',value: totalWeight });
