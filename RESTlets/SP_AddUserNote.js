@@ -25,7 +25,9 @@ define(['N/record', 'N/error'],
       var noteObj = {
         "note": context.note,
         "title": context.noteTitle,
-        "author": context.author
+        "author": context.author,
+        "notedate": context.noteDate,
+        "time": context.time
       }
       // set the note entity to the lead
       var noteRecord = record.create({
@@ -46,6 +48,14 @@ define(['N/record', 'N/error'],
       noteRecord.setValue({
         fieldId: 'author',
         value: noteObj.author
+      });
+      noteRecord.setValue({
+        fieldId: 'notedate',
+        value: new Date(noteObj.notedate)
+      });
+      noteRecord.setValue({
+        fieldId: 'time',
+        value: noteObj.time
       });
       var noteId = noteRecord.save({
         enableSourcing: false,

@@ -8,7 +8,7 @@ dotenv.config();
 const createNote = async () => {
 
   // csv to json
-  const jsonArray = await csv().fromFile('./csv/sample-notes.csv');
+  const jsonArray = await csv().fromFile('./csv/test-notes-date.csv');
   console.log('READING CSV & CONVERTING TO JSON ARRAY');
   console.log(jsonArray);
 
@@ -51,16 +51,42 @@ const createNote = async () => {
       console.log('ROW')
       console.log(row);
 
+      let noteTitle = row.noteTitle !== "" ? row.noteTitle : "Untitled";
+      let note = row.note.replace(/<\/?[^>]+(>|$)/g, "");
+      note = note.replace("&nbsp;", " ");
+
+      // date
+      var d = row.noteDate.split('/');
+      let month;
+      if (d[0].length < 2) {
+        month = '0' + d[0];
+      } else {
+        month = d[0];
+      }
+      let day;
+      if (d[1].length < 2) {
+        day = '0' + d[1];
+      } else {
+        day = d[1];
+      }
+
+      const date = day + '/' + month + '/' + d[2];
+
       // data
       let fileData = {
         recordtype: 'note',
         recordID: Number(row.ownerID),
-        note: row.note,
-        noteTitle: row.noteTitle,
-        author: Number(row.author)
+        note: note,
+        noteTitle: noteTitle,
+        author: Number(row.author),
+        noteDate: row.noteDate,
+        time: row.time
       }
 
       console.log('POSTING NOTE TO NETSUITE & ATTACHING TO USER ID (' + row.ownerID + ')');
+      console.log('-----------------------');
+      console.log(fileData);
+      console.log('-----------------------');
 
       const authorization = oauth.authorize(requestData, token);
       const header = oauth.toHeader(authorization);
@@ -82,7 +108,7 @@ const createNote = async () => {
         console.log('+++++++++++++++++++++++++++++');
         console.log();
         console.log();
-        moveAlong();
+        // moveAlong();
       } else {
         console.log('ERROR OCCURED, CHECK EMAIL OR SCRIPT LOG FOR DETAILS.');
       }
