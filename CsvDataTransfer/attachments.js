@@ -3,13 +3,14 @@ const fetch = require('node-fetch');
 const OAuth = require('oauth-1.0a');
 const crypto = require('crypto');
 const pdf2base64 = require('pdf-to-base64');
+const imageToBase64 = require('image-to-base64');
 const csv = require('csvtojson');
 dotenv.config();
 
 const createAttachFile = async () => {
 
   // csv to json
-  const jsonArray = await csv().fromFile('./csv/sample-attachments.csv');
+  const jsonArray = await csv().fromFile('./csv/Upload_Attachments_001_Final_Day2.csv');
   console.log('READING CSV & CONVERTING TO JSON ARRAY');
   console.log(jsonArray);
 
@@ -51,53 +52,117 @@ const createAttachFile = async () => {
       let row = jsonArray.shift();
       console.log('ROW')
       console.log(row);
-      console.log('CONVERTING: ' + row.fileName + ' TO BASE64.');
-      pdf2base64('./attachments/' + row.fileName)
-        .then(async pdfResponse => {
-          console.log('BASE64 ENCODING SUCCESSFUL');
-          // console.log(pdfResponse);
-          // get name
-          let fn = row.fileName.split('.pdf');
+      
+      // get file extension
+      const re = /(?:\.([^.]+))?$/;
+      let ext = re.exec(row.fileName)[1];
+      ext = ext.toLowerCase();
+      let fn = row.fileName.replace('.' + ext, '');
 
-          // data
-          let fileData = {
-            recordtype: 'file',
-            customerID: Number(row.ownerID),
-            fileName: fn[0],
-            fileContents: pdfResponse,
-            fileDescription: 'This is a CA Resale Certificate'
-          }
+      if (ext === 'jpeg' || ext === 'jpg' || ext === 'png') {
+        console.log('CONVERTING IMAGE: ' + row.fileName + ' TO BASE64.');
 
-          console.log('POSTING (' + fn[0] + ') TO NETSUITE & ATTACHING TO USER ID (' + row.ownerID + ')');
+        let fileType;
+        if (ext === 'jpeg' || ext === 'jpg') {
+          fileType = 'jpg';
+        } else {
+          fileType = 'png';
+        }
+        imageToBase64('./attachments/' + row.fileName) // you can also to use url
+          .then(async imgResponse => {
+            console.log('BASE64 ENCODING SUCCESSFUL');
+            // data
+            let fileData = {
+              recordtype: 'file',
+              customerID: Number(row.ownerID),
+              fileName: fn,
+              fileContents: imgResponse,
+              fileType: fileType
+            }
 
-          const authorization = oauth.authorize(requestData, token);
-          const header = oauth.toHeader(authorization);
-          header.Authorization += ', realm="' + accountID + '"';
-          header['content-type'] = 'application/json';
+            console.log('POSTING (' + fn + ') TO NETSUITE & ATTACHING TO USER ID (' + row.ownerID + ')');
 
-          const response = await fetch(requestData.url, {
-            method: requestData.method,
-            headers: header,
-            body: JSON.stringify(fileData)
+            const authorization = oauth.authorize(requestData, token);
+            const header = oauth.toHeader(authorization);
+            header.Authorization += ', realm="' + accountID + '"';
+            header['content-type'] = 'application/json';
+
+            const response = await fetch(requestData.url, {
+              method: requestData.method,
+              headers: header,
+              body: JSON.stringify(fileData)
+            });
+
+            const content = await response.json();
+            console.log('RESPONSE ========>');
+            console.log(content);
+
+            if (response.ok) {
+              console.log('RESPONSE OK, LETS MOVE ALONG!');
+              console.log('+++++++++++++++++++++++++++++');
+              console.log();
+              console.log();
+              moveAlong();
+            } else {
+              console.log('ERROR OCCURED, CHECK EMAIL OR SCRIPT LOG FOR DETAILS.');
+            }
+          })
+          .catch(
+            (error) => {
+              console.log(error); //Exepection error....
+            }
+          )
+      } else if(ext === 'pdf') {
+        console.log('CONVERTING PDF: ' + row.fileName + ' TO BASE64.');
+
+        pdf2base64('./attachments/' + row.fileName)
+          .then(async pdfResponse => {
+            console.log('BASE64 ENCODING SUCCESSFUL');
+            // console.log(pdfResponse);
+
+            // data
+            let fileData = {
+              recordtype: 'file',
+              customerID: Number(row.ownerID),
+              fileName: fn,
+              fileContents: pdfResponse,
+              fileType: 'pdf'
+            }
+
+            console.log('POSTING (' + fn + ') TO NETSUITE & ATTACHING TO USER ID (' + row.ownerID + ')');
+
+            const authorization = oauth.authorize(requestData, token);
+            const header = oauth.toHeader(authorization);
+            header.Authorization += ', realm="' + accountID + '"';
+            header['content-type'] = 'application/json';
+
+            const response = await fetch(requestData.url, {
+              method: requestData.method,
+              headers: header,
+              body: JSON.stringify(fileData)
+            });
+
+            const content = await response.json();
+            console.log('RESPONSE ========>');
+            console.log(content);
+
+            if (response.ok) {
+              console.log('RESPONSE OK, LETS MOVE ALONG!');
+              console.log('+++++++++++++++++++++++++++++');
+              console.log();
+              console.log();
+              moveAlong();
+            } else {
+              console.log('ERROR OCCURED, CHECK EMAIL OR SCRIPT LOG FOR DETAILS.');
+            }
+          })
+          .catch(error => {
+            console.log(error);
           });
-
-          const content = await response.json();
-          console.log('RESPONSE ========>');
-          console.log(content);
-          
-          if (response.ok) {
-            console.log('RESPONSE OK, LETS MOVE ALONG!');
-            console.log('+++++++++++++++++++++++++++++');
-            console.log();
-            console.log();
-            moveAlong();
-          } else {
-            console.log('ERROR OCCURED, CHECK EMAIL OR SCRIPT LOG FOR DETAILS.');
-          }
-        })
-        .catch(error => {
-          console.log(error);
-        });
+      } else {
+        console.log('DOCUMENT IS NOT AN IMAGE OR PDF, SKIP & CONTINUE');
+        moveAlong();
+      }
     }
   })();
 

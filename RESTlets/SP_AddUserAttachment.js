@@ -25,16 +25,24 @@ define(['N/file', 'N/record', 'N/error'],
       var fileObj = {
         "name": context.fileName,
         "contents": context.fileContents,
-        "description": context.fileDescription
+        "filetype": context.fileType
+      };
+
+      var fileType;
+      if (fileObj.filetype === 'jpg') {
+        fileType = file.Type.JPGIMAGE;
+      } else if (fileObj.filetype === 'png') {
+        fileType = file.Type.PNGIMAGE;
+      } else {
+        fileType = file.Type.PDF;
       }
 
       var fileRecord = file.create({
         name: fileObj.name,
-        fileType: file.Type.PDF,
+        fileType: fileType,
         contents: fileObj.contents,
-        description: fileObj.description,
         encoding: file.Encoding.UTF8,
-        folder: 749,
+        folder: 752,
         isOnline: false
       });
 

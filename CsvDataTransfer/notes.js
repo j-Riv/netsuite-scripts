@@ -8,7 +8,7 @@ dotenv.config();
 const createNote = async () => {
 
   // csv to json
-  const jsonArray = await csv().fromFile('./csv/test-notes-date.csv');
+  const jsonArray = await csv().fromFile('./csv/NOTES_FINAL_UPLOAD_DAY2.csv');
   console.log('READING CSV & CONVERTING TO JSON ARRAY');
   console.log(jsonArray);
 
@@ -54,6 +54,7 @@ const createNote = async () => {
       let noteTitle = row.noteTitle !== "" ? row.noteTitle : "Untitled";
       let note = row.note.replace(/<\/?[^>]+(>|$)/g, "");
       note = note.replace("&nbsp;", " ");
+      note = note.replace(".&nbsp;", ".");
 
       // date
       var d = row.noteDate.split('/');
@@ -69,8 +70,14 @@ const createNote = async () => {
       } else {
         day = d[1];
       }
+      let year;
+      if (d[2].length < 2) {
+        year = '20' + d[2];
+      } else {
+        year = d[2];
+      }
 
-      const date = day + '/' + month + '/' + d[2];
+      const date = month + '/' + day + '/' + year;
 
       // data
       let fileData = {
@@ -79,7 +86,7 @@ const createNote = async () => {
         note: note,
         noteTitle: noteTitle,
         author: Number(row.author),
-        noteDate: row.noteDate,
+        noteDate: date,
         time: row.time
       }
 
@@ -108,7 +115,7 @@ const createNote = async () => {
         console.log('+++++++++++++++++++++++++++++');
         console.log();
         console.log();
-        // moveAlong();
+        moveAlong();
       } else {
         console.log('ERROR OCCURED, CHECK EMAIL OR SCRIPT LOG FOR DETAILS.');
       }

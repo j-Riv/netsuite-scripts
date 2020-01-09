@@ -42,6 +42,10 @@ define(['N/record', 'N/error'],
         value: noteObj.note
       });
       noteRecord.setValue({
+        fieldId: 'notetype',
+        value: 9
+      });
+      noteRecord.setValue({
         fieldId: 'title',
         value: noteObj.title
       });
@@ -53,10 +57,10 @@ define(['N/record', 'N/error'],
         fieldId: 'notedate',
         value: new Date(noteObj.notedate)
       });
-      noteRecord.setValue({
-        fieldId: 'time',
-        value: noteObj.time
-      });
+      // noteRecord.setValue({
+      //   fieldId: 'time',
+      //   value: noteObj.time
+      // });
       var noteId = noteRecord.save({
         enableSourcing: false,
         ignoreMandatoryFields: true
