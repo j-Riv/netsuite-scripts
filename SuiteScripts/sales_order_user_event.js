@@ -43,7 +43,7 @@ define(['N/record'], function (record) {
     }
     // set fields
     currentRecord.setValue({ fieldId: 'custbody_sp_total_items_weight',value: totalWeight });
-    currentRecord.setValue({ ieldId: 'custbody_sp_total_items',value: totalItems });
+    currentRecord.setValue({ fieldId: 'custbody_sp_total_items',value: totalItems });
     currentRecord.save({
       enableSourcing: true,
       ignoreMandatoryFields: false
