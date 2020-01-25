@@ -77,7 +77,8 @@ const createAttachFile = async () => {
               customerID: Number(row.ownerID),
               fileName: fn,
               fileContents: imgResponse,
-              fileType: fileType
+              fileType: fileType,
+              folder: 752
             }
 
             console.log('POSTING (' + fn + ') TO NETSUITE & ATTACHING TO USER ID (' + row.ownerID + ')');

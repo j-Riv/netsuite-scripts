@@ -25,7 +25,8 @@ define(['N/file', 'N/record', 'N/error'],
       var fileObj = {
         "name": context.fileName,
         "contents": context.fileContents,
-        "filetype": context.fileType
+        "filetype": context.fileType,
+        "folder": context.folder
       };
 
       var fileType;
@@ -42,7 +43,7 @@ define(['N/file', 'N/record', 'N/error'],
         fileType: fileType,
         contents: fileObj.contents,
         encoding: file.Encoding.UTF8,
-        folder: 752,
+        folder: Number(fileObj.folder), // 752 zoho attachments
         isOnline: false
       });
 
