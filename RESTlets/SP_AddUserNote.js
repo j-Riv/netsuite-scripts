@@ -19,6 +19,10 @@ define(['N/record', 'N/error'],
           });
     }
 
+    /**
+     * Attaches note to entity
+     * @param {*} context - post body
+     */
     function post(context) {
       doValidation([context.recordtype], ['recordtype'], 'POST');
       // new note
@@ -57,10 +61,6 @@ define(['N/record', 'N/error'],
         fieldId: 'notedate',
         value: new Date(noteObj.notedate)
       });
-      // noteRecord.setValue({
-      //   fieldId: 'time',
-      //   value: noteObj.time
-      // });
       var noteId = noteRecord.save({
         enableSourcing: false,
         ignoreMandatoryFields: true

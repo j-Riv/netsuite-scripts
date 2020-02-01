@@ -18,7 +18,11 @@ define(['N/record', 'N/error'],
             message: 'Missing a required argument: [' + argNames[i] + '] for method: ' + methodName
           });
     }
-    // Get a standard NetSuite record
+
+    /**
+     * Loads standard records
+     * @param {*} context - post body 
+     */
     function post(context) {
       doValidation([context.recordtype, context.id], ['recordtype', 'id'], 'POST');
       return JSON.stringify(record.load({

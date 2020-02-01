@@ -20,11 +20,11 @@ define(['N/file', 'N/record', 'N/error'],
     }
 
     /**
-     * Attaches file to Entity
+     * Attaches file to Record
      * @param {*} context - post body
      */
     function post(context) {
-      doValidation([context.recordtype], ['recordtype'], 'POST');
+      doValidation([context.recordType], ['recordtype'], 'POST');
       // new file
       var fileObj = {
         "name": context.fileName,
@@ -32,22 +32,23 @@ define(['N/file', 'N/record', 'N/error'],
         "filetype": context.fileType,
         "folder": context.folder
       };
-
+      
+      // set file type
       var fileType;
-      if (fileObj.filetype === 'jpg') {
+      if (context.fileType === 'jpg') {
         fileType = file.Type.JPGIMAGE;
-      } else if (fileObj.filetype === 'png') {
+      } else if (context.fileType === 'png') {
         fileType = file.Type.PNGIMAGE;
       } else {
         fileType = file.Type.PDF;
       }
 
       var fileRecord = file.create({
-        name: fileObj.name,
+        name: context.fileName,
         fileType: fileType,
-        contents: fileObj.contents,
+        contents: context.fileContents,
         encoding: file.Encoding.UTF8,
-        folder: Number(fileObj.folder), // 752 zoho attachments
+        folder: Number(context.folder), // 752 zoho attachments
         isOnline: false
       });
 
@@ -60,8 +61,8 @@ define(['N/file', 'N/record', 'N/error'],
           id: fileID
         },
         to: {
-          type: 'customer',
-          id: context.customerID
+          type: context.parentRecordType,
+          id: context.parentRecordId
         }
       });
 
