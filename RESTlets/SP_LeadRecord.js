@@ -82,10 +82,21 @@ define(['N/record', 'N/error'],
                 rec.selectNewLine({ sublistId: 'contact' });
                 rec.setCurrentSublistValue({ sublistId: 'contact', fieldId: 'firstname', value: context.billingfirstname });
                 rec.setCurrentSublistValue({ sublistId: 'contact', fieldId: 'lastname', value: context.billinglastname });
-                rec.setCurrentSublistValue({ sublistId: 'contact', fieldId: 'email', value: context.email });
+                rec.setCurrentSublistValue({ sublistId: 'contact', fieldId: 'email', value: context.billingemail });
                 rec.setCurrentSublistValue({ sublistId: 'contact', fieldId: 'phone', value: context.billingphone });
                 rec.setCurrentSublistValue({ sublistId: 'contact', fieldId: 'title', value: context.billingtitle });
                 rec.commitLine({ sublistId: 'contact' });
+
+                if (context.secondContact) {
+                    // contact
+                    rec.selectNewLine({ sublistId: 'contact' });
+                    rec.setCurrentSublistValue({ sublistId: 'contact', fieldId: 'firstname', value: context.contactfirstname });
+                    rec.setCurrentSublistValue({ sublistId: 'contact', fieldId: 'lastname', value: context.contactlastname });
+                    rec.setCurrentSublistValue({ sublistId: 'contact', fieldId: 'email', value: context.email });
+                    rec.setCurrentSublistValue({ sublistId: 'contact', fieldId: 'phone', value: context.phone });
+                    rec.setCurrentSublistValue({ sublistId: 'contact', fieldId: 'title', value: context.contacttitle });
+                    rec.commitLine({ sublistId: 'contact' });
+                }
             }
 
             var recordId = rec.save();
