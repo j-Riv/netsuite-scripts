@@ -9,7 +9,7 @@ define(['N/search'],
     function post(context) {
       var customerSearchResult = search.create({
         type: search.Type.CUSTOMER,
-        filters: [{ name: 'email', operator: 'is', values: context.email }]
+        filters: [{ name: context.fieldName, operator: 'is', values: context.fieldValue }]
       }).run().getRange({ start: 0, end: 1 });
 
       var customerInternalId = customerSearchResult[0].id;
