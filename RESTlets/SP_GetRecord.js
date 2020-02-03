@@ -24,9 +24,9 @@ define(['N/record', 'N/error'],
      * @param {*} context - post body 
      */
     function post(context) {
-      doValidation([context.recordtype, context.id], ['recordtype', 'id'], 'POST');
+      doValidation([context.recordType, context.id], ['recordtype', 'id'], 'POST');
       return JSON.stringify(record.load({
-        type: context.recordtype,
+        type: context.recordType,
         id: context.id
       }));
     }

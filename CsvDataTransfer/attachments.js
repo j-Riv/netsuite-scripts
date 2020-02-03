@@ -26,7 +26,7 @@ const createAttachFile = async () => {
     secret: process.env.NETSUITE_CONSUMER_SECRET
   }
   const requestData = {
-    url: process.env.NETSUITE_USER_ATTACHMENTS_RESTLET_URL,
+    url: process.env.NETSUITE_ADD_FILE_ATTACHMENTS_RESTLET_URL,
     method: 'POST'
   }
   const oauth = OAuth({
@@ -73,12 +73,13 @@ const createAttachFile = async () => {
             console.log('BASE64 ENCODING SUCCESSFUL');
             // data
             let fileData = {
-              recordtype: 'file',
-              customerID: Number(row.ownerID),
+              recordType: 'file',
+              parentId: Number(row.ownerID),
+              parentRecordType: 'customer',
               fileName: fn,
               fileContents: imgResponse,
               fileType: fileType,
-              folder: 752
+              folder: 752 // zoho attachments
             }
 
             console.log('POSTING (' + fn + ') TO NETSUITE & ATTACHING TO USER ID (' + row.ownerID + ')');

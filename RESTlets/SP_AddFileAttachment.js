@@ -18,22 +18,13 @@ define(['N/file', 'N/record', 'N/error'],
             message: 'Missing a required argument: [' + argNames[i] + '] for method: ' + methodName
           });
     }
-
     /**
      * Attaches file to Record
      * @param {*} context - post body
      */
     function post(context) {
       doValidation([context.recordType], ['recordtype'], 'POST');
-      // new file
-      var fileObj = {
-        "name": context.fileName,
-        "contents": context.fileContents,
-        "filetype": context.fileType,
-        "folder": context.folder
-      };
-      
-      // set file type
+
       var fileType;
       if (context.fileType === 'jpg') {
         fileType = file.Type.JPGIMAGE;
@@ -62,7 +53,7 @@ define(['N/file', 'N/record', 'N/error'],
         },
         to: {
           type: context.parentRecordType,
-          id: context.parentRecordId
+          id: context.parentId
         }
       });
 

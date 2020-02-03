@@ -18,16 +18,18 @@ define(['N/record', 'N/error'],
             message: 'Missing a required argument: [' + argNames[i] + '] for method: ' + methodName
           });
     }
-
-    // Create a NetSuite record from request params
+    /**
+     * Creates a Case Record and generates contact note
+     * @param {*} context 
+     */
     function post(context) {
-      doValidation([context.recordtype], ['recordtype'], 'POST');
+      doValidation([context.recordType], ['recordtype'], 'POST');
       var rec = record.create({
         type: context.recordtype,
         isDynamic: true
       });
 
-      rec.setValue('customform', Number(context.customform));
+      rec.setValue('customform', Number(context.customForm));
       rec.setValue('company', Number(context.company));
       rec.setValue('profile', Number(context.profile));
       rec.setValue('priority', Number(context.priority));
@@ -37,11 +39,11 @@ define(['N/record', 'N/error'],
 
       rec.setValue('title', context.title);
       rec.setValue('email', context.email);
-      rec.setValue('incomingmessage', context.incomingmessage);
-      rec.setValue('firstname', context.firstname);
-      rec.setValue('lastname', context.lastname);
+      rec.setValue('incomingmessage', context.incomingMessage);
+      rec.setValue('firstname', context.firstName);
+      rec.setValue('lastname', context.lastName);
       rec.setValue('phone', context.phone);
-      rec.setValue('quicknote', context.quicknote);
+      rec.setValue('quicknote', context.quickNote);
 
       var recordId = rec.save();
 
@@ -53,8 +55,8 @@ define(['N/record', 'N/error'],
       note.setValue('activity', recordId);
       note.setValue('title', 'Contact Details');
       note.setValue('author', context.company);
-      var noteContent = 'Name: ' + context.firstname + ' ' + 
-        context.lastname + ' / Phone: ' + context.phone + 
+      var noteContent = 'Name: ' + context.firstName + ' ' + 
+        context.lastName + ' / Phone: ' + context.phone + 
         ' / Email: ' + context.email + ' / Submitted By: ' + context.email; 
       note.setValue('note', noteContent);
 
