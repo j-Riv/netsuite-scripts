@@ -25,7 +25,7 @@ define(['N/record', 'N/error'],
     function post(context) {
       doValidation([context.recordType], ['recordtype'], 'POST');
       var rec = record.create({
-        type: context.recordtype,
+        type: context.recordType,
         isDynamic: true
       });
 
