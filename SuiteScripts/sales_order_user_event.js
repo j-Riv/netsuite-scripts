@@ -4,6 +4,19 @@
  * @NModuleScope SameAccount
  */
 define(['N/record'], function (record) {
+  /**
+   * 
+   * @param {decimal} value - the value you want to round to
+   * @param {integer} decimals - how many decimal places you want to round to 
+   */
+  function round(value, decimals) {
+    return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
+  }
+
+  /**
+   * Calculates and sets the total order weight and total order item count
+   * @param {*} context - form data 
+   */
   function calculateTotalWeight(context) {
     // check for user event type
     if (context.type == 'create' || context.type == 'edit') {
@@ -48,6 +61,7 @@ define(['N/record'], function (record) {
         }
 
       }
+      totalWeight = round(totalWeight, 2);
       // set fields
       currentRecord.setValue({ fieldId: 'custbody_sp_total_items_weight', value: totalWeight });
       currentRecord.setValue({ fieldId: 'custbody_sp_total_items', value: totalItems });
