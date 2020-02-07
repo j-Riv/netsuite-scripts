@@ -3,7 +3,7 @@
  * @NScriptType Restlet
  */
 
-define(['N/search'], 
+define(['N/search'],
   function (search) {
 
     function post(context) {
@@ -12,9 +12,16 @@ define(['N/search'],
         filters: [{ name: context.fieldName, operator: 'is', values: context.fieldValue }]
       }).run().getRange({ start: 0, end: 1 });
 
-      var customerInternalId = customerSearchResult[0].id;
+      var data = {
+        customer: false
+      };
 
-      return String(customerInternalId);
+      if (customerSearchResult[0]) {
+        data.customer = true;
+        data.id = customerSearchResult[0].id;
+      };
+
+      return JSON.stringify(data);
     }
 
     return {
