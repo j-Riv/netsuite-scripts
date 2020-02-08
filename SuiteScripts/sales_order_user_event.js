@@ -1,11 +1,11 @@
 /**
- * @NApiVersion 2.x
+ * @NApiVersion 2.1
  * @NScriptType UserEventScript
  * @NModuleScope SameAccount
  */
 define(['N/record'], function (record) {
   /**
-   * 
+   * Rounds value to 2 decimals
    * @param {decimal} value - the value you want to round to
    * @param {integer} decimals - how many decimal places you want to round to 
    */
@@ -71,7 +71,22 @@ define(['N/record'], function (record) {
       });
     }
   }
+
+  function beforeLoad(context) {
+    // only create button in edit mode
+    if (context.type !== context.UserEventType.VIEW) {
+      context.form
+        .addButton({
+          id: 'custpage_calculate_handling',
+          label: 'Calculate Handling',
+          functionName: 'calculateHandling'
+        });
+      context.form.clientScriptModulePath = 'SuiteScripts/sales_order_client.js';
+    }
+  }
+
   return {
+    beforeLoad: beforeLoad,
     afterSubmit: calculateTotalWeight
   }
 });

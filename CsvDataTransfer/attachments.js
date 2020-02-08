@@ -10,7 +10,7 @@ dotenv.config();
 const createAttachFile = async () => {
 
   // csv to json
-  const jsonArray = await csv().fromFile('./csv/Upload_Attachments_001_Final_Day2.csv');
+  const jsonArray = await csv().fromFile('./csv/contacts/netsuite-contact-attachments.csv');
   console.log('READING CSV & CONVERTING TO JSON ARRAY');
   console.log(jsonArray);
 
@@ -68,7 +68,7 @@ const createAttachFile = async () => {
         } else {
           fileType = 'png';
         }
-        imageToBase64('./attachments/' + row.fileName) // you can also to use url
+        imageToBase64('./attachments/' + row.fileUrl) // you can also to use url
           .then(async imgResponse => {
             console.log('BASE64 ENCODING SUCCESSFUL');
             // data
@@ -117,18 +117,20 @@ const createAttachFile = async () => {
       } else if(ext === 'pdf') {
         console.log('CONVERTING PDF: ' + row.fileName + ' TO BASE64.');
 
-        pdf2base64('./attachments/' + row.fileName)
+        pdf2base64('./attachments/' + row.fileUrl)
           .then(async pdfResponse => {
             console.log('BASE64 ENCODING SUCCESSFUL');
             // console.log(pdfResponse);
 
             // data
             let fileData = {
-              recordtype: 'file',
-              customerID: Number(row.ownerID),
+              recordType: 'file',
+              parentId: Number(row.ownerID),
+              parentRecordType: 'customer',
               fileName: fn,
               fileContents: pdfResponse,
-              fileType: 'pdf'
+              fileType: 'pdf',
+              folder: 752 // zoho attachments
             }
 
             console.log('POSTING (' + fn + ') TO NETSUITE & ATTACHING TO USER ID (' + row.ownerID + ')');
