@@ -2,8 +2,8 @@
  *@NApiVersion 2.x
  *@NScriptType ClientScript
  */
-define(['N/currentRecord', 'N/ui/dialog', 'N/error'],
-  function (currentRecord, dialog, error) {
+define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
+  function (currentRecord, dialog, log) {
 
     function pageInit(context) {
       // todo
@@ -67,22 +67,46 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/error'],
           } else if (UsRegion2.includes(shipState)) {
             hadnlingCost = parseFloat(shippingCost) * .6;
           } else if (UsRegion3.includes(shipState)) {
-            hadnlingCost = parseFloat(shippingCost) * .5;
+            handlingCost = parseFloat(shippingCost) * .5;
           } else if (UsRegion4.includes(shipState)) {
-            hadnlingCost = parseFloat(shippingCost) * .25;
+            handlingCost = parseFloat(shippingCost) * .25;
           } else if (UsRegion5.includes(shipState)) {
-            hadnlingCost = parseFloat(shippingCost) * .25;
+            handlingCost = parseFloat(shippingCost) * .25;
           } else {
             handlingCost = 0.00;
           }
-          salesRecord.setValue('handlingcost', round(handlingCost, 2));
+
+          // round handling cost
+          handlingCost = round(handlingCost, 2);
+
+          // log
+          var logData = {
+            'Shipping Method': shipMethod,
+            'Ship State': shipState,
+            'Handling Cost': '$' + handlingCost
+          };
+
+          log.debug({ 
+            title: 'Calculating and Setting Handling Cost',
+            details: logData 
+          });
+
+          salesRecord.setValue('handlingcost', handlingCost);
         } else {
+          log.error({ 
+            title: 'Shipping Method is not selected' ,
+            details: 'Shipping Method is not selected'
+          });
           dialog.alert({
             title: 'Ship Method Error',
             message: 'Error: Please select a Ship Method'
           });
         }
       } else {
+        log.error({ 
+          title: 'Handling Cost Error',
+          details: 'Sales Channel ' + salesRecord.getValue('custbody_fa_channel') + ', FarApp has already added the handling cost to the shipping cost. Please do not add it again.'
+        });
         dialog.alert({
           title: 'Handling Cost Error',
           message: 'Error: Sales Channel ' + salesRecord.getValue('custbody_fa_channel') + ', FarApp has already added the handling cost to the shipping cost. Please do not add it again.'
