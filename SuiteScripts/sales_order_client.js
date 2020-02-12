@@ -114,9 +114,68 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
       }
     }
 
+    /**
+     * Calculates and sets the total order weight and total order item count
+     * @param {*} context - form data 
+     */
+    function calculateTotalWeight() {
+      // check for user event type
+      try {
+        // get record
+        var record = currentRecord.get();
+        // get line count
+        var lines = record.getLineCount({ sublistId: 'item' });
+        var totalWeight = 0;
+        var totalItems = 0;
+
+        for (var i = 0; i < lines; i++) {
+          // get weight unit (lb, oz, kg, g)
+          var quantity = record.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
+          var weight = record.getSublistValue({ sublistId: 'item', fieldId: 'custcol_sp_item_weight', line: i });
+          // check if line item has quantity
+          // custom line items like discount and subtotal should not -- these will be skipped
+          if (quantity && weight) {
+            var unit = record.getSublistValue({ sublistId: 'item', fieldId: 'custcol_sp_item_weight_units', line: i });
+            if (unit === 'oz') {
+              // convert oz to lbs
+              weight = weight * 0.0625;
+            } else if (unit === 'kg') {
+              // convert oz to kg
+              weight = weight * 2.20462;
+            } else if (unit === 'g') {
+              // convert oz to g
+              weight = weight * 0.00220462;
+            } else {
+              weight = weight * 1;
+            }
+
+            // calculate line weight
+            var lineWeight = weight * quantity;
+            // calculate total weight
+            totalWeight = parseFloat(totalWeight) + parseFloat(lineWeight);
+            // calculate total item count
+            totalItems = parseInt(totalItems) + parseInt(quantity);
+          }
+
+        }
+        totalWeight = round(totalWeight, 2);
+        // set fields
+        record.setValue({ fieldId: 'custbody_sp_total_items_weight', value: totalWeight });
+        record.setValue({ fieldId: 'custbody_sp_total_items', value: totalItems });
+        record.save({
+          enableSourcing: true,
+          ignoreMandatoryFields: false
+        });
+      } catch (e) {
+        console.log(e.message);
+      }
+
+    }
+
     return {
       pageInit: pageInit,
       fieldChanged: fieldChanged,
-      calculateHandling: calculateHandling
+      calculateHandling: calculateHandling,
+      calculateTotalWeight: calculateTotalWeight
     };
   }); 
