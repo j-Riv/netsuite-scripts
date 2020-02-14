@@ -56,6 +56,7 @@ const createPickingTicketPDF = async () => {
 
     const content = await response.json();
 
+    // if response ok
     if (response.ok) {
       const pickingTickets = content.results;
       console.log('GETTING PDF(s) FOR THE FOLLOWING ID(s):' + pickingTickets);
