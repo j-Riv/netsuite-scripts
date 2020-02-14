@@ -13,7 +13,7 @@ define(['N/search'],
 
       var resultSet = mySearch.run()
       
-      var results = resultSet.getRange(0, 10);
+      var results = resultSet.getRange(0, 1000);
 
       var ids = [];
 
