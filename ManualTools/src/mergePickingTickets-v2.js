@@ -1,12 +1,13 @@
-const dotenv = require('dotenv');
-const fetch = require('node-fetch');
-const OAuth = require('oauth-1.0a');
-const crypto = require('crypto');
-const path = require('path');
-const fs = require('fs');
-
-const hummus = require('hummus');
-const memoryStreams = require('memory-streams');
+import 'babel-polyfill';
+import regeneratorRuntime from "regenerator-runtime";
+import dotenv from 'dotenv';
+import fetch from 'node-fetch';
+import OAuth from 'oauth-1.0a';
+import crypto from 'crypto';
+import path from 'path';
+import fs from 'fs';
+import hummus from 'hummus';
+import memoryStreams from 'memory-streams';
 
 dotenv.config();
 
@@ -150,7 +151,7 @@ const getPDFs = async(oauth, token, accountID, pickingTickets, buffers) => {
     const dateTime = year + '-' + month + '-' + day + 'T' + hour + '-' + min + '-' + sec;
     // merge pdf(s)
     const newBuffer = await mergePDFs(buffers);
-    const pdfPath = path.join(__dirname, '/pdf/' + 'PICKING-TICKETS_' + dateTime + '.pdf');
+    const pdfPath = path.join(__dirname, '../public/pdf/' + 'PICKING-TICKETS_' + dateTime + '.pdf');
 
     fs.writeFile(pdfPath, newBuffer, error => {
       if (error) {

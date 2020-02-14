@@ -2,25 +2,15 @@ const dotenv = require('dotenv');
 const fetch = require('node-fetch');
 const OAuth = require('oauth-1.0a');
 const crypto = require('crypto');
-const jsBase64 = require('js-base64');
 const path = require('path');
 const fs = require('fs');
+
+const hummus = require('hummus');
+const memoryStreams = require('memory-streams');
+
 dotenv.config();
 
 const createPickingTicketPDF = async () => {
-
-  // let pickingTickets = [
-  //   '113',
-  //   '1295',
-  //   '1297',
-  //   '7128',
-  //   '1771',
-  //   '1788',
-  //   '2407',
-  //   '2408',
-  //   '2423',
-  //   '3429'
-  // ];
 
   console.log('NETSUITE OAUTH SETUP');
   // netsuite production
@@ -67,7 +57,9 @@ const createPickingTicketPDF = async () => {
 
   if (response.ok) {
     const pickingTickets = content.results;
-    console.log('Getting PDF(s) for the following ID(s):' + pickingTickets);
+    console.log('GETTING PDF(s) FOR THE FOLLOWING ID(s):' + pickingTickets);
+
+    let buffers = [];
 
     (async function moveAlong() {
       // if we still have rows in the quie, let's process the next one.
@@ -102,47 +94,63 @@ const createPickingTicketPDF = async () => {
         });
 
         const content = await response.json();
-        console.log('RESPONSE ========>');
-        // console.log(content);
 
         if (response.ok) {
-          // const bin = Base64.atob(content.fileContent);
-          const bin = jsBase64.Base64.atob(content.fileContent);
-
-          // const pdfPath = path.join(__dirname, '/pdf/' + content.fileName + '.pdf');
-
-          // fs.writeFile(pdfPath, bin, 'base64', error => {
-          //   if (error) {
-          //     throw error;
-          //   } else {
-          //     console.log('base64 saved!');
-          //     console.log('RESPONSE OK, LETS MOVE ALONG!');
-          //     console.log('+++++++++++++++++++++++++++++');
-          //     console.log();
-          //     console.log();
-          //     moveAlong();
-          //   }
-          const pdfPath = path.join(__dirname, '/pdf/merged.pdf');
-
-          fs.appendFileSync(pdfPath, bin, 'base64', error => {
-            if (error) {
-              throw error;
-            } else {
-              console.log('base64 saved!');
-              console.log('RESPONSE OK, LETS MOVE ALONG!');
-              console.log('+++++++++++++++++++++++++++++');
-              console.log();
-              console.log();
-              moveAlong();
-            }
-          });
+          console.log('RECEIVED PDF FROM NETSUITE APPENDING TO LIST.');
+          buffers.push(content.fileBuffer);
+          moveAlong();
         } else {
           console.log('ERROR OCCURED, CHECK EMAIL OR SCRIPT LOG FOR DETAILS.');
         }
+      } else {
+        console.log('MERGING FILES ...');
+        console.log(buffers.length);
+
+        // get time
+        const date = new Date();
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        const hour = date.getHours();
+        const min = date.getMinutes();
+        const sec = date.getSeconds();
+        const dateTime = year + '-' + month + '-' + day + 'T' + hour + '-' + min + '-' + sec;
+
+        const newBuffer = await mergePDFs(buffers);
+        const pdfPath = path.join(__dirname, '../public/pdf/' + 'PICKING-TICKETS_' + dateTime + '.pdf');
+
+        fs.writeFile(pdfPath, newBuffer, 'utf8', error => {
+          if (error) {
+            throw error;
+          } else {
+            console.log('FILES MERGED!');
+          }
+        });
       }
     })();
   } 
 
 }
+
+async function mergePDFs(buffers) {
+  var outStream = new memoryStreams.WritableStream();
+
+  try {
+    var [firstPDFStream, ...restPDFStreams] = buffers.map(buffer => {
+      let bufferPDF = Buffer.from(buffer, 'base64');
+      return new hummus.PDFRStreamForBuffer(bufferPDF);
+    });
+    console.log(restPDFStreams.length);
+    var pdfWriter = hummus.createWriterToModify(firstPDFStream, new hummus.PDFStreamForResponse(outStream));
+    restPDFStreams.forEach(PDFStream => pdfWriter.appendPDFPagesFromPDF(PDFStream));
+
+    pdfWriter.end();
+    outStream.end();
+    return outStream.toBuffer();
+  } catch (e) {
+    outStream.end();
+    throw new Error('ERROR DURING PDF COMBINATION: ' + e.message);
+  }
+};
 
 createPickingTicketPDF();
