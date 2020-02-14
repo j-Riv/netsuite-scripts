@@ -48,87 +48,95 @@ const createPickingTicketPDF = async () => {
   console.log('READY TO PROCESS DATA');
 
   // get picking ticket ids
-  const response = await fetch(requestData.url, {
-    method: requestData.method,
-    headers: header
-  });
+  try {
+    const response = await fetch(requestData.url, {
+      method: requestData.method,
+      headers: header
+    });
 
-  const content = await response.json();
+    const content = await response.json();
 
-  if (response.ok) {
-    const pickingTickets = content.results;
-    console.log('GETTING PDF(s) FOR THE FOLLOWING ID(s):' + pickingTickets);
+    if (response.ok) {
+      const pickingTickets = content.results;
+      console.log('GETTING PDF(s) FOR THE FOLLOWING ID(s):' + pickingTickets);
 
-    let buffers = [];
+      let buffers = [];
 
-    (async function moveAlong() {
-      // if we still have rows in the quie, let's process the next one.
-      console.log('THERE ARE (' + pickingTickets.length + ') picking tickets.');
-      if (pickingTickets.length) {
-        console.log('++++++++ PROCESSING +++++++');
-        let pickingTicketID = pickingTickets.shift();
-        console.log('Picking Ticket ID')
-        console.log(pickingTicketID);
+      (async function moveAlong() {
+        // if we still have rows in the quie, let's process the next one.
+        console.log('THERE ARE (' + pickingTickets.length + ') picking tickets.');
+        if (pickingTickets.length) {
+          console.log('++++++++ PROCESSING +++++++');
+          let pickingTicketID = pickingTickets.shift();
+          console.log('Picking Ticket ID')
+          console.log(pickingTicketID);
 
-        // data
-        let data = {
-          id: pickingTicketID
-        }
-
-        console.log('GETTING PICKING TICKET ID: (' + pickingTicketID + ')');
-
-        const requestData = {
-          url: process.env.NETSUITE_PRINT_PICKING_TICKET_RESTLET_URL,
-          method: 'POST'
-        }
-
-        const authorization = oauth.authorize(requestData, token);
-        const header = oauth.toHeader(authorization);
-        header.Authorization += ', realm="' + accountID + '"';
-        header['content-type'] = 'application/json';
-
-        const response = await fetch(requestData.url, {
-          method: requestData.method,
-          headers: header,
-          body: JSON.stringify(data)
-        });
-
-        const content = await response.json();
-
-        if (response.ok) {
-          console.log('RECEIVED PDF FROM NETSUITE APPENDING TO LIST.');
-          buffers.push(content.fileBuffer);
-          moveAlong();
-        } else {
-          console.log('ERROR OCCURED, CHECK EMAIL OR SCRIPT LOG FOR DETAILS.');
-        }
-      } else {
-        console.log('MERGING FILES ...');
-        console.log(buffers.length);
-
-        // get time
-        const date = new Date();
-        const year = date.getFullYear();
-        const month = date.getMonth() + 1;
-        const day = date.getDate();
-        const hour = date.getHours();
-        const min = date.getMinutes();
-        const sec = date.getSeconds();
-        const dateTime = year + '-' + month + '-' + day + 'T' + hour + '-' + min + '-' + sec;
-
-        const newBuffer = await mergePDFs(buffers);
-        const pdfPath = path.join(__dirname, '/pdf/' + 'PICKING-TICKETS_' + dateTime + '.pdf');
-
-        fs.writeFile(pdfPath, newBuffer, 'utf8', error => {
-          if (error) {
-            throw error;
-          } else {
-            console.log('FILES MERGED!');
+          // data
+          let data = {
+            id: pickingTicketID
           }
-        });
-      }
-    })();
-  } 
+
+          console.log('GETTING PICKING TICKET ID: (' + pickingTicketID + ')');
+
+          const requestData = {
+            url: process.env.NETSUITE_PRINT_PICKING_TICKET_RESTLET_URL,
+            method: 'POST'
+          }
+
+          const authorization = oauth.authorize(requestData, token);
+          const header = oauth.toHeader(authorization);
+          header.Authorization += ', realm="' + accountID + '"';
+          header['content-type'] = 'application/json';
+
+          try {
+            const response = await fetch(requestData.url, {
+              method: requestData.method,
+              headers: header,
+              body: JSON.stringify(data)
+            });
+
+            const content = await response.json();
+
+            if (response.ok) {
+              console.log('RECEIVED PDF FROM NETSUITE APPENDING TO LIST.');
+              buffers.push(content.fileBuffer);
+              moveAlong();
+            } else {
+              console.log('ERROR OCCURED, CHECK EMAIL OR SCRIPT LOG FOR DETAILS.');
+            }
+          } catch(e) {
+            throw new Error('ERROR GETTING PICKING TICKET: ' + e.message);
+          }
+        } else {
+          console.log('MERGING FILES ...');
+          console.log(buffers.length);
+
+          // get time
+          const date = new Date();
+          const year = date.getFullYear();
+          const month = date.getMonth() + 1;
+          const day = date.getDate();
+          const hour = date.getHours();
+          const min = date.getMinutes();
+          const sec = date.getSeconds();
+          const dateTime = year + '-' + month + '-' + day + 'T' + hour + '-' + min + '-' + sec;
+          // merge pdf(s)
+          const newBuffer = await mergePDFs(buffers);
+          const pdfPath = path.join(__dirname, '/pdf/' + 'PICKING-TICKETS_' + dateTime + '.pdf');
+
+          fs.writeFile(pdfPath, newBuffer, 'utf8', error => {
+            if (error) {
+              throw error;
+            } else {
+              console.log('FILES MERGED!');
+            }
+          });
+        }
+      })();
+    } 
+  } catch (e) {
+    throw new Error('ERROR GETTING PICKING TICKET ID(s): ' + e.message);
+  }
 
 }
 
