@@ -32,7 +32,9 @@ node_modules
 
 # LocalDataTransfer
 # exclude directories
-CsvDataTransfer/attachments/*
-!CsvDataTransfer/attachments/README.md
-CsvDataTransfer/csv/*
-!CsvDataTransfer/csv/README.md
+ManualTools/attachments/*
+!ManualTools/attachments/README.md
+ManualTools/csv/*
+!ManualTools/csv/README.md
+ManualTools/pdf/*
+!ManualTools/pdf/README.md
