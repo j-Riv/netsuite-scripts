@@ -1,5 +1,5 @@
 import 'babel-polyfill';
-import regeneratorRuntime from "regenerator-runtime";
+// import regeneratorRuntime from "regenerator-runtime";
 import dotenv from 'dotenv';
 import fetch from 'node-fetch';
 import OAuth from 'oauth-1.0a';
@@ -55,9 +55,38 @@ const main = async () => {
  * @returns {String[]} - array of ids
  */
 const getPickingTicketIDs = async (oauth, token, accountID) => {
+  // get args
+  const args = process.argv.slice(2);
+  let getPrinted;
+  if (args[0] === '-np') {
+    getPrinted = false;
+    console.log('GETTING ID(s) FOR SALES ORDER(s) THAT ARE OPEN AND PRINTING TICKETS HAVE NOT BEEN PRINTED.');
+  } else {
+    console.log('GETTING ID(s) FOR ALL OPEN SALES ORDER(s).');
+  }
+
+  let marketplace;
+  if (args[1] === '-rs') {
+    marketplace = 'shopify';
+  }
+  if (args[1] === '-ws') {
+    marketplace = 'shopify-wholesaleshopify';
+  }
+  if (args[1] === '-amz') {
+    marketplace = 'amazon';
+  }
+  if (args[1] === '-eb') {
+    marketplace = 'ebay';
+  }
+
+  const searchData = {
+    getPrinted,
+    marketplace
+  }
+
   const requestData = {
     url: process.env.NETSUITE_GET_PICKING_TICKET_IDS_RESTLET_URL,
-    method: 'GET'
+    method: 'POST'
   }
   const authorization = oauth.authorize(requestData, token);
   const header = oauth.toHeader(authorization);
@@ -67,7 +96,8 @@ const getPickingTicketIDs = async (oauth, token, accountID) => {
   try {
     const response = await fetch(requestData.url, {
       method: requestData.method,
-      headers: header
+      headers: header,
+      body: JSON.stringify(searchData)
     });
 
     const content = await response.json();
@@ -75,7 +105,7 @@ const getPickingTicketIDs = async (oauth, token, accountID) => {
     // if response ok
     if (response.ok) {
       const pickingTickets = content.results;
-      console.log('GETTING PDF(s) FOR THE FOLLOWING ID(s):' + pickingTickets);
+      console.log('ID(s):' + '\n\n' + pickingTickets);
 
       return pickingTickets;    
     }
@@ -94,19 +124,17 @@ const getPickingTicketIDs = async (oauth, token, accountID) => {
  */
 const getPDFs = async(oauth, token, accountID, pickingTickets, buffers) => {
   // if we still have rows in the quie, let's process the next one.
-  console.log('THERE ARE (' + pickingTickets.length + ') picking tickets.');
+  console.log('\n\n' + 'THERE ARE (' + pickingTickets.length + ') PICKING TICKETS.');
   if (pickingTickets.length) {
-    console.log('++++++++ PROCESSING +++++++');
+    console.log('\n\n' + '++++++++ PROCESSING +++++++');
     let pickingTicketID = pickingTickets.shift();
-    console.log('Picking Ticket ID')
-    console.log(pickingTicketID);
 
     // data
     let data = {
       id: pickingTicketID
     }
 
-    console.log('GETTING PICKING TICKET ID: (' + pickingTicketID + ')');
+    console.log('🤔 ---> GETTING PICKING TICKET ID: (' + pickingTicketID + ')');
 
     const requestData = {
       url: process.env.NETSUITE_PRINT_PICKING_TICKET_RESTLET_URL,
@@ -127,17 +155,17 @@ const getPDFs = async(oauth, token, accountID, pickingTickets, buffers) => {
       const content = await response.json();
 
       if (response.ok) {
-        console.log('RECEIVED PDF FROM NETSUITE APPENDING TO LIST.');
+        console.log('\n\n' + '📂 ---> RECEIVED PDF FROM NETSUITE APPENDING TO LIST.');
         buffers.push(content.fileBuffer);
         getPDFs(oauth, token, accountID, pickingTickets, buffers);
       } else {
-        console.log('ERROR OCCURED, CHECK EMAIL OR SCRIPT LOG FOR DETAILS.');
+        console.log('\n\n' + 'ERROR OCCURED, CHECK EMAIL OR SCRIPT LOG FOR DETAILS.');
       }
     } catch (e) {
-      throw new Error('ERROR GETTING PICKING TICKET: ' + e.message);
+      throw new Error('\n\n' + 'ERROR GETTING PICKING TICKET: ' + e.message);
     }
   } else {
-    console.log('MERGING FILES ...');
+    console.log('\n\n' + 'MERGING FILES ...');
     console.log(buffers.length);
 
     // get date & time to use for name
@@ -157,7 +185,7 @@ const getPDFs = async(oauth, token, accountID, pickingTickets, buffers) => {
       if (error) {
         throw error;
       } else {
-        console.log('FILES MERGED!');
+        console.log('\n\n' + 'FILES MERGED!');
       }
     });
   }
@@ -185,7 +213,7 @@ const mergePDFs = async buffers => {
     return outStream.toBuffer();
   } catch (e) {
     outStream.end();
-    throw new Error('ERROR DURING PDF COMBINATION: ' + e.message);
+    throw new Error('\n\n' + 'ERROR DURING PDF COMBINATION: ' + e.message);
   }
 };
 
