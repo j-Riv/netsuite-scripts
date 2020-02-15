@@ -14,25 +14,11 @@ define(['N/search'],
     function getPickingTicketIds(context) {
       
       // set saved search
-      var savedSearch;
+      var savedSearch = 'customsearch955';
+      // if getPrinted - gets all picking tickets from all open sales orders
+      // else gets picking tickets that have not been printed from sales orders
       if (context.getPrinted) {
-        // gets all picking tickets from all open sales orders
         savedSearch = 'customsearch949';
-      } else {
-        // gets picking tickets that have not been printed 
-        // from open sales orders
-        savedSearch = 'customsearch955';
-      }
-
-      // set marketplace
-      var marketplace;
-      var operator;
-      if (context.marketplace) {
-        marketplace = context.marketplace;
-        operator = 'is';
-      } else {
-        marketplace = '';
-        operator = 'isempty';
       }
 
       // load saved search
@@ -40,16 +26,30 @@ define(['N/search'],
         id: savedSearch
       });
 
-      // get filters
-      var defaultFilters = mySearch.filters;
-      // add new filters
-      var newFilters = {
-        'name': 'custbody_fa_channel',
-        'operator': operator,
-        'values': marketplace
-      };
-      defaultFilters.push(newFilters);
-      mySearch.filters = defaultFilters;
+      // set marketplace
+      var marketplace;
+      var operator;
+      if (context.marketplace) {
+        if (context.marketplace == 'netsuite') {
+          // set marketplace to empty for in netsuite transactions
+          marketplace = '';
+          operator = 'isempty';
+        } else {
+          // set marketplace to appropriate FarApp marketplace
+          marketplace = context.marketplace;
+          operator = 'is';
+        }
+        // get filters
+        var defaultFilters = mySearch.filters;
+        // add new filters
+        var newFilters = {
+          'name': 'custbody_fa_channel',
+          'operator': operator,
+          'values': marketplace
+        };
+        defaultFilters.push(newFilters);
+        mySearch.filters = defaultFilters;
+      }
 
       // run search
       var resultSet = mySearch.run()
