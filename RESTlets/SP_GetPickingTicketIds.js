@@ -14,11 +14,11 @@ define(['N/search'],
     function getPickingTicketIds(context) {
       
       // set saved search
-      var savedSearch = 'customsearch955';
+      var savedSearch = 'customsearch_sp_sales_order_np_picking';
       // if getPrinted - gets all picking tickets from all open sales orders
       // else gets picking tickets that have not been printed from sales orders
       if (context.getPrinted) {
-        savedSearch = 'customsearch949';
+        savedSearch = 'customsearch_sp_open_sales_orders';
       }
 
       // load saved search
