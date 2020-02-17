@@ -3,7 +3,7 @@
  * @NScriptType UserEventScript
  * @NModuleScope SameAccount
  */
-define(['N/record'], function (record) {
+define(['N/record', 'N/log'], function (record, log) {
   /**
    * Rounds value to 2 decimals
    * @param {decimal} value - the value you want to round to
@@ -22,7 +22,10 @@ define(['N/record'], function (record) {
     if (context.type == 'create' || context.type == 'edit') {
       try {
         // get record
-        var currentRecord = context.newRecord;
+        var currentRecord = record.load({
+          type: context.newRecord.type,
+          id: context.newRecord.id
+        });
         // get line count
         var lines = currentRecord.getLineCount({ sublistId: 'item' });
         var totalWeight = 0;
@@ -35,7 +38,16 @@ define(['N/record'], function (record) {
           // check if line item has quantity
           // custom line items like discount and subtotal should not -- these will be skipped
           if (quantity && weight) {
+            log.debug({
+              title: 'Quantity of line ' + i,
+              details: quantity
+            });
             var unit = currentRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_sp_item_weight_units', line: i });
+
+            log.debug({
+              title: 'Weight',
+              details: weight + ' ' + unit
+            });
             if (unit === 'oz') {
               // convert oz to lbs
               weight = weight * 0.0625;
@@ -51,6 +63,10 @@ define(['N/record'], function (record) {
 
             // calculate line weight
             var lineWeight = weight * quantity;
+            log.debug({
+              title: 'Line Weight',
+              details: weight + ' ' + unit
+            });
             // calculate total weight
             totalWeight = parseFloat(totalWeight) + parseFloat(lineWeight);
             // calculate total item count
@@ -61,13 +77,24 @@ define(['N/record'], function (record) {
         totalWeight = round(totalWeight, 2);
         // set fields
         currentRecord.setValue({ fieldId: 'custbody_sp_total_items_weight', value: totalWeight });
+        log.debug({
+          title: 'Set Value: Total Items Weight (lbs):',
+          details: totalWeight
+        });
         currentRecord.setValue({ fieldId: 'custbody_sp_total_items', value: totalItems });
+        log.debug({
+          title: 'Set Value: Total Items:',
+          details: totalItems
+        });
         currentRecord.save({
           enableSourcing: true,
           ignoreMandatoryFields: false
         });
       } catch (e) {
-        console.log(e.message);
+        log.error({
+          title: 'Error',
+          details: e.message
+        });
       }
     }
   }
@@ -87,6 +114,6 @@ define(['N/record'], function (record) {
 
   return {
     beforeLoad: beforeLoad,
-    beforeSubmit: calculateTotalWeight
+    afterSubmit: calculateTotalWeight
   }
 });
