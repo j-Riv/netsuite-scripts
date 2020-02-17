@@ -7,7 +7,7 @@ Future home for SuiteScripts & RESTlets
 - [SuiteScripts](/SuiteScripts)
 - [RESTlets](/RESTlets)
 - [Sample Responses](/SampleResponses)
-- [CSV Data Transfer - Used for Migration from Zoho](/CsvDataTransfer)
+- [Manual Tools - Used for Migration from Zoho](/ManualTools)
 
 ### Documentation:
 - [RESTlets](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=chapter_N2970114.html)
