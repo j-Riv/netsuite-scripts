@@ -15,12 +15,15 @@ yarn install
 ```javascript
 // Netsuite Production
 NETSUITE_ACCT_ID="NETSUITE SPRODUCTION ACCT ID"
-NETSUITE_USER_NOTES_RESTLET_URL="NETSUITE PRODUCTION RESTLET URL" // Callback RESTlet URL
-NETSUITE_USER_ATTACHMENTS_RESTLET_URL="NETSUITE PRODUCTION RESTLET URL" // Callback RESTlet URL
 NETSUITE_CONSUMER_KEY="NETSUITE PRODUCTION CONSUMER KEY" // Generated at Integration Record creation
 NETSUITE_CONSUMER_SECRET="NETSUITE PRODUCTION CONSUMER SECRET" // Generated at Integration Record creation
 NETSUITE_ACCESS_TOKEN="NETSUITE PRODUCTION ACCESS TOKEN" // User specific access token
 NETSUITE_TOKEN_SECRET="NETSUITE PRODUCTION TOKEN SECRET" // User specific token secret
+// URLs
+NETSUITE_USER_NOTES_RESTLET_URL="NETSUITE PRODUCTION RESTLET URL" // Callback RESTlet URL
+NETSUITE_USER_ATTACHMENTS_RESTLET_URL="NETSUITE PRODUCTION RESTLET URL" // Callback RESTlet URL
+NETSUITE_GET_PICKING_TICKET_IDS_RESTLET_URL="NETSUITE PRODUCTION RESTLET URL" // Callback RESTlet URL
+NETSUITE_PRINT_PICKING_TICKET_RESTLET_URL="NETSUITE PRODUCTION RESTLET URL" // Callback RESTlet URL
 ```
 
 Resources:
@@ -34,3 +37,4 @@ Resources:
   - [record.create](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=section_4267258059.html)
   - [record.attach](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=section_4267284169.html)
 - [N/file Module](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=section_4205693274.html)
+- [N/render Module](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=section_4412042824.html)
