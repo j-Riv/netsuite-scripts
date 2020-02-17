@@ -123,7 +123,7 @@ const createPickingTicketPDF = async () => {
           const dateTime = year + '-' + month + '-' + day + 'T' + hour + '-' + min + '-' + sec;
           // merge pdf(s)
           const newBuffer = await mergePDFs(buffers);
-          const pdfPath = path.join(__dirname, '/pdf/' + 'PICKING-TICKETS_' + dateTime + '.pdf');
+          const pdfPath = path.join(__dirname, '../public/pdf/' + 'PICKING-TICKETS_' + dateTime + '.pdf');
 
           fs.writeFile(pdfPath, newBuffer, 'utf8', error => {
             if (error) {

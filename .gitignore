@@ -30,11 +30,12 @@ Saved/*
 node_modules
 .env
 
-# LocalDataTransfer
+# Manual Tools
 # exclude directories
-ManualTools/attachments/*
-!ManualTools/attachments/README.md
-ManualTools/csv/*
-!ManualTools/csv/README.md
-ManualTools/pdf/*
-!ManualTools/pdf/README.md
+ManualTools/lib/
+ManualTools/public/attachments/*
+!ManualTools/public/attachments/README.md
+ManualTools/public/csv/*
+!ManualTools/public/csv/README.md
+ManualTools/public/pdf/*
+!ManualTools/public/pdf/README.md
