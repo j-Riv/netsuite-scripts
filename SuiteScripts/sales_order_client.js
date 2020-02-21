@@ -12,6 +12,7 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
 
     function fieldChanged(context) {
       var salesRecord = currentRecord.get();
+      // on shipping cost change
       if (context.fieldId == 'shippingcost') {
         var shipMethod = salesRecord.getValue('shipmethod');
         if (salesRecord.getValue('custbody_fa_channel') == "") {
@@ -20,6 +21,14 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
             calculateHandling();
           }
         }
+      }
+      // on handling cost change
+      if (context.fieldId == 'handlingcost') {
+        var shippingCost = parseFloat(salesRecord.getValue('shippingcost'));
+        var handlingCost = parseFloat(salesRecord.getValue('handlingcost'));
+        // add total
+        var total = shippingCost + handlingCost;
+        salesRecord.setValue('custbody_sp_total_shipping_cost', total);
       }
     }
 
