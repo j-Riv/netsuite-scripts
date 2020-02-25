@@ -13,28 +13,30 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
     function fieldChanged(context) {
       var salesRecord = currentRecord.get();
       if (salesRecord.getValue('custbody_fa_channel') == "") {
-        // on shipping cost change
-        if (context.fieldId == 'shippingcost') {
-          var shipMethod = salesRecord.getValue('shipmethod');
-          // Amazon FBA (21719), In Store Pickup (22004), Will Call (21989)
-          if (shipMethod !== 21719 || shipMethod !== 22004 || shipMethod !== 21989) {
+        var shipMethod = salesRecord.getValue('shipmethod');
+        // Amazon FBA (21719), In Store Pickup (22004), Will Call (21989), Freight (22022)
+        if (shipMethod !== 21719 || shipMethod !== 22004 || shipMethod !== 21989 || shipMethod !== 22022) {
+          // on shipping cost change
+          if (context.fieldId == 'shippingcost') {
+            // calculate handling
             calculateHandling();
+            // get cost for total
+            var shippingCost = parseFloat(salesRecord.getValue('shippingcost'));
+            var handlingCost = parseFloat(salesRecord.getValue('handlingcost'));
+            // add total
+            var total = shippingCost + handlingCost;
+            total = round(total, 2);
+            salesRecord.setValue('custbody_sp_total_shipping_cost', total);
           }
-          var shippingCost = parseFloat(salesRecord.getValue('shippingcost'));
-          var handlingCost = parseFloat(salesRecord.getValue('handlingcost'));
-          // add total
-          var total = shippingCost + handlingCost;
-          total = round(total, 2);
-          salesRecord.setValue('custbody_sp_total_shipping_cost', total);
-        }
-        // on handling cost change
-        if (context.fieldId == 'handlingcost') {
-          var shippingCost = parseFloat(salesRecord.getValue('shippingcost'));
-          var handlingCost = parseFloat(salesRecord.getValue('handlingcost'));
-          // add total
-          var total = shippingCost + handlingCost;
-          total = round(total, 2);
-          salesRecord.setValue('custbody_sp_total_shipping_cost', total);
+          // on handling cost change
+          if (context.fieldId == 'handlingcost') {
+            var shippingCost = parseFloat(salesRecord.getValue('shippingcost'));
+            var handlingCost = parseFloat(salesRecord.getValue('handlingcost'));
+            // add total
+            var total = shippingCost + handlingCost;
+            total = round(total, 2);
+            salesRecord.setValue('custbody_sp_total_shipping_cost', total);
+          }
         }
       }
     }
