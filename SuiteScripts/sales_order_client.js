@@ -12,23 +12,30 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
 
     function fieldChanged(context) {
       var salesRecord = currentRecord.get();
-      // on shipping cost change
-      if (context.fieldId == 'shippingcost') {
-        var shipMethod = salesRecord.getValue('shipmethod');
-        if (salesRecord.getValue('custbody_fa_channel') == "") {
+      if (salesRecord.getValue('custbody_fa_channel') == "") {
+        // on shipping cost change
+        if (context.fieldId == 'shippingcost') {
+          var shipMethod = salesRecord.getValue('shipmethod');
           // Amazon FBA (21719), In Store Pickup (22004), Will Call (21989)
-          if (shipMethod !== 21719 || shipMethod !== 22004 || shipMethod !== 21989 ) {
+          if (shipMethod !== 21719 || shipMethod !== 22004 || shipMethod !== 21989) {
             calculateHandling();
           }
+          var shippingCost = parseFloat(salesRecord.getValue('shippingcost'));
+          var handlingCost = parseFloat(salesRecord.getValue('handlingcost'));
+          // add total
+          var total = shippingCost + handlingCost;
+          total = round(total, 2);
+          salesRecord.setValue('custbody_sp_total_shipping_cost', total);
         }
-      }
-      // on handling cost change
-      if (context.fieldId == 'handlingcost') {
-        var shippingCost = parseFloat(salesRecord.getValue('shippingcost'));
-        var handlingCost = parseFloat(salesRecord.getValue('handlingcost'));
-        // add total
-        var total = shippingCost + handlingCost;
-        salesRecord.setValue('custbody_sp_total_shipping_cost', total);
+        // on handling cost change
+        if (context.fieldId == 'handlingcost') {
+          var shippingCost = parseFloat(salesRecord.getValue('shippingcost'));
+          var handlingCost = parseFloat(salesRecord.getValue('handlingcost'));
+          // add total
+          var total = shippingCost + handlingCost;
+          total = round(total, 2);
+          salesRecord.setValue('custbody_sp_total_shipping_cost', total);
+        }
       }
     }
 
@@ -51,56 +58,58 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
       if (salesRecord.getValue('custbody_fa_channel') == "") {
         // check for ship method returns ID
         var shipMethod = salesRecord.getValue('shipmethod');
-        if (shipMethod !== '') {
+        if (shipMethod && shipMethod !== '') {
           var shipState = salesRecord.getValue('shipstate');
-          var UsRegion1 = [
-            'AZ', 'CA', 'ID', 'NV', 'UT'
-          ];
-          var UsRegion2 = [
-            'AR', 'CO', 'KS', 'MO', 'MT', 'NE', 'NM', 'OK', 'OR', 'TX', 'WA', 'WY'
-          ];
-          var UsRegion3 = [
-            'AL', 'DE', 'FL', 'GA', 'IL', 'IN', 'IA', 'KY', 'LA', 'MD', 'MA', 'MI', 'MN', 'MS', 'NC', 'ND', 'OH', 'SC', 'SD', 'TN', 'VA', 'WV', 'WI'
-          ];
-          var UsRegion4 = [
-            'CT', 'DC', 'ME', 'NH', 'NJ', 'NY', 'RI', 'VT', 'GU', 'VI'
-          ];
-          var UsRegion5 = [
-            'AK', 'HI', 'PR', 'AS'
-          ];
+          if (shipState && shipState !== '') {
+            var UsRegion1 = [
+              'AZ', 'CA', 'ID', 'NV', 'UT'
+            ];
+            var UsRegion2 = [
+              'AR', 'CO', 'KS', 'MO', 'MT', 'NE', 'NM', 'OK', 'OR', 'TX', 'WA', 'WY'
+            ];
+            var UsRegion3 = [
+              'AL', 'DE', 'FL', 'GA', 'IL', 'IN', 'IA', 'KY', 'LA', 'MD', 'MA', 'MI', 'MN', 'MS', 'NC', 'ND', 'OH', 'SC', 'SD', 'TN', 'VA', 'WV', 'WI'
+            ];
+            var UsRegion4 = [
+              'CT', 'DC', 'ME', 'NH', 'NJ', 'NY', 'RI', 'VT', 'GU', 'VI'
+            ];
+            var UsRegion5 = [
+              'AK', 'HI', 'PR', 'AS'
+            ];
 
-          var shippingCost = parseFloat(salesRecord.getValue('shippingcost'));
-          var handlingCost = 0;
-          if (UsRegion1.includes(shipState)) {
-            handlingCost = parseFloat(shippingCost) * .7;
-          } else if (UsRegion2.includes(shipState)) {
-            hadnlingCost = parseFloat(shippingCost) * .6;
-          } else if (UsRegion3.includes(shipState)) {
-            handlingCost = parseFloat(shippingCost) * .5;
-          } else if (UsRegion4.includes(shipState)) {
-            handlingCost = parseFloat(shippingCost) * .25;
-          } else if (UsRegion5.includes(shipState)) {
-            handlingCost = parseFloat(shippingCost) * .25;
-          } else {
-            handlingCost = 0.00;
+            var shippingCost = parseFloat(salesRecord.getValue('shippingcost'));
+            var handlingCost = 0;
+            if (UsRegion1.includes(shipState)) {
+              handlingCost = parseFloat(shippingCost) * .7;
+            } else if (UsRegion2.includes(shipState)) {
+              hadnlingCost = parseFloat(shippingCost) * .6;
+            } else if (UsRegion3.includes(shipState)) {
+              handlingCost = parseFloat(shippingCost) * .5;
+            } else if (UsRegion4.includes(shipState)) {
+              handlingCost = parseFloat(shippingCost) * .25;
+            } else if (UsRegion5.includes(shipState)) {
+              handlingCost = parseFloat(shippingCost) * .25;
+            } else {
+              handlingCost = 0.00;
+            }
+
+            // round handling cost
+            handlingCost = round(handlingCost, 2);
+
+            // log
+            var logData = {
+              'Shipping Method': shipMethod,
+              'Ship State': shipState,
+              'Handling Cost': '$' + handlingCost
+            };
+            log.debug({ 
+              title: 'Calculating and Setting Handling Cost',
+              details: logData 
+            });
+
+            salesRecord.setValue('handlingcost', handlingCost);
+          
           }
-
-          // round handling cost
-          handlingCost = round(handlingCost, 2);
-
-          // log
-          var logData = {
-            'Shipping Method': shipMethod,
-            'Ship State': shipState,
-            'Handling Cost': '$' + handlingCost
-          };
-
-          log.debug({ 
-            title: 'Calculating and Setting Handling Cost',
-            details: logData 
-          });
-
-          salesRecord.setValue('handlingcost', handlingCost);
         } else {
           log.error({ 
             title: 'Shipping Method is not selected' ,
