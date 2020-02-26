@@ -18,7 +18,10 @@ define(['N/record', 'N/error'],
                         message: 'Missing a required argument: [' + argNames[i] + '] for method: ' + methodName
                     });
         }
-        // Get a standard NetSuite record
+        /**
+         * Get the lead record
+         * @param {Object} context - post body
+         */
         function _get(context) {
             doValidation([context.recordtype, context.id], ['recordtype', 'id'], 'GET');
             return JSON.stringify(record.load({
@@ -26,7 +29,10 @@ define(['N/record', 'N/error'],
                 id: context.id
             }));
         }
-        // Delete a standard NetSuite record
+        /**
+         * Delete the lead record
+         * @param {Object} context - post body 
+         */
         function _delete(context) {
             doValidation([context.recordtype, context.id], ['recordtype', 'id'], 'DELETE');
             record.delete({
@@ -35,13 +41,17 @@ define(['N/record', 'N/error'],
             });
             return String(context.id);
         }
-        // Create a NetSuite record from request params
+        /**
+         * Creates a Lead from the Wholesale Application Form
+         * @param {Object} context - post body
+         */
         function post(context) {
             doValidation([context.recordtype], ['recordtype'], 'POST');
             var rec = record.create({
                 type: context.recordtype,
                 isDynamic: true
             });
+            // Loop through fields
             for (var fldName in context)
                 if (context.hasOwnProperty(fldName))
                     if (fldName !== 'recordtype')
@@ -49,7 +59,7 @@ define(['N/record', 'N/error'],
 
             // Add address & contacts
             if (context.recordtype === 'lead') {
-                // address
+                // Addresses
                 var leadAddress = context.addressbook;
                 leadAddress.forEach(function (addr) {
                     rec.selectNewLine({ sublistId: 'addressbook' });
@@ -78,7 +88,7 @@ define(['N/record', 'N/error'],
                     address.setValue({ fieldId: 'zip', value: addr.zip });
                     rec.commitLine({ sublistId: 'addressbook' });
                 });
-                // contact
+                // Contact
                 rec.selectNewLine({ sublistId: 'contact' });
                 rec.setCurrentSublistValue({ sublistId: 'contact', fieldId: 'firstname', value: context.billingfirstname });
                 rec.setCurrentSublistValue({ sublistId: 'contact', fieldId: 'lastname', value: context.billinglastname });
@@ -88,7 +98,7 @@ define(['N/record', 'N/error'],
                 rec.commitLine({ sublistId: 'contact' });
 
                 if (context.secondContact) {
-                    // contact
+                    // Second Contact
                     rec.selectNewLine({ sublistId: 'contact' });
                     rec.setCurrentSublistValue({ sublistId: 'contact', fieldId: 'firstname', value: context.contactfirstname });
                     rec.setCurrentSublistValue({ sublistId: 'contact', fieldId: 'lastname', value: context.contactlastname });
@@ -98,17 +108,21 @@ define(['N/record', 'N/error'],
                     rec.commitLine({ sublistId: 'contact' });
                 }
             }
-
+            // Save record and return id
             var recordId = rec.save();
             return String(recordId);
         }
-        // Upsert a NetSuite record from request param
+        /**
+         * Upsert a NetSuite record from request param
+         * @param {Object} context 
+         */
         function put(context) {
             doValidation([context.recordtype, context.id], ['recordtype', 'id'], 'PUT');
             var rec = record.load({
                 type: context.recordtype,
                 id: context.id
             });
+            // Loop through fields
             for (var fldName in context)
                 if (context.hasOwnProperty(fldName))
                     if (fldName !== 'recordtype' && fldName !== 'id')
@@ -116,7 +130,7 @@ define(['N/record', 'N/error'],
             rec.save();
             return JSON.stringify(rec);
         }
-        
+        // Export Functions
         return {
             get: _get,
             delete: _delete,

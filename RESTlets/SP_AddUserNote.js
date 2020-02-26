@@ -25,7 +25,7 @@ define(['N/record', 'N/error'],
      */
     function post(context) {
       doValidation([context.recordtype], ['recordtype'], 'POST');
-      // new note
+      // New note
       var noteObj = {
         "note": context.note,
         "title": context.noteTitle,
@@ -33,10 +33,11 @@ define(['N/record', 'N/error'],
         "notedate": context.noteDate,
         "time": context.time
       }
-      // set the note entity to the lead
+      // Set the note entity to the lead
       var noteRecord = record.create({
         type: record.Type.NOTE
       });
+      // Set values
       noteRecord.setValue({
         fieldId: 'entity',
         value: context.recordID

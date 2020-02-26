@@ -12,8 +12,7 @@ define(['N/search'],
      */
 
     function getPickingTicketIds(context) {
-      
-      // set saved search
+      // Set saved search
       var savedSearch = 'customsearch_sp_sales_order_np_picking';
       // if getPrinted - gets all picking tickets from all open sales orders
       // else gets picking tickets that have not been printed from sales orders
@@ -21,27 +20,27 @@ define(['N/search'],
         savedSearch = 'customsearch_sp_open_sales_orders';
       }
 
-      // load saved search
+      // Load saved search
       var mySearch = search.load({
         id: savedSearch
       });
 
-      // set marketplace
+      // Set marketplace
       var marketplace;
       var operator;
       if (context.marketplace) {
         if (context.marketplace == 'netsuite') {
-          // set marketplace to empty for in netsuite transactions
+          // Set marketplace to empty for in netsuite transactions
           marketplace = '';
           operator = 'isempty';
         } else {
-          // set marketplace to appropriate FarApp marketplace
+          // Set marketplace to appropriate FarApp marketplace
           marketplace = context.marketplace;
           operator = 'is';
         }
-        // get filters
+        // Get filters
         var defaultFilters = mySearch.filters;
-        // add new filters
+        // Add new filters
         var newFilters = {
           'name': 'custbody_fa_channel',
           'operator': operator,
@@ -51,12 +50,12 @@ define(['N/search'],
         mySearch.filters = defaultFilters;
       }
 
-      // run search
+      // Run search
       var resultSet = mySearch.run()
-      // get result range
+      // Get result range
       var results = resultSet.getRange(0, 1000);
 
-      // get internal ids
+      // Get internal ids
       var ids = [];
       for (var i in results) {
         var result = results[i];

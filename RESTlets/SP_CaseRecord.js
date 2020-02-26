@@ -29,6 +29,7 @@ define(['N/record', 'N/error'],
         isDynamic: true
       });
 
+      // Set values
       rec.setValue('customform', Number(context.customForm));
       rec.setValue('company', Number(context.company));
       rec.setValue('profile', Number(context.profile));
@@ -45,13 +46,15 @@ define(['N/record', 'N/error'],
       rec.setValue('phone', context.phone);
       rec.setValue('quicknote', context.quickNote);
 
+      // Save case record
       var recordId = rec.save();
 
-      // create note
+      // Create note
       var note = record.create({
         type: record.Type.NOTE
       });
 
+      // Set values
       note.setValue('activity', recordId);
       note.setValue('title', 'Contact Details');
       note.setValue('author', context.company);
@@ -60,7 +63,8 @@ define(['N/record', 'N/error'],
         ' / Email: ' + context.email + ' / Submitted By: ' + context.email; 
       note.setValue('note', noteContent);
 
-      var noteId = note.save();
+      // Save note
+      note.save();
 
       return String(recordId);
     }

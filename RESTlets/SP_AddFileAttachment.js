@@ -45,7 +45,7 @@ define(['N/file', 'N/record', 'N/error'],
 
       var fileID = fileRecord.save();
 
-      // attach record
+      // Attach record
       var id = record.attach({
         record: {
           type: 'file',
