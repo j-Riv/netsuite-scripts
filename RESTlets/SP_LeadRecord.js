@@ -23,6 +23,7 @@ define(['N/record', 'N/error'],
          * @param {Object} context - post body
          */
         function _get(context) {
+            // Parse data passed to url ex: &recordtype=customer&id=1102
             doValidation([context.recordtype, context.id], ['recordtype', 'id'], 'GET');
             return JSON.stringify(record.load({
                 type: context.recordtype,
