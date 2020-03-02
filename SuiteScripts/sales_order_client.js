@@ -84,7 +84,7 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
             if (UsRegion1.includes(shipState)) {
               handlingCost = parseFloat(shippingCost) * .7;
             } else if (UsRegion2.includes(shipState)) {
-              hadnlingCost = parseFloat(shippingCost) * .6;
+              handlingCost = parseFloat(shippingCost) * .6;
             } else if (UsRegion3.includes(shipState)) {
               handlingCost = parseFloat(shippingCost) * .5;
             } else if (UsRegion4.includes(shipState)) {
