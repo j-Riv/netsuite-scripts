@@ -189,10 +189,13 @@ define(['N/currentRecord', 'N/record', 'N/ui/dialog', 'N/log'],
               });
               var components = loadedItem.getLineCount({ sublistId: 'member' });
 
+              var totalComponents = 0;
               for (var j = 0; j < components; j++) {
                 var componentQuantity = loadedItem.getSublistValue({ sublistId: 'member', fieldId: 'quantity', line: j });
-                var quantity = quantity * componentQuantity;
+                totalComponents += componentQuantity;
               }
+              // calculate total item count for kit items
+              quantity = quantity * totalComponents;
             }
             // calculate total item count
             totalItems = parseInt(totalItems) + parseInt(quantity);
