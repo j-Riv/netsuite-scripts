@@ -2,8 +2,8 @@
  *@NApiVersion 2.x
  *@NScriptType ClientScript
  */
-define(['N/currentRecord', 'N/record', 'N/ui/dialog', 'N/log'],
-  function (currentRecord, record, dialog, log) {
+define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
+  function (currentRecord, dialog, log) {
 
     function pageInit(context) {
       // todo
@@ -142,21 +142,20 @@ define(['N/currentRecord', 'N/record', 'N/ui/dialog', 'N/log'],
       // check for user event type
       try {
         // get record
-        var salesRecord = currentRecord.get();
+        var record = currentRecord.get();
         // get line count
-        var lines = salesRecord.getLineCount({ sublistId: 'item' });
+        var lines = record.getLineCount({ sublistId: 'item' });
         var totalWeight = 0;
         var totalItems = 0;
 
         for (var i = 0; i < lines; i++) {
           // get weight unit (lb, oz, kg, g)
-          var quantity = salesRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
-          var weight = salesRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_sp_item_weight', line: i });
-
+          var quantity = record.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
+          var weight = record.getSublistValue({ sublistId: 'item', fieldId: 'custcol_sp_item_weight', line: i });
           // check if line item has quantity
           // custom line items like discount and subtotal should not -- these will be skipped
           if (quantity && weight) {
-            var unit = salesRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_sp_item_weight_units', line: i });
+            var unit = record.getSublistValue({ sublistId: 'item', fieldId: 'custcol_sp_item_weight_units', line: i });
             if (unit === 'oz') {
               // convert oz to lbs
               weight = weight * 0.0625;
@@ -174,34 +173,19 @@ define(['N/currentRecord', 'N/record', 'N/ui/dialog', 'N/log'],
             var lineWeight = weight * quantity;
             // calculate total weight
             totalWeight = parseFloat(totalWeight) + parseFloat(lineWeight);
-            totalWeight = round(totalWeight, 2);
-            // set fields
-            salesRecord.setValue({ fieldId: 'custbody_sp_total_items_weight', value: totalWeight });
-
-            var itemType = salesRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_sp_item_type', line: i });
-
-            // load  item record
-            if (itemType == 'Kit/Package') {
-              var itemId = salesRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_sp_item_id', line: i });
-              var loadedItem = record.load({
-                type: record.Type.KIT_ITEM,
-                id: Number(itemId)
-              });
-              var components = loadedItem.getLineCount({ sublistId: 'member' });
-
-              for (var j = 0; j < components; j++) {
-                var componentQuantity = loadedItem.getSublistValue({ sublistId: 'member', fieldId: 'quantity', line: j });
-                var quantity = quantity * componentQuantity;
-              }
-            }
             // calculate total item count
             totalItems = parseInt(totalItems) + parseInt(quantity);
           }
 
         }
-        // set total item count
-        salesRecord.setValue({ fieldId: 'custbody_sp_total_items', value: totalItems });
-
+        totalWeight = round(totalWeight, 2);
+        // set fields
+        record.setValue({ fieldId: 'custbody_sp_total_items_weight', value: totalWeight });
+        record.setValue({ fieldId: 'custbody_sp_total_items', value: totalItems });
+        record.save({
+          enableSourcing: true,
+          ignoreMandatoryFields: false
+        });
       } catch (e) {
         console.log(e.message);
       }
