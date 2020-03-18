@@ -104,17 +104,17 @@ define(['N/currentRecord', 'N/record', 'N/ui/dialog', 'N/log'],
               'Ship State': shipState,
               'Handling Cost': '$' + handlingCost
             };
-            log.debug({ 
+            log.debug({
               title: 'Calculating and Setting Handling Cost',
-              details: logData 
+              details: logData
             });
 
             salesRecord.setValue('handlingcost', handlingCost);
-          
+
           }
         } else {
-          log.error({ 
-            title: 'Shipping Method is not selected' ,
+          log.error({
+            title: 'Shipping Method is not selected',
             details: 'Shipping Method is not selected'
           });
           dialog.alert({
@@ -123,7 +123,7 @@ define(['N/currentRecord', 'N/record', 'N/ui/dialog', 'N/log'],
           });
         }
       } else {
-        log.error({ 
+        log.error({
           title: 'Handling Cost Error',
           details: 'Sales Channel ' + salesRecord.getValue('custbody_fa_channel') + ', FarApp has already added the handling cost to the shipping cost. Please do not add it again.'
         });
