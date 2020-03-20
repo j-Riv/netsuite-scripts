@@ -139,8 +139,8 @@ define(['N/currentRecord', 'N/record', 'N/ui/dialog', 'N/log'],
      * @param {*} context - form data 
      */
     function calculateTotalWeight() {
+      // check for user event type
       try {
-        console.log('starting calculation / conversion...');
         // get record
         var salesRecord = currentRecord.get();
         // get line count
@@ -149,7 +149,6 @@ define(['N/currentRecord', 'N/record', 'N/ui/dialog', 'N/log'],
         var totalItems = 0;
 
         for (var i = 0; i < lines; i++) {
-          console.log('checking line: ' + i);
           // get weight unit (lb, oz, kg, g)
           var quantity = salesRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
           var weight = salesRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_sp_item_weight', line: i });
@@ -158,7 +157,6 @@ define(['N/currentRecord', 'N/record', 'N/ui/dialog', 'N/log'],
           // custom line items like discount and subtotal should not -- these will be skipped
           if (quantity && weight) {
             var unit = salesRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_sp_item_weight_units', line: i });
-            console.log('converting ' + unit + ' to lb...');
             if (unit === 'oz') {
               // convert oz to lbs
               weight = weight * 0.0625;
@@ -172,26 +170,18 @@ define(['N/currentRecord', 'N/record', 'N/ui/dialog', 'N/log'],
               weight = weight * 1;
             }
 
-            // set line weight
-            console.log('setting converted item weight');
-            var convertedWeight = round(weight, 3);
-            var currentLine = salesRecord.selectLine({ sublistId: 'item', line: i });
-            currentLine.setCurrentSublistValue({ sublistId: 'item', fieldId: 'custcol_sp_converted_item_weight', value: convertedWeight, ignoreFieldChange: false });
-            salesRecord.commitLine({ sublistId: 'item' });
-
             // calculate line weight
             var lineWeight = weight * quantity;
             // calculate total weight
             totalWeight = parseFloat(totalWeight) + parseFloat(lineWeight);
-            // totalWeight = round(totalWeight, 2);
-            // // set fields
-            // salesRecord.setValue({ fieldId: 'custbody_sp_total_items_weight', value: totalWeight });
+            totalWeight = round(totalWeight, 2);
+            // set fields
+            salesRecord.setValue({ fieldId: 'custbody_sp_total_items_weight', value: totalWeight });
 
             var itemType = salesRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_sp_item_type', line: i });
 
             // load  item record
             if (itemType == 'Kit/Package') {
-              console.log('item is of type kit/package looking at components to get accurate item quantities...');
               var itemId = salesRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_sp_item_id', line: i });
               var loadedItem = record.load({
                 type: record.Type.KIT_ITEM,
@@ -201,7 +191,6 @@ define(['N/currentRecord', 'N/record', 'N/ui/dialog', 'N/log'],
 
               var totalComponents = 0;
               for (var j = 0; j < components; j++) {
-                console.log('checking component ' + j);
                 var componentQuantity = loadedItem.getSublistValue({ sublistId: 'member', fieldId: 'quantity', line: j });
                 totalComponents += componentQuantity;
               }
@@ -213,20 +202,8 @@ define(['N/currentRecord', 'N/record', 'N/ui/dialog', 'N/log'],
           }
 
         }
-        // set total weight
-        totalWeight = round(totalWeight, 2);
-        // set fields
-        salesRecord.setValue({ fieldId: 'custbody_sp_total_items_weight', value: totalWeight });
         // set total item count
         salesRecord.setValue({ fieldId: 'custbody_sp_total_items', value: totalItems });
-
-        console.log('Total order weight: ' + totalWeight + ' lb(s) | Total order item count: ' + totalItems);
-        console.log('DONE!');
-
-        dialog.alert({
-          title: 'Completed',
-          message: 'Calculation / Conversion has been completed. Any errors will be logged in console.'
-        });
 
       } catch (e) {
         console.log(e.message);
