@@ -62,9 +62,6 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
         if (shipmethod != '30611') {
           itemFulfill.setValue('shipmethod', '30611');
         }
-        itemFulfill.setValue('shipstatus', 'C');
-        itemFulfill.setValue('generateintegratedshipperlabel', true);
-
       } catch (e) {
         console.log(e.message);
       }
