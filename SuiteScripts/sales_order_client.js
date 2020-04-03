@@ -240,4 +240,4 @@ define(['N/currentRecord', 'N/record', 'N/ui/dialog', 'N/log'],
       calculateHandling: calculateHandling,
       calculateTotalWeight: calculateTotalWeight
     };
-  }); 
+  });
