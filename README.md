@@ -6,6 +6,7 @@ Future home for SuiteScripts & RESTlets
 ### Contents:
 - [SuiteScripts](/SuiteScripts)
 - [RESTlets](/RESTlets)
+- [ActionScripts](/ActionScripts)
 - [Sample Responses](/SampleResponses)
 - [Manual Tools - Used for Migration from Zoho](/ManualTools)
 
