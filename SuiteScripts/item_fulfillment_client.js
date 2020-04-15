@@ -4,16 +4,23 @@
  */
 define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
   function (currentRecord, dialog, log) {
-    // fedex expreess 2day
-    // production: 30611 | Sandbox: 30588
+
+    // Shipping Methods - Production
+    var fedEx2Day = '30611';
+    var uspsPriority = '22001';
+    var uspsFirstClass = '22000';
+    var uspsPriorityEnvelope = '31089';
+    // Shipping Methods - SB
+    // var fedEx2Day = '30588';
+    // var uspsPriority = '22001';
+    // var uspsFirstClass = '22000';
+    // var uspsPriorityEnvelope = '';
+
     /**
      * On page load it checks the item fulfillment ship method
      * if method is FedEx 2 Day Express then it checks the status,
      * depending on the status it automatically selects the 
      * appropriate fields.
-     * Ex:
-     * - Sets Saturday delivery if ship day is Thursday.
-     * - Sets ship date as next business day if shipping on a Saturday or after 4:45pm.
      */
     function pageInit() {
       // on page load
@@ -21,7 +28,7 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
       var itemFulfill = currentRecord.get();
       var status = itemFulfill.getValue('shipstatus');
       // check if fedex express 2day
-      if (itemFulfill.getValue('shipmethod') == '30611') {
+      if (itemFulfill.getValue('shipmethod') == fedEx2Day) {
         var isShipNextDay = '';
         var shipDay;
         // check day
@@ -43,7 +50,14 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
               shipDay = shipNextDay(true);
               isShipNextDay = ' Since it\'s a Saturday, the ship date has been changed automatically to: ' + shipDay + ' Make sure it\'s correct.';
             } else {
-              if (hour >= '16' && minutes >= '45') {
+              if (hour == '16') {
+                if (minutes >= '45') {
+                  shipDay = shipNextDay(true);
+                  isShipNextDay = ' It\'s after 4:45 PM the ship date has been changed automatically to: ' + shipDay + ' Make sure it\'s correct.';
+
+                }
+              }
+              if (hour > '16') {
                 shipDay = shipNextDay(true);
                 isShipNextDay = ' It\'s after 4:45 PM the ship date has been changed automatically to: ' + shipDay + ' Make sure it\'s correct.';
               }
@@ -59,12 +73,85 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
           console.log(e.message);
         }
       }
+      // USPS Priority
+      if (itemFulfill.getValue('shipmethod') == uspsPriority) {
+        try {
+          // if status picked or packed
+          if (status == 'A' || status == 'B') {
+            itemFulfill.setValue('shipstatus', 'C');
+            itemFulfill.setValue('generateintegratedshipperlabel', true);
+            // set package size
+            itemFulfill.selectLine({ sublistId: 'packageusps', line: 0 });
+            itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packagewidthusps', value: '6' });
+            itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packagelengthusps', value: '9' });
+            itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packageheightusps', value: '3' });
+            // Commit line
+            itemFulfill.commitLine({ sublistId: 'packageusps' });
+
+            dialog.alert({
+              title: 'Ship Status Changed',
+              message: 'Ship status has been changed to USPS Priority, please save and print label.'
+            });
+          }
+        } catch (e) {
+          console.log(e.message);
+        }
+      }
+      // USPS First Class
+      if (itemFulfill.getValue('shipmethod') == uspsFirstClass) {
+        try {
+          // if status picked or packed
+          if (status == 'A' || status == 'B') {
+            itemFulfill.setValue('shipstatus', 'C');
+            itemFulfill.setValue('generateintegratedshipperlabel', true);
+            // set package size
+            itemFulfill.selectLine({ sublistId: 'packageusps', line: 0 });
+            itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packagewidthusps', value: '6' });
+            itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packagelengthusps', value: '9' });
+            itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packageheightusps', value: '3' });
+            // Commit line
+            itemFulfill.commitLine({ sublistId: 'packageusps' });
+
+            dialog.alert({
+              title: 'Ship Status Changed',
+              message: 'Ship status has been changed to USPS First Class, please save and print label.'
+            });
+          }
+        } catch (e) {
+          console.log(e.message);
+        }
+      }
+      // USPS Priority - Flat Rate Envelope
+      if (itemFulfill.getValue('shipmethod') == uspsPriorityEnvelope) {
+        try {
+          // if status picked or packed
+          if (status == 'A' || status == 'B') {
+            itemFulfill.setValue('shipstatus', 'C');
+            itemFulfill.setValue('generateintegratedshipperlabel', true);
+            // // Add a new line item to package sublist
+            itemFulfill.selectLine({ sublistId: 'packageusps', line: 0 });
+            itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packagingusps', value: 16 });
+            itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packagewidthusps', value: '6' });
+            itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packagelengthusps', value: '9' });
+            itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packageheightusps', value: '3' });
+            // Commit Line
+            itemFulfill.commitLine({ sublistId: 'packageusps' });
+
+            dialog.alert({
+              title: 'Ship Status Changed',
+              message: 'Ship status has been changed to USPS Priority and Packaging has been set to Flat Rate Envelope, please save and print label.'
+            });
+          }
+        } catch (e) {
+          console.log(e.message);
+        }
+      }
     }
 
     /**
      * Automates the manual process of selecting FedEx 2 Day Express
      */
-    function fedexExpress() {
+    function setFedexExpress() {
       console.log('FedEx Express button selected');
       var itemFulfill = currentRecord.get();
       console.log(itemFulfill);
@@ -79,7 +166,7 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
         console.log('Ship method');
         console.log(shipmethod);
         if (shipmethod != '30611') {
-          itemFulfill.setValue('shipmethod', '30611');
+          itemFulfill.setValue('shipmethod', fedEx2Day);
         }
       } catch (e) {
         console.log(e.message);
@@ -94,7 +181,7 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
       console.log('FedEx Client Script Loaded');
       var itemFulfill = currentRecord.get();
       // check if fedex express 2day
-      if (itemFulfill.getValue('shipmethod') == '30611') {
+      if (itemFulfill.getValue('shipmethod') == fedEx2Day) {
         try {
           var today = new Date();
           var shipDay = new Date(today);
@@ -132,9 +219,82 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
       }
     }
 
+    /**
+     * Sets shipping method as USPS Priority.
+     */
+    function setUspsPriority() {
+      console.log('USPS Priority has been selected.');
+      var itemFulfill = currentRecord.get();
+      try {
+        // change shipment method -- reloads
+        var shipmethod = itemFulfill.getValue('shipmethod');
+        console.log('Ship method');
+        console.log(shipmethod);
+        if (shipmethod != uspsPriority) {
+          itemFulfill.setValue('shipmethod', uspsPriority);
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    }
+
+    /**
+     * Sets shipping method as USPS First-Class.
+     */
+    function setUspsFirstClass() {
+      console.log('USPS First-Class has been selected.');
+      var itemFulfill = currentRecord.get();
+      try {
+        // change shipment method -- reloads
+        var shipmethod = itemFulfill.getValue('shipmethod');
+        console.log('Ship method');
+        console.log(shipmethod);
+        if (shipmethod != uspsFirstClass) {
+          itemFulfill.setValue('shipmethod', uspsFirstClass);
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    }
+
+    /**
+     * Sets shipping method as USPS Priority.
+     * Has to be different shipping method so paginit func can
+     * set the package to Flat Rate Envelope.
+     */
+    function setUspsPriorityEnvelope() {
+      console.log('USPS Priority - Flat Rate Envelope has been selected.');
+      var itemFulfill = currentRecord.get();
+      try {
+        // change shipment method -- reloads
+        var shipmethod = itemFulfill.getValue('shipmethod');
+        console.log('Ship method');
+        console.log(shipmethod);
+        if (shipmethod != uspsPriorityEnvelope) {
+          itemFulfill.setValue('shipmethod', uspsPriorityEnvelope);
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    }
+
+    /** 
+     * Gets triggered on field changed, mostly to get field names that don't
+     * exist in the docs.
+     */
+    function fieldChanged(context) {
+      var itemFulfillment = currentRecord.get();
+      console.log('field changed');
+      console.log(context.fieldId);
+    }
+
     return {
       pageInit: pageInit,
-      fedexExpress: fedexExpress,
-      shipNextDay: shipNextDay
+      setFedexExpress: setFedexExpress,
+      setUspsPriority: setUspsPriority,
+      setUspsFirstClass: setUspsFirstClass,
+      setUspsPriorityEnvelope: setUspsPriorityEnvelope,
+      shipNextDay: shipNextDay,
+      // fieldChanged: fieldChanged
     };
   }); 
