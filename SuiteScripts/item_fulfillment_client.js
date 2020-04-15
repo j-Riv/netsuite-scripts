@@ -29,6 +29,7 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
       var status = itemFulfill.getValue('shipstatus');
       // check if fedex express 2day
       if (itemFulfill.getValue('shipmethod') == fedEx2Day) {
+        var msg;
         var isShipNextDay = '';
         var shipDay;
         // check day
@@ -45,7 +46,7 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
             // if thursday set saturday delivery
             if (day == '4') {
               itemFulfill.setValue('saturdaydeliveryfedex', true);
-              var msg = 'Saturday Delivery has been selected and the status has changed to SHIPPED.';
+              msg = 'FedEx 2Day Express with Saturday Delivery has been selected and the status has changed to SHIPPED.';
             } else if (day == '6') {
               shipDay = shipNextDay(true);
               isShipNextDay = ' Since it\'s a Saturday, the ship date has been changed automatically to: ' + shipDay + ' Make sure it\'s correct.';
@@ -61,7 +62,7 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
                 shipDay = shipNextDay(true);
                 isShipNextDay = ' It\'s after 4:45 PM the ship date has been changed automatically to: ' + shipDay + ' Make sure it\'s correct.';
               }
-              var msg = 'Status has changed to SHIPPED.';
+              msg = 'FedEx 2Day Express has been selected and status has changed to SHIPPED.';
             }
 
             dialog.alert({
