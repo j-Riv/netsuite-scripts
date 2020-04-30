@@ -10,11 +10,14 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
     var uspsPriority = '22001';
     var uspsFirstClass = '22000';
     var uspsPriorityEnvelope = '31089';
+    var uspsPriorityLegalEnvelope = '31094';
+    var uspsPriorityMdFlatRateBox = '31136';
     // Shipping Methods - SB
     // var fedEx2Day = '30588';
     // var uspsPriority = '22001';
     // var uspsFirstClass = '22000';
     // var uspsPriorityEnvelope = '';
+    // var uspsPriorityMdFlatRateBox = '';
 
     /**
      * On page load it checks the item fulfillment ship method
@@ -43,10 +46,25 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
           if (status == 'A' || status == 'B') {
             itemFulfill.setValue('shipstatus', 'C');
             itemFulfill.setValue('generateintegratedshipperlabel', true);
+
             // if thursday set saturday delivery
             if (day == '4') {
               itemFulfill.setValue('saturdaydeliveryfedex', true);
               msg = 'FedEx 2Day Express with Saturday Delivery has been selected and the status has changed to SHIPPED.';
+              if (hour == '16') {
+                if (minutes >= '45') {
+                  itemFulfill.setValue('saturdaydeliveryfedex', false);
+                  shipDay = shipNextDay(true);
+                  msg = 'FedEx 2Day Express has been selected and the status has changed to SHIPPED.';
+                  isShipNextDay = ' It\'s after 4:45 PM the ship date has been changed automatically to: ' + shipDay + ' Make sure it\'s correct.';
+                }
+              }
+              if (hour > '16') {
+                itemFulfill.setValue('saturdaydeliveryfedex', false);
+                shipDay = shipNextDay(true);
+                msg = 'FedEx 2Day Express has been selected and the status has changed to SHIPPED.';
+                isShipNextDay = ' It\'s after 4:45 PM the ship date has been changed automatically to: ' + shipDay + ' Make sure it\'s correct.';
+              }
             } else if (day == '6') {
               shipDay = shipNextDay(true);
               isShipNextDay = ' Since it\'s a Saturday, the ship date has been changed automatically to: ' + shipDay + ' Make sure it\'s correct.';
@@ -55,15 +73,24 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
                 if (minutes >= '45') {
                   shipDay = shipNextDay(true);
                   isShipNextDay = ' It\'s after 4:45 PM the ship date has been changed automatically to: ' + shipDay + ' Make sure it\'s correct.';
-
+                  if (day == '3') {
+                    itemFulfill.setValue('saturdaydeliveryfedex', true);
+                    isShipNextDay = isShipNextDay + ' Since shipping will be on a Thursday, Saturday shipping has also been selected.'
+                  }
                 }
               }
               if (hour > '16') {
                 shipDay = shipNextDay(true);
                 isShipNextDay = ' It\'s after 4:45 PM the ship date has been changed automatically to: ' + shipDay + ' Make sure it\'s correct.';
+                if (day == '3') {
+                  itemFulfill.setValue('saturdaydeliveryfedex', true);
+                  isShipNextDay = isShipNextDay + ' Since shipping will be on a Thursday, Saturday shipping has also been selected.'
+                }
               }
               msg = 'FedEx 2Day Express has been selected and status has changed to SHIPPED.';
             }
+
+            updateTranDate();
 
             dialog.alert({
               title: 'Ship Status Changed',
@@ -81,13 +108,16 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
           if (status == 'A' || status == 'B') {
             itemFulfill.setValue('shipstatus', 'C');
             itemFulfill.setValue('generateintegratedshipperlabel', true);
+
             // set package size
             itemFulfill.selectLine({ sublistId: 'packageusps', line: 0 });
             itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packagewidthusps', value: '6' });
-            itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packagelengthusps', value: '9' });
+            itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packagelengthusps', value: '12' });
             itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packageheightusps', value: '3' });
             // Commit line
             itemFulfill.commitLine({ sublistId: 'packageusps' });
+
+            updateTranDate();
 
             dialog.alert({
               title: 'Ship Status Changed',
@@ -105,6 +135,7 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
           if (status == 'A' || status == 'B') {
             itemFulfill.setValue('shipstatus', 'C');
             itemFulfill.setValue('generateintegratedshipperlabel', true);
+
             // set package size
             itemFulfill.selectLine({ sublistId: 'packageusps', line: 0 });
             itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packagewidthusps', value: '6' });
@@ -112,6 +143,8 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
             itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packageheightusps', value: '3' });
             // Commit line
             itemFulfill.commitLine({ sublistId: 'packageusps' });
+
+            updateTranDate();
 
             dialog.alert({
               title: 'Ship Status Changed',
@@ -129,6 +162,7 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
           if (status == 'A' || status == 'B') {
             itemFulfill.setValue('shipstatus', 'C');
             itemFulfill.setValue('generateintegratedshipperlabel', true);
+
             // // Add a new line item to package sublist
             itemFulfill.selectLine({ sublistId: 'packageusps', line: 0 });
             itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packagingusps', value: 16 });
@@ -137,6 +171,8 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
             itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packageheightusps', value: '3' });
             // Commit Line
             itemFulfill.commitLine({ sublistId: 'packageusps' });
+
+            updateTranDate();
 
             dialog.alert({
               title: 'Ship Status Changed',
@@ -147,6 +183,65 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
           console.log(e.message);
         }
       }
+
+      // USPS Priority - Flat Rate Legal Envelope
+      if (itemFulfill.getValue('shipmethod') == uspsPriorityLegalEnvelope) {
+        try {
+          // if status picked or packed
+          if (status == 'A' || status == 'B') {
+            itemFulfill.setValue('shipstatus', 'C');
+            itemFulfill.setValue('generateintegratedshipperlabel', true);
+
+            // // Add a new line item to package sublist
+            itemFulfill.selectLine({ sublistId: 'packageusps', line: 0 });
+            itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packagingusps', value: 25 });
+            itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packagewidthusps', value: '12' });
+            itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packagelengthusps', value: '6' });
+            itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packageheightusps', value: '3' });
+            // Commit Line
+            itemFulfill.commitLine({ sublistId: 'packageusps' });
+
+            updateTranDate();
+
+            dialog.alert({
+              title: 'Ship Status Changed',
+              message: 'Ship status has been changed to USPS Priority and Packaging has been set to Flat Rate Legal Envelope, please save and print label.'
+            });
+          }
+        } catch (e) {
+          console.log(e.message);
+        }
+      }
+
+      // USPS Priority - Medium Flat Rate Box
+      if (itemFulfill.getValue('shipmethod') == uspsPriorityMdFlatRateBox) {
+        try {
+          // if status picked or packed
+          if (status == 'A' || status == 'B') {
+            itemFulfill.setValue('shipstatus', 'C');
+            itemFulfill.setValue('generateintegratedshipperlabel', true);
+
+            // // Add a new line item to package sublist
+            itemFulfill.selectLine({ sublistId: 'packageusps', line: 0 });
+            itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packagingusps', value: 23 });
+            itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packagewidthusps', value: '8' });
+            itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packagelengthusps', value: '11' });
+            itemFulfill.setCurrentSublistValue({ sublistId: 'packageusps', fieldId: 'packageheightusps', value: '6' });
+            // Commit Line
+            itemFulfill.commitLine({ sublistId: 'packageusps' });
+
+            updateTranDate();
+
+            dialog.alert({
+              title: 'Ship Status Changed',
+              message: 'Ship status has been changed to USPS Priority and Packaging has been set to Medium Flat Rate Box, please save and print label.'
+            });
+          }
+        } catch (e) {
+          console.log(e.message);
+        }
+      }
+
     }
 
     /**
@@ -194,6 +289,11 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
             daysToAdd = 2;
           } else {
             daysToAdd = 1;
+          }
+
+          // if thursday and shipping next day remove saturday delivery
+          if (day == 4) {
+            itemFulfill.setValue('saturdaydeliveryfedex', false);
           }
 
           shipDay.setDate(shipDay.getDate() + daysToAdd);
@@ -279,14 +379,67 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
       }
     }
 
+    /**
+     * Sets shipping method as USPS Priority.
+     * Has to be different shipping method so paginit func can
+     * set the package to Flat Rate Legal Envelope.
+     */
+    function setUspsPriorityLegalEnvelope() {
+      console.log('USPS Priority - Flat Rate Legal Envelope has been selected.');
+      var itemFulfill = currentRecord.get();
+      try {
+        // change shipment method -- reloads
+        var shipmethod = itemFulfill.getValue('shipmethod');
+        console.log('Ship method');
+        console.log(shipmethod);
+        if (shipmethod != uspsPriorityLegalEnvelope) {
+          itemFulfill.setValue('shipmethod', uspsPriorityLegalEnvelope);
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    }
+
+    /**
+     * Sets shipping method as USPS Priority.
+     * Has to be different shipping method so paginit func can
+     * set the package to Medium Flat Rate Box.
+     */
+    function setUspsPriorityMediumBox() {
+      console.log('USPS Priority - Medium Flat Rate Box has been selected.');
+      var itemFulfill = currentRecord.get();
+      try {
+        // change shipment method -- reloads
+        var shipmethod = itemFulfill.getValue('shipmethod');
+        console.log('Ship method');
+        console.log(shipmethod);
+        if (shipmethod != uspsPriorityMdFlatRateBox) {
+          itemFulfill.setValue('shipmethod', uspsPriorityMdFlatRateBox);
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    }
+
     /** 
      * Gets triggered on field changed, mostly to get field names that don't
      * exist in the docs.
      */
     function fieldChanged(context) {
-      var itemFulfillment = currentRecord.get();
       console.log('field changed');
       console.log(context.fieldId);
+      if (context.fieldId == 'shipmethod') {
+        pageInit();
+      }
+
+    }
+
+    function updateTranDate() {
+      var itemFulfillment = currentRecord.get();
+      var date = new Date();
+      // Set Tran Date
+      console.log('Setting Transaction Date.');
+      itemFulfillment.setValue('trandate', date);
     }
 
     return {
@@ -295,6 +448,8 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
       setUspsPriority: setUspsPriority,
       setUspsFirstClass: setUspsFirstClass,
       setUspsPriorityEnvelope: setUspsPriorityEnvelope,
+      setUspsPriorityLegalEnvelope: setUspsPriorityLegalEnvelope,
+      setUspsPriorityMediumBox: setUspsPriorityMediumBox,
       shipNextDay: shipNextDay,
       // fieldChanged: fieldChanged
     };
