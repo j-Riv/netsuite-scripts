@@ -28,6 +28,9 @@ define(['N/record', 'N/log'], function (record, log) {
       }
       // set sales rep
       currentRecord.setValue({ fieldId: 'salesrep', value: salesRep });
+    } else {
+      // set channel as wholesale for all NetSuite created orders
+      currentRecord.setValue({ fieldId: 'custbody_sp_channel', value: 'Wholesale' });
     }
   }
 
