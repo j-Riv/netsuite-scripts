@@ -6,53 +6,61 @@
  *
 */
 
-define(['N/email', 'N/render'], function(email, render) {
-    /**
-     * Workflow action script that generates an email 
-     * based on a NetSuite Email Template when the 
-     * item fulfillment has been shipped and shipping method 
-     * is either 'In Store Pickup' or 'Curbside Pickup'.
-     * @param {object} context - the item fulfillment record
-     */
-    function sendEmail(context) {
-        var curbsidePickup = '31171';
-        var inStorePickup = '22004';
-        var itemFulfill = context.newRecord;
-        var shipMethod = itemFulfill.getValue('shipmethod');
-        var customer = itemFulfill.getValue('entity');
-        var shipStatus = itemFulfill.getValue('shipstatus');
-  
-        // curbside
-        if (shipMethod == curbsidePickup || shipMethod == inStorePickup) {
-            if (shipStatus == 'C') {
-                var mergeResult = render.mergeEmail({
-                        templateId: 124,
-                        entity: null,
-                        recipient: null,
-                        supportCaseId: null, 
-                        transactionId: itemFulfill.id,
-                        customRecord: null
-                    });
+define(['N/email', 'N/record', 'N/render'], function (email, record, render) {
+  /**
+   * Sends an email whenever an item fulfillment with
+   * shipping methods of Curbside Pickup, In Store Pickup
+   * and Will Call are set to status shipped.
+   * @param {*} context - Record Object
+   */
+  function sendEmail(context) {
+    // shipping methods
+    var curbsidePickup = '31171';
+    var inStorePickup = '22004';
+    var willCall = '21989';
 
-                var emailSubject = 'Curbside Pickup Order: ' + itemFulfill.getValue('custbody_sp_order_number'); 
-                var emailBody = mergeResult.body; 
-                var timeStamp = new Date().getUTCMilliseconds();
-        
-                email.send({
-                    author: 264,
-                    recipients: customer,
-                    replyTo: 'store@suavecito.com',
-                    bcc: [207],
-                    subject: emailSubject,
-                    body: emailBody,
-                    transactionId: itemFulfill.id
-                });   
-            }
-        }
-        return true; 
-    }
+    var itemFulfill = context.newRecord;
+    var shipMethod = itemFulfill.getValue('shipmethod');
+    var customer = itemFulfill.getValue('entity');
+    var shipStatus = itemFulfill.getValue('shipstatus');
 
-    return {
-        onAction: sendEmail
+    // curbside
+    if (shipMethod == curbsidePickup || shipMethod == inStorePickup || shipMethod == willCall) {
+      var method;
+      if (shipMethod == willCall) {
+        method = 'Will Call ';
+      } else {
+        method = 'Curbside Pickup '
+      }
+      if (shipStatus == 'C') {
+        var mergeResult = render.mergeEmail({
+          templateId: 124,
+          entity: null,
+          recipient: null,
+          supportCaseId: null,
+          transactionId: itemFulfill.id,
+          customRecord: null
+        });
+
+        var emailSubject = method + 'Order: ' + itemFulfill.getValue('custbody_sp_order_number');
+        var emailBody = mergeResult.body;
+        var timeStamp = new Date().getUTCMilliseconds();
+
+        email.send({
+          author: 264,
+          recipients: customer,
+          replyTo: 'store@suavecito.com',
+          bcc: [207],
+          subject: emailSubject,
+          body: emailBody,
+          transactionId: itemFulfill.id
+        });
+      }
     }
+    return true;
+  }
+
+  return {
+    onAction: sendEmail
+  }
 }); 
