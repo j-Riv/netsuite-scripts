@@ -27,10 +27,13 @@ define(['N/email', 'N/record', 'N/render'], function (email, record, render) {
     // curbside
     if (shipMethod == curbsidePickup || shipMethod == inStorePickup || shipMethod == willCall) {
       var method;
+      var replyToEmail;
       if (shipMethod == willCall) {
         method = 'Will Call ';
+        replyToEmail = 'wholesale@suavecito.com';
       } else {
-        method = 'Curbside Pickup '
+        method = 'Curbside Pickup ';
+        replyToEmail = 'store@suavecito.com';
       }
       if (shipStatus == 'C') {
         var mergeResult = render.mergeEmail({
@@ -49,7 +52,7 @@ define(['N/email', 'N/record', 'N/render'], function (email, record, render) {
         email.send({
           author: 264,
           recipients: customer,
-          replyTo: 'store@suavecito.com',
+          replyTo: replyToEmail,
           bcc: [207],
           subject: emailSubject,
           body: emailBody,
