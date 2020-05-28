@@ -28,12 +28,16 @@ define(['N/email', 'N/record', 'N/render'], function (email, record, render) {
     if (shipMethod == curbsidePickup || shipMethod == inStorePickup || shipMethod == willCall) {
       var method;
       var replyToEmail;
+      var bccList;
+
       if (shipMethod == willCall) {
         method = 'Will Call ';
         replyToEmail = 'wholesale@suavecito.com';
+        bccList = [207, 73560];
       } else {
         method = 'Curbside Pickup ';
         replyToEmail = 'store@suavecito.com';
+        bccList = [207];
       }
       if (shipStatus == 'C') {
         var mergeResult = render.mergeEmail({
@@ -53,7 +57,7 @@ define(['N/email', 'N/record', 'N/render'], function (email, record, render) {
           author: 264,
           recipients: customer,
           replyTo: replyToEmail,
-          bcc: [207],
+          bcc: bccList,
           subject: emailSubject,
           body: emailBody,
           transactionId: itemFulfill.id
@@ -67,3 +71,4 @@ define(['N/email', 'N/record', 'N/render'], function (email, record, render) {
     onAction: sendEmail
   }
 }); 
+ 
