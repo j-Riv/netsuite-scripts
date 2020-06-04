@@ -12,7 +12,9 @@ define(['N/currentRecord', 'N/record', 'N/ui/dialog', 'N/log'],
 
     function fieldChanged(context) {
       var salesRecord = currentRecord.get();
-      if (salesRecord.getValue('custbody_fa_channel') == "") {
+      var channel = salesRecord.getValue('custbody_fa_channel');
+      var shipCountry = salesRecord.getValue('shipcountry');
+      if (channel == "" && shipCountry == 'US') {
         var shipMethod = salesRecord.getValue('shipmethod');
         // Amazon FBA (21719), In Store Pickup (22004), Will Call (21989), Freight (22022)
         if (shipMethod !== 21719 || shipMethod !== 22004 || shipMethod !== 21989 || shipMethod !== 22022) {
@@ -56,8 +58,10 @@ define(['N/currentRecord', 'N/record', 'N/ui/dialog', 'N/log'],
      */
     function calculateHandling() {
       var salesRecord = currentRecord.get();
+      var channel = salesRecord.getValue('custbody_fa_channel');
+      var shipCountry = salesRecord.getValue('shipcountry');
       // check for marketplace
-      if (salesRecord.getValue('custbody_fa_channel') == "") {
+      if (channel == '' && shipCountry == 'US') {
         // check for ship method returns ID
         var shipMethod = salesRecord.getValue('shipmethod');
         if (shipMethod && shipMethod !== '') {
