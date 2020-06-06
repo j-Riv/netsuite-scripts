@@ -5,8 +5,8 @@
  * @NModuleScope public
  *
 */
-define(['N/record', 'N/log', './packageSelector'],
-  function (record, log, packageSelector) {
+define(['N/record', 'N/log', './packageSelector', './getUspsRates'],
+  function (record, log, packageSelector, getUspsRates) {
 
     // Shipping Methods - Production
     var fedEx2Day = '30611';
@@ -19,6 +19,8 @@ define(['N/record', 'N/log', './packageSelector'],
     function testing(context) {
       try {
         packageSelector.setPackage(context.newRecord);
+
+        getUspsRates.getRates('testing usps');
 
       } catch (e) {
         log.debug({

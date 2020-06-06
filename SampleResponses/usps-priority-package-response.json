@@ -1,0 +1,67 @@
+{
+    "Package": {
+        "@attributes": {
+            "ID": "1ST"
+        },
+        "ZipOrigination": {
+            "#text": "92703"
+        },
+        "ZipDestination": {
+            "#text": "92843"
+        },
+        "Pounds": {
+            "#text": "1"
+        },
+        "Ounces": {
+            "#text": "0"
+        },
+        "Container": {
+            "#text": "VARIABLE"
+        },
+        "Zone": {
+            "#text": "1"
+        },
+        "Postage": {
+            "@attributes": {
+                "CLASSID": "1"
+            },
+            "MailService": {
+                "#text": "Priority Mail 1-Day<sup>™</sup>"
+            },
+            "Rate": {
+                "#text": "7.50"
+            },
+            "SpecialServices": {
+                "SpecialService": [{
+                        "ServiceID": {
+                            "#text": "119"
+                        },
+                        "ServiceName": {
+                            "#text": "Adult Signature Required"
+                        },
+                        "Available": {
+                            "#text": "true"
+                        },
+                        "Price": {
+                            "#text": "6.65"
+                        }
+                    },
+                    {
+                        "ServiceID": {
+                            "#text": "120"
+                        },
+                        "ServiceName": {
+                            "#text": "Adult Signature Restricted Delivery"
+                        },
+                        "Available": {
+                            "#text": "true"
+                        },
+                        "Price": {
+                            "#text": "6.90"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}
