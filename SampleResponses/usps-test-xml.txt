@@ -1,0 +1,18 @@
+# USPS Shipping Calculator
+
+## USPS PRIORITY
+https://secure.shippingapis.com/shippingapi.dll?API=RateV4&XML=<RateV4Request USERID="681SUAVE2769"><Revision>2</Revision><Package ID="1ST"><Service>PRIORITY</Service><ZipOrigination>92703</ZipOrigination><ZipDestination>92843</ZipDestination><Pounds>0</Pounds><Ounces>2</Ounces><Container></Container><Width></Width><Length></Length><Height></Height><Girth></Girth><Machinable>false</Machinable></Package></RateV4Request>
+
+## USPS First-Class
+https://secure.shippingapis.com/shippingapi.dll?API=RateV4&XML=<RateV4Request USERID="681SUAVE2769"><Revision>2</Revision><Package ID="1ST"><Service>FIRST CLASS</Service><FirstClassMailType>PARCEL</FirstClassMailType><ZipOrigination>92703</ZipOrigination><ZipDestination>92843</ZipDestination><Pounds>0</Pounds><Ounces>2</Ounces><Container></Container><Width></Width><Length></Length><Height></Height><Girth></Girth><Machinable>false</Machinable></Package></RateV4Request>
+
+# USPS Verify Address
+
+## Validate Address
+https://secure.shippingapis.com/ShippingAPI.dll?API=Verify&XML=<AddressValidateRequest USERID="681SUAVE2769"><Address><Address1>2831 W 1st Street</Address1><Address2></Address2><City>Santa Ana</City><State>CA</State><Zip5>92703</Zip5><Zip4></Zip4></Address></AddressValidateRequest>
+
+## ZIP Code Lookup
+https://secure.shippingapis.com/ShippingAPI.dll?API=ZipCodeLookup&XML=<ZipCodeLookupRequest USERID="681SUAVE2769"><Address><Address1>2831 W 1st Street</Address1><Address2></Address2><City>Santa Ana</City><State>CA</State></Address></ZipCodeLookupRequest>
+
+## City / State Lookup
+https://secure.shippingapis.com/ShippingAPI.dll?API=CityStateLookup&XML=<CityStateLookupRequest USERID="681SUAVE2769"><ZipCode ID="0"><Zip5>92703</Zip5></ZipCode></CityStateLookupRequest>

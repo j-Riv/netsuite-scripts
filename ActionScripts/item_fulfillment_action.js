@@ -121,7 +121,7 @@ define(['N/record', 'N/log'],
       return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
     }
 
-    function testing(context) {
+    function onAction(context) {
       var itemFulfill = context.newRecord;
       try {
         // testing output
@@ -176,6 +176,6 @@ define(['N/record', 'N/log'],
     }
 
     return {
-      onAction: testing
+      onAction: onAction
     }
   });
