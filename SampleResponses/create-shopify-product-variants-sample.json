@@ -1,0 +1,60 @@
+{
+    "randomId": "aDV3nyg9DwimEq",
+    "name": "Test - Matrix Item",
+    "sku": "STESTM",
+    "description": "<ul><li> Suavecito Pomade OG Logo </li><li>Printed On Black AAA Style Shirt</li><li> 100 % Cotton</li></ul>",
+    "brand": "Suavecito",
+    "productType": "Mens Apparel",
+    "upc": "",
+    "weight": "",
+    "weightUnit": "lb",
+    "price": "",
+    "hasVariants": "true",
+    "option": "Option",
+    "variants": [{
+            "option1": "S",
+            "price": "18.99",
+            "sku": "STESTS",
+            "weight": "0.5",
+            "weight_unit": "lb",
+            "barcode": "12345678910",
+            "inventory_management": "Shopify"
+        },
+        {
+            "option1": "M",
+            "price": "18.99",
+            "sku": "STESTM",
+            "weight": "0.5",
+            "weight_unit": "lb",
+            "barcode": "12345678911",
+            "inventory_management": "Shopify"
+        },
+        {
+            "option1": "L",
+            "price": "18.99",
+            "sku": "STESTL",
+            "weight": "",
+            "weight_unit": "lb",
+            "barcode": "12345678912",
+            "inventory_management": "Shopify"
+        },
+        {
+            "option1": "XL",
+            "price": "18.99",
+            "sku": "STESTXL",
+            "weight": "0.5",
+            "weight_unit": "lb",
+            "barcode": "12345678913",
+            "inventory_management": "Shopify"
+        },
+        {
+            "option1": "2XL",
+            "price": "20.99",
+            "sku": "STEST2XL",
+            "weight": "0.5",
+            "weight_unit": "lb",
+            "barcode": "12345678914",
+            "inventory_management": "Shopify"
+        }
+    ]
+}
