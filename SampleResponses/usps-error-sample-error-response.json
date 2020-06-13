@@ -1,0 +1,20 @@
+{
+    "Package": {
+        "@attributes": {
+            "ID": "1ST"
+        },
+        "Error": {
+            "Number": {
+                "#text": "-2147219407"
+            },
+            "Source": {
+                "#text": "RateEngineV4;RateV4.ProcessRequest"
+            },
+            "Description": {
+                "#text": "BOX is an invalid container type for PRIORITY service. Valid Containers are: FLAT RATE ENVELOPE, LEGAL FLAT RATE ENVELOPE, PADDED FLAT RATE ENVELOPE, SM FLAT RATE ENVELOPE, WINDOW FLAT RATE ENVELOPE, GIFT CARD FLAT RATE ENVELOPE, SM FLAT RATE BOX, MD FLAT RATE BOX, LG FLAT RATE BOX and VARIABLE."
+            },
+            "HelpFile": {},
+            "HelpContext": {}
+        }
+    }
+}
