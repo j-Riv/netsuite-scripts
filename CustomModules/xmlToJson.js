@@ -5,7 +5,12 @@
  */
 
 define(['N/xml'], function (xmlMod) {
-  //This function refer to https://davidwalsh.name/convert-xml-json
+  /**
+   * Converts xml to json.
+   * refer to https://davidwalsh.name/convert-xml-json
+   * @param {*} xmlNode 
+   * @returns {json}
+   */
   function xmlToJson(xmlNode) {
     // Create the return object
     var obj = Object.create(null);
