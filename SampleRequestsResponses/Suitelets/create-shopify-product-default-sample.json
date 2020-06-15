@@ -1,13 +1,13 @@
 {
     "randomId": "aDV3nyg9DwimEq",
-    "name": "Test - Firme Hold Pomade",
+    "title": "Test - Firme Hold Pomade",
     "sku": "Test - P002NN",
     "description": "<p><b>Our water based pomade comes in singles, 3 packs and 5 packs. Please make your selection in the Size drop down menu above.</b></p>\r\n<p><span>It all started with one pomade - Suavecito’s Original Hold Pomade. This is a uniquely scented styling water based product that is formulated to keep your hair in place all day long. It combs into your hair easily with it’s creamy consistency and provides a strong grip for a slick back, pompadour, side part or any hairstyle you are rocking. This pomade is water-soluble, washing out with no effort using only water leaving your hair feeling untouched. No special shampoos or soaps are needed for removal. It dries with a medium firmness and medium shine. No flakes and no harsh chemicals.</span></p>\r\n<p><span>Proudly made in the United States.</span></p>\r\n<p><b>Directions:</b> <span>Apply to DRY hair for less shine and a stronger hold.  Apply to DAMP hair for more shine and a lighter hold</span></p>\r\n<p><span>Start with a quarter sized amount in your palm. Rub product into hands and fingers. Work into hair with fingertips from the roots up. Ensure even distribution of product. Comb to desired style. To remove, simply wash out with water.</span></p>\r\n<ul>\r\n<li><span>Medium hold - medium shine</span></li>\r\n<li><span>Washes out with just water</span></li>\r\n<li><span>No harsh chemicals and never flakes</span></li>\r\n<li><span>Great for: pompadours, slick backs and side parts</span></li>\r\n</ul>\r\n<span>It started in a small house’s kitchen with a couple of friends and family. They got together to create a pomade that would be used between them for their nights out on the town. The formula was made and the scent was found. The pomade was used daily between them and local barbers started to catch on. From there the pomade left the small circle of friends and family. It made it’s way in zip lock baggies and tupperware containers to barbers eager to get their hands on it. A name was given. Then a logo was devised. It was no longer a secret anymore and Suavecito Pomade was born.</span>",
     "brand": "Suavecito",
-    "productType": "Mens Groooming",
-    "upc": "200011111333",
+    "product_type": "Mens Groooming",
+    "barcode": "200011111333",
     "weight": ".353",
-    "weightUnit": "lb",
+    "weight_unit": "lb",
     "price": "11.99",
     "hasVariants": "false"
 }

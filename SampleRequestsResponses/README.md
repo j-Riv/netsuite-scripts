@@ -1,2 +1,2 @@
-# Sample Responses
-> RESTlet Responses
+# SAMPLE REQUESTS & RESPONSES
+> Requests & Responses
