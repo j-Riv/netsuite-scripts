@@ -278,13 +278,27 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
 
             response.writePage(successForm);
 
+          } else {
+            throw new Error(JSON.stringify(newProduct));
           }
 
         } catch (e) {
-          log.debug({
+          log.error({
             title: 'ERROR!',
             details: e.message
           });
+
+          var shopifyErrorForm = serverWidget.createForm({
+            title: 'Post Product to Shopify'
+          });
+
+          shopifyErrorForm.addPageInitMessage({
+            type: message.Type.ERROR,
+            title: 'ERROR!',
+            message: e.message,
+          });
+
+          response.writePage(shopifyErrorForm);
         }
 
       } else {
