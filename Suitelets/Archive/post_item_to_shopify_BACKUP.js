@@ -191,8 +191,6 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
               'baseprice',
               'price2',
               'description',
-              'custitem_sp_size',
-              'custitem_sp_color'
             ]
           });
 
@@ -215,23 +213,9 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
 
           childResults.forEach(function (item, index) {
             var sku = item.getValue('itemid').split(' : ');
-            var color = item.getText('custitem_sp_color');
-            var size = item.getText('custitem_sp_size');
-
-            var optionName;
-            if (size != '') {
-              optionName = size;
-              itemObj.option = 'Size';
-            } else if (color != '') {
-              optionName = color;
-              itemObj.option = 'Color';
-            } else {
-              optionName = 'Option ' + index;
-              itemObj.option = 'Options';
-            }
-
+            var displayName = item.getValue('displayname').split(' - ');
             variants.push({
-              option1: optionName,
+              option1: displayName[1],
               price: item.getValue(pricelevel),
               sku: sku[1],
               weight: item.getValue('weight'),
@@ -244,6 +228,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
           itemObj.hasVariants = true;
           // stringify variant array of object
           itemObj.variants = JSON.stringify(variants);
+          itemObj.option = 'Option';
 
         } else { // single item
 
