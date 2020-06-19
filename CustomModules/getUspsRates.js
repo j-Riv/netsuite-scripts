@@ -14,9 +14,16 @@ define(['N/record', 'N/https', 'N/xml', 'N/log', './xmlToJson'],
      * @param {string} addr2 
      * @param {string} city 
      * @param {string} state 
-     * @param {string} zip 
+     * @param {string} zip
+     * @param {string} country
      */
-    function validateAddress(addr1, addr2, city, state, zip) {
+    function validateAddress(addr1, addr2, city, state, zip, country) {
+
+      log.debug({
+        title: 'VALIDATING ADDRESS',
+        details: addr1 + ' ' + addr2 + ' ' + city + ', ' + state + ' ' + zip + ', ' + country
+      });
+
       var url = 'https://secure.shippingapis.com/ShippingAPI.dll?API=Verify&XML='
         + '<AddressValidateRequest USERID="' + uspsUser +'">'
         + '<Address>'
@@ -52,39 +59,30 @@ define(['N/record', 'N/https', 'N/xml', 'N/log', './xmlToJson'],
         var jsonObj = xmlToJson.parseXML(xmlDocument.documentElement);
 
         if ('Error' in jsonObj.Address) {
-          log.debug({
-            title: 'Address Validation Error!',
-            details: jsonObj.Package.Error.Description['#text']
-          });
-
-          return false;
-
+          throw new Error(jsonObj.Address.Error.Description['#text']);
         } else {
-          
           return true;
-
         }
 
       } catch (e) {
-        log.debug({
-          title: 'ERROR!',
+        log.error({
+          title: 'ADDRESS VALIDATION ERROR!',
           details: e.message
         });
-
-        return false;
+        throw new Error(e.message);
       }
 
     }
 
     /**
      * Gets USPS package Rates via USPS web services.
-     * @param {string} zipDestination 
      * @param {string} method 
      * @param {string} containerType 
+     * @param {string} zipDestination
      * @param {string} weightPounds 
      * @param {string} boxDimensions 
      */
-    function getRates(zipDestination, method, containerType, weightPounds, boxDimensions) {
+    function getRateByMethod(method, containerType, zipDestination, weightPounds, boxDimensions) {
       // PRIORITY CONTAINER TYPES:
       // Valid Containers are: FLAT RATE ENVELOPE, LEGAL FLAT RATE ENVELOPE, 
       // PADDED FLAT RATE ENVELOPE, SM FLAT RATE ENVELOPE, WINDOW FLAT RATE 
@@ -98,15 +96,108 @@ define(['N/record', 'N/https', 'N/xml', 'N/log', './xmlToJson'],
       // var width = 6;
       // var length = 9;
       // var height = 3;
+      var url;
+      if (method.name == 'PRIORITY COMMERCIAL') {
+        url = 'https://secure.shippingapis.com/shippingapi.dll?API=RateV4&XML='
+          + '<RateV4Request USERID="' + uspsUser + '">'
+          + '<Revision>2</Revision>'
+          + '<Package ID="1ST">'
+          + '<Service>' + method + '</Service>'
+          + '<ZipOrigination>92703</ZipOrigination>'
+          + '<ZipDestination>' + zipDestination + '</ZipDestination>'
+          + '<Pounds>' + weightPounds +'</Pounds>'
+          + '<Ounces>' + weightOunces + '</Ounces>'
+          + '<Container>' + containerType + '</Container>'
+          + '<Width>' + boxDimensions.width + '</Width>'
+          + '<Length>' + boxDimensions.length + '</Length>'
+          + '<Height>' + boxDimensions.height + '</Height>'
+          + '<Girth></Girth>'
+          + '<Machinable>false</Machinable>'
+          + '</Package>'
+          + '</RateV4Request>';
+      } else {
+        url = 'https://secure.shippingapis.com/shippingapi.dll?API=RateV4&XML='
+          + '<RateV4Request USERID="' + uspsUser + '">'
+          + '<Revision>2</Revision>'
+          + '<Package ID="1ST">'
+          + '<Service>' + method + '</Service>'
+          + '<FirstClassMailType>PARCEL</FirstClassMailType>'
+          + '<ZipOrigination>92703</ZipOrigination>'
+          + '<ZipDestination>' + zipDestination + '</ZipDestination>'
+          + '<Pounds>' + weightPounds + '</Pounds>'
+          + '<Ounces>' + weightOunces + '</Ounces>'
+          + '<Container>' + containerType + '</Container>'
+          + '<Width>' + boxDimensions.width + '</Width>'
+          + '<Length>' + boxDimensions.length + '</Length>'
+          + '<Height>' + boxDimensions.height + '</Height>'
+          + '<Girth></Girth>'
+          + '<Machinable>false</Machinable>'
+          + '</Package>'
+          + '</RateV4Request>';
+      }
 
+      try {
+        var headersObj = {
+          name: 'Content-Type',
+          value: 'text/xml'
+        };
+
+        var response = https.get({
+          url: url,
+          headers: headersObj
+        });
+
+        log.debug({
+          title: 'USPS GET RATE BY METHOD RESPONSE', 
+          details: response.body
+        });
+
+        var xmlDocument = xml.Parser.fromString({
+          text: response.body
+        });
+
+        var jsonObj = xmlToJson.parseXML(xmlDocument.documentElement);
+        var rate;
+        var mailService;
+        
+        if ('Error' in jsonObj.Package) {
+          log.error({
+            title: 'USPS GET RATE ERROR!',
+            details: jsonObj.Package.Error.Description['#text']
+          });
+          throw new Error(jsonObj.Package.Error.Description['#text']);
+        } else {
+          rate = jsonObj.Package.Postage.CommercialRate['#text'];
+          mailService = jsonObj.Package.Postage.MailService['#text'];
+
+          log.debug({
+            title: 'Package',
+            details: rate + '|' + mailService
+          });
+        }
+
+        return rate;
+
+      } catch (e) {
+        log.error({
+          title: 'ERROR!',
+          details: JSON.stringify(e.message)
+        });
+        throw new Error(JSON.stringify(e.message));
+      }
+    }
+
+    function getAllRates(zipDestination, weightPounds, boxDimensions) {
+      var weightOunces = 0;
+      var containerType = '';
       var url = 'https://secure.shippingapis.com/shippingapi.dll?API=RateV4&XML='
         + '<RateV4Request USERID="' + uspsUser + '">'
         + '<Revision>2</Revision>'
         + '<Package ID="1ST">'
-        + '<Service>' + method + '</Service>'
+        + '<Service>Online</Service>'
         + '<ZipOrigination>92703</ZipOrigination>'
         + '<ZipDestination>' + zipDestination + '</ZipDestination>'
-        + '<Pounds>' + weightPounds +'</Pounds>'
+        + '<Pounds>' + weightPounds + '</Pounds>'
         + '<Ounces>' + weightOunces + '</Ounces>'
         + '<Container>' + containerType + '</Container>'
         + '<Width>' + boxDimensions.width + '</Width>'
@@ -129,7 +220,7 @@ define(['N/record', 'N/https', 'N/xml', 'N/log', './xmlToJson'],
         });
 
         log.debug({
-          title: 'USPS Rate Response', 
+          title: 'USPS GET ALL RATES RESPONSE',
           details: response.body
         });
 
@@ -138,38 +229,46 @@ define(['N/record', 'N/https', 'N/xml', 'N/log', './xmlToJson'],
         });
 
         var jsonObj = xmlToJson.parseXML(xmlDocument.documentElement);
-        var rate;
-        var mailService;
-        
-        if ('Error' in jsonObj.Package) {
-          log.debug({
-            title: 'USPS Rate Error!',
-            details: jsonObj.Package.Error.Description['#text']
+        var postage = [];
+        jsonObj.Package.Postage.forEach(function(p){
+          var rate;
+          if ('Rate' in p) {
+            rate = p.Rate['#text'];
+          } else {
+            rate = null;
+          }
+          var commercialRate;
+          if ('CommercialRate' in p) {
+            commercialRate = p.CommercialRate['#text'];
+          } else {
+            commercialRate = null;
+          }
+          postage.push({
+            classID: p['@attributes'].CLASSID,
+            mailService: p.MailService['#text'],
+            rate: rate,
+            commercialRate: commercialRate  
           });
-        } else {
-          rate = jsonObj.Package.Postage.Rate['#text'];
-          mailService = jsonObj.Package.Postage.MailService['#text'];
-
-          log.debug({
-            title: 'Package',
-            details: rate + '|' + mailService
-          });
-        }
-
-        return rate;
-
-      } catch (e) {
-        log.debug({
-          title: 'ERROR!',
-          details: e.message
         });
 
-        return false;
+        log.debug({
+          title: 'ALL RATES POSTAGE',
+          details: JSON.stringify(postage)
+        });
+
+      } catch(e) {
+        log.error({
+          title: 'ERROR GETTING ALL USPS RATES!',
+          details: JSON.stringify(e.message)
+        });
+        throw new Error(JSON.stringify(e.message));
       }
+
     }
 
     return {
       validateAddress: validateAddress,
-      getRates: getRates
+      getRateByMethod: getRateByMethod,
+      getAllRates: getAllRates
     }
   });
