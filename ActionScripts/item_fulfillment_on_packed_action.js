@@ -67,7 +67,7 @@ define(['N/record', 'N/log', './packageSelector', './getUspsRates'],
           length: 9,
           height: 3
         };
-        var method = 'PRIORITY';
+        var method = 'PRIORITY COMMERCIAL';
         var weightPounds = shippingWeight;
         var containerType = '';
         
