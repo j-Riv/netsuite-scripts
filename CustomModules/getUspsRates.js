@@ -48,7 +48,7 @@ define(['N/record', 'N/https', 'N/xml', 'N/log', './xmlToJson'],
         });
 
         log.debug({
-          title: 'Address Validation Response',
+          title: 'ADDRESS VALIDATION RESPONSE',
           details: response.body
         });
 

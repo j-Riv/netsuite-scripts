@@ -117,7 +117,7 @@ define(['N/record', 'N/log', './packageSelector'],
       } catch (e) {
         log.error({
           title: 'ON PACKED ACTION ERROR!',
-          details: tranId + ' | ' + e.message
+          details: e.message
         });
 
         return false;

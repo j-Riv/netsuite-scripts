@@ -203,6 +203,7 @@ define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals'],
           title: 'SET PACKAGE ERROR!',
           details: e.message
         });
+        itemFulfill.setValue('custbody_sp_manual_fulfillment_req', true);
         throw new Error(e.message);
       }
     }
