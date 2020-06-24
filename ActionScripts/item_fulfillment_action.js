@@ -56,9 +56,10 @@ define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals'],
 
     /**
      * Does some cool shit.
-     * @param {object} context 
+     * @param {Object} context 
      */
     function onAction(context) {
+      // Get item fulfillment record
       var itemFulfill = context.newRecord;
       try {
         // Calculate total weight & item count
@@ -66,13 +67,14 @@ define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals'],
           title: 'RUNNING CALCULATE TOTAL WEIGHT COUNT',
           details: 'Will calculate total weight and item count...'
         });
-        // calculateTotalWeightCount(itemFulfill);
+
         itemFulfillmentTotal.calculate(itemFulfill);
-        // Testing output
+
+        // Testing output -- can delete this later
         var lines = itemFulfill.getLineCount({ sublistId: 'item' });
         log.debug({
           title: 'ITEM FULFILLMENT',
-          details: 'There were ' + lines + ' lines in IT.'
+          details: 'There were ' + lines + ' lines in item fulfillment.'
         });
         for (var i = 0; i < lines; i++) {
           var quantity = itemFulfill.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
@@ -82,26 +84,29 @@ define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals'],
             details: itemName + ' x ' + quantity
           });
         }
+        // End of Testing output
 
-        // set package
-        // which should call box selection algo
-        // which should call setShipMethod
+        // Set package
+        // Which should call box selection algo
+        // Which should call setShipMethod
         setPackage(itemFulfill);
 
       } catch (e) {
+        // Changing the ship method should cause an error
+        // we catch the error, log it and continue.
         log.error({
           title: 'ON ACTION ERROR!',
           details: e.message
         });
 
-        // do shit
+        // Set ship status to 'Packed'
         itemFulfill.setValue('shipstatus', 'B', true);
-
+        // Log ship method (should no longer be 'manual') + ship status.
         log.debug({
           title: 'CATCH',
           details: itemFulfill.getValue('shipmethod') + ' | ' + itemFulfill.getValue('shipstatus')
         })
-
+        // Log package list should be usps
         log.debug({
           title: 'PACKAGE',
           details: itemFulfill.getSublists()
@@ -113,7 +118,7 @@ define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals'],
 
     /**
      * Sets the package on the Item Fulfillment Record
-     * @param {object} itemFulfill - The Item Fulfillment Record
+     * @param {Object} itemFulfill - The Item Fulfillment Record
      */
     function setPackage(itemFulfill) {
       log.debug({
@@ -152,11 +157,11 @@ define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals'],
 
         var weightPounds = shippingWeight;
 
-        // Once box is set check ship country. If it is international, ship it manually.
+        // Once the box is set check the ship country. If it is international, ship it manually.
         if (country == 'US') {
           // Validate Address
           var addressOk = getUspsRates.validateAddress(addr1, addr2, city, state, zip, country);
-
+          // If address is ok, continue
           if (addressOk) {
             log.debug({
               title: 'RUNNING GETUSPSRATES',
@@ -166,6 +171,8 @@ define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals'],
             // Method will be selected taking account box size, box weight and customer
             // paid shipping cost
             // check if weight exceeds 1 lb 
+            // This might change depending, this sets what ship method list index to start on
+            // 0 = USPS First Class, 1 = USPS Priority
             var i = 0;
             if (parseFloat(weightPounds) >= 1) {
               var i = 1;
@@ -174,7 +181,10 @@ define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals'],
               title: 'TOTAL WEIGHT | INDEX',
               details: weightPounds + ' | ' + i
             });
+            // Get ship method from method list
             var method = shipMethods[shipMethodNames[i]];
+            // Set box data
+            // Set custom box dimensions if not using flat rate
             var boxData = {
               carrierPackaging: shipMethods[shipMethodNames[i]].packaging,
               customBoxDimensions: boxDimensions
@@ -210,12 +220,12 @@ define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals'],
 
     /**
      * Sets the shipping method on the Item Fulfillment Record.
-     * @param {object} itemFulfill - Item Fulmillment Record
-     * @param {object} method - Shipping Method
+     * @param {Object} itemFulfill - Item Fulmillment Record
+     * @param {Object} method - Shipping Method
      * @param {decimal} shippingCost - Customer Paid Shipping Cost
      * @param {string} zip - Zip Code
      * @param {decimal} weightPounds - Package Weight in LBs
-     * @param {object} boxDimensions - Box Dimensions
+     * @param {Object} boxDimensions - Box Dimensions
      * @param {integer} i - Current index
      */
     function setShipMethod(itemFulfill, method, shippingCost, zip, weightPounds, boxDimensions, i) {
@@ -257,7 +267,7 @@ define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals'],
      * Loads a Record.
      * @param {string} id - The Record's Internal ID
      * @param {string} type - The Record's Type
-     * @returns {object} - The Record
+     * @returns {Object} - The Record
      */
     function loadRecord(id, type) {
       var objRecord = record.load({
