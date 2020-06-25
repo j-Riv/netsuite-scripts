@@ -83,10 +83,6 @@ define(['N/record', 'N/https', 'N/xml', 'N/log', './xmlToJson'],
      * @param {string} boxDimensions 
      */
     function getRateByMethod(method, containerType, zipDestination, weightPounds, boxDimensions) {
-      log.debug({
-        title: 'USPS --> BOX DIMENSIONS',
-        details: JSON.stringify(boxDimensions)
-      });
       // PRIORITY CONTAINER TYPES:
       // Valid Containers are: FLAT RATE ENVELOPE, LEGAL FLAT RATE ENVELOPE, 
       // PADDED FLAT RATE ENVELOPE, SM FLAT RATE ENVELOPE, WINDOW FLAT RATE 
@@ -101,7 +97,7 @@ define(['N/record', 'N/https', 'N/xml', 'N/log', './xmlToJson'],
       // var length = 9;
       // var height = 3;
       var url;
-      if (method.name == 'PRIORITY COMMERCIAL') {
+      if (method.service == 'PRIORITY COMMERCIAL') {
         url = 'https://secure.shippingapis.com/shippingapi.dll?API=RateV4&XML='
           + '<RateV4Request USERID="' + uspsUser + '">'
           + '<Revision>2</Revision>'

@@ -46,6 +46,22 @@ define(['N/log'],
           z: 2.5,
           cols: [{ x: 0, y: 0, z: 0 }],
           remaining_col_space: 11.25
+        },
+        {
+          name: 'Square',
+          x: 7,
+          y: 7,
+          z: 6,
+          cols: [{ x: 0, y: 0, z: 0 }],
+          remaining_col_space: 7
+        },
+        {
+          name: 'MD Flat Rate',
+          x: 11,
+          y: 8.5,
+          z: 5.5,
+          cols: [{ x: 0, y: 0, z: 0 }],
+          remaining_col_space: 11
         }
       ];
 

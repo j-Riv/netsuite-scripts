@@ -12,35 +12,35 @@ define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals', './tes
     var shipMethods = {
       uspsFirstClass: { 
         id: '22000',
-        name: 'FIRST CLASS COMMERCIAL',
+        service: 'FIRST CLASS COMMERCIAL',
         container: 'VARIABLE',
         weightMaxLB: 1,
         packaging: 14
       },
       uspsPriority: {
         id: '22001',
-        name: 'PRIORITY COMMERCIAL',
+        service: 'PRIORITY COMMERCIAL',
         container: 'VARIABLE',
         weightMaxLB: 70,
         packaging: 14
       },
       uspsPriorityEnvelope: { 
         id: '31089',
-        name: 'PRIORITY COMMERCIAL',
+        service: 'PRIORITY COMMERCIAL',
         container: 'FLAT RATE ENVELOPE',
         weightMaxLB: 70,
         packaging: 16
       },
       uspsPriorityLegalEnvelope: { 
         id: '31094',
-        name: 'PRIORITY COMMERCIAL',
+        service: 'PRIORITY COMMERCIAL',
         container: 'LEGAL FLAT RATE ENVELOPE',
         weightMaxLB: 70,
         packaging: 25
       },
       uspsPriorityMdFlatRateBox: { 
         id: '31136',
-        name: 'PRIORITY COMMERCIAL',
+        service: 'PRIORITY COMMERCIAL',
         container: 'MD FLAT RATE BOX',
         weightMaxLB: 70,
         packaging: 23
@@ -175,6 +175,7 @@ define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals', './tes
           // width: 6,
           // length: 9,
           // height: 3
+          name: theBox.name,
           width: Math.ceil(theBox.y),
           length: Math.ceil(theBox.x),
           height: Math.ceil(theBox.z)
@@ -200,7 +201,7 @@ define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals', './tes
             // This might change depending, this sets what ship method list index to start on
             // 0 = USPS First Class, 1 = USPS Priority
             var i = 0;
-            if (parseFloat(weightPounds) >= 1) {
+            if (parseFloat(weightPounds) >= 1 || marketShipMethod == 'uspsPriority') {
               var i = 1;
             }
             log.debug({
@@ -210,13 +211,7 @@ define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals', './tes
             // Get ship method from method list
             // var method = shipMethods[shipMethodNames[i]];
             var method = shipMethods[shipMethodNames[i]];
-            // Set box data
-            // Set custom box dimensions if not using flat rate
-            var boxData = {
-              carrierPackaging: shipMethods[shipMethodNames[i]].packaging,
-              customBoxDimensions: boxDimensions
-            }
-            itemFulfill.setValue('custbody_sp_box_data', JSON.stringify(boxData));
+
             setShipMethod(itemFulfill, method, shippingCost, zip, weightPounds, boxDimensions, i);
             
           } else {
@@ -255,38 +250,99 @@ define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals', './tes
      * @param {Object} boxDimensions - Box Dimensions
      * @param {integer} i - Current index
      */
+    // function setShipMethod(itemFulfill, method, shippingCost, zip, weightPounds, boxDimensions, i) {
+    //   log.debug({
+    //     title: 'RUNNING SET SHIP METHOD',
+    //     details: 'Running setShipMethod'
+    //   });
+    //   try {
+    //     var rate = getUspsRates.getRateByMethod(method.name, method.container, zip, weightPounds, boxDimensions);
+    //     // var allRates = getUspsRates.getAllRates(zip, weightPounds, boxDimensions);
+    //   } catch (e) {
+    //     throw new Error(e.message);
+    //   }
+    //   // load record
+    //   var createdFrom = itemFulfill.getValue('createdfrom');
+    //   var salesOrder = loadRecord(createdFrom, 'SALES_ORDER');
+    //   var subtotal = salesOrder.getValue('subtotal');
+    //   log.debug({
+    //     title: 'PAID SHIPPING COST | RATE | SUBTOTAL',
+    //     details: shippingCost + ' | ' + rate + ' | ' + subtotal
+    //   });
+    //   // fails because md box is 13.20
+    //   if (parseFloat(shippingCost) >= parseFloat(rate) || parseFloat(subtotal) >= 25.00) {
+    //     try {
+    //       itemFulfill.setValue('shipmethod', method.id);
+    //     } catch (e) {
+    //       log.debug({
+    //         title: 'ERROR SETTING SHIP METHOD',
+    //         details: JSON.stringify(e.message)
+    //       });
+    //       throw new Error(e.message);
+    //     }
+    //   } else {
+    //     setShipMethod(itemFulfill, shipMethods[shipMethodNames[i + 1]], shippingCost, zip, weightPounds, boxDimensions, i + 1);
+    //   }
+    // }
+
     function setShipMethod(itemFulfill, method, shippingCost, zip, weightPounds, boxDimensions, i) {
       log.debug({
         title: 'RUNNING SET SHIP METHOD',
         details: 'Running setShipMethod'
-      });
+      });    
       try {
-        var rate = getUspsRates.getRateByMethod(method.name, method.container, zip, weightPounds, boxDimensions);
+        var rate = parseFloat(getUspsRates.getRateByMethod(method.service, method.container, zip, weightPounds, boxDimensions));
         // var allRates = getUspsRates.getAllRates(zip, weightPounds, boxDimensions);
-      } catch(e) {
+      } catch (e) {
         throw new Error(e.message);
       }
+      // check box dimensions
+      // compare rate vs flat rate
+      var flatRateEnvelopeCost = 7.15;
+      var flatRateLegalEnvelopeCost = 7.45;
+      var flatRateMdBoxCost = 13.20;
+      shippingCost = parseFloat(shippingCost);
       // load record
       var createdFrom = itemFulfill.getValue('createdfrom');
       var salesOrder = loadRecord(createdFrom, 'SALES_ORDER');
-      var subtotal = salesOrder.getValue('subtotal');
+      var subtotal = parseFloat(salesOrder.getValue('subtotal'));
       log.debug({
         title: 'PAID SHIPPING COST | RATE | SUBTOTAL',
         details: shippingCost + ' | ' + rate + ' | ' + subtotal
       });
       // fails because md box is 13.20
-      if (parseFloat(shippingCost) >= parseFloat(rate) || parseFloat(subtotal) >= 25.00) {
-        try {
-          itemFulfill.setValue('shipmethod', method.id);
-        } catch (e) {
-          log.debug({
-            title: 'ERROR SETTING SHIP METHOD',
-            details: JSON.stringify(e.message)
-          });
-          throw new Error(e.message);
-        }
-      } else {
-        setShipMethod(itemFulfill, shipMethods[shipMethodNames[i + 1]], shippingCost, zip, weightPounds, boxDimensions, i + 1);
+      // if customer paid shipping cost >= rate or if subtotal >= $25
+      var sm = method.id;
+      var pkg = method.packaging;
+      if (rate <= flatRateEnvelopeCost && boxDimensions.name == 'Membership') {
+        // set flat rate ship method
+        sm = method.id;
+        pkg = method.packaging;
+      } else if (rate >= flatRateEnvelopeCost && boxDimensions.name == 'Membership') {
+        sm = shipMethods['uspsPriorityEnvelope'].id;
+        pkg = shipMethods['uspsPriorityEnvelope'].packaging;
+      } else if (rate >= flatRateEnvelopeCost && boxDimensions.name == 'Membership Large') {
+        sm = shipMethods['uspsPriorityLegalEnvelope'].id;
+        pkg = shipMethods['uspsPriorityLegalEnvelope'].packaging;
+      }
+
+      // Set box data
+      // Set custom box dimensions if not using flat rate
+      // add flat rate dimensions
+      var boxData = {
+        carrierPackaging: pkg,
+        customBoxDimensions: boxDimensions
+      }
+      itemFulfill.setValue('custbody_sp_box_data', JSON.stringify(boxData));
+
+      try {
+        itemFulfill.setValue('shipmethod', sm);
+      } catch (e) {
+        log.debug({
+          title: 'ERROR SETTING SHIP METHOD',
+          details: JSON.stringify(e.message)
+        });
+        throw new Error(e.message);
       }
     }
 

@@ -15,6 +15,10 @@ define(['N/log'],
 
       var boxData = itemFulfill.getValue('custbody_sp_box_data');
       boxData = JSON.parse(boxData);
+      log.debug({
+        title: 'BOX DATA',
+        details: JSON.stringify(boxData)
+      });
 
       if (typeof boxData == 'object') {
         try {
