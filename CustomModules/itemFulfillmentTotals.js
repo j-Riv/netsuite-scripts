@@ -10,7 +10,7 @@ define(['N/record', 'N/log'],
     /**
      * Calculates the total item fulfillment weight as well
      * as the total item count.
-     * @param {object} itemFulfill - The Item Fulfillment record
+     * @param {Object} itemFulfill - The Item Fulfillment record
      */
     function calculate(itemFulfill) {
       try { 

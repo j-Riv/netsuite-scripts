@@ -1,5 +1,5 @@
 /**
- * packageSelector.js
+ * packageSetter.js
  * @NApiVersion 2.x
  * @NModuleScope Public
  */

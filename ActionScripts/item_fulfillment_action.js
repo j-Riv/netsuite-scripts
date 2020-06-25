@@ -1,12 +1,12 @@
 /**
 *
-@NApiVersion 2.x
+@NApiVersion 2.1
  * @NScriptType WorkflowActionScript
  * @NModuleScope public
  *
 */
-define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals'],
-  function (record, log, getUspsRates, itemFulfillmentTotal) {
+define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals', './testBox'],
+  function (record, log, getUspsRates, itemFulfillmentTotal, testBox) {
 
     // Shipping Methods - Production
     var shipMethods = {
@@ -53,6 +53,18 @@ define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals'],
       'uspsPriorityLegalEnvelope',
       'uspsPriorityMdFlatRateBox'
     ];
+
+    function selectShipMethod(itemFulfill) {
+      var marketShipMethod = itemFulfill.getValue('custbody_sp_customer_ship_method');
+      var shipMethod = false;
+      if (marketShipMethod.indexOf('USPS First-Class') != -1) {
+        shipMethod = 'uspsFirstClass';
+      }
+      if (marketShipMethod.indexOf('USPS Priority Mail') != -1) {
+        shipMethod = 'uspsPriority';
+      }
+      return shipMethod;
+    }
 
     /**
      * Does some cool shit.
@@ -149,10 +161,23 @@ define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals'],
         });
 
         // Calculate box algo will go around here
+        var theBox = testBox.selectBox(itemFulfill, 0);
+        var boxNum = 1;
+        while (!theBox) {
+          theBox = testBox.selectBox(itemFulfill, boxNum);
+          boxNum++;
+        }
+        log.debug({
+          title: 'THE FINAL BOX',
+          details: JSON.stringify(theBox)
+        });
         var boxDimensions = {
-          width: 6,
-          length: 9,
-          height: 3
+          // width: 6,
+          // length: 9,
+          // height: 3
+          width: Math.ceil(theBox.y),
+          length: Math.ceil(theBox.x),
+          height: Math.ceil(theBox.z)
         };
 
         var weightPounds = shippingWeight;
@@ -161,8 +186,9 @@ define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals'],
         if (country == 'US') {
           // Validate Address
           var addressOk = getUspsRates.validateAddress(addr1, addr2, city, state, zip, country);
+          var marketShipMethod = selectShipMethod(itemFulfill);
           // If address is ok, continue
-          if (addressOk) {
+          if (addressOk && marketShipMethod != false) {
             log.debug({
               title: 'RUNNING GETUSPSRATES',
               details: 'Zip: ' + zip + ' | Weight (lbs): ' + weightPounds + ' | Box Dimensions: ' + boxDimensions
@@ -182,6 +208,7 @@ define(['N/record', 'N/log', './getUspsRates', './itemFulfillmentTotals'],
               details: weightPounds + ' | ' + i
             });
             // Get ship method from method list
+            // var method = shipMethods[shipMethodNames[i]];
             var method = shipMethods[shipMethodNames[i]];
             // Set box data
             // Set custom box dimensions if not using flat rate
