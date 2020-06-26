@@ -5,8 +5,8 @@
  * @NModuleScope public
  *
 */
-define(['N/record', 'N/log', './ratePackageSelector/run', './itemFulfillmentTotals'],
-  function (record, log, main, itemFulfillmentTotal) {
+define(['N/record', 'N/log', './ratePackageSelector/run', './ratePackageSelector/orderTotals'],
+  function (record, log, main, orderTotals) {
 
     /**
      * Does some cool shit.
@@ -22,7 +22,7 @@ define(['N/record', 'N/log', './ratePackageSelector/run', './itemFulfillmentTota
           details: 'Will calculate total weight and item count...'
         });
 
-        itemFulfillmentTotal.calculate(itemFulfill);
+        orderTotals._calc(itemFulfill);
 
         // Testing output -- can delete this later
         var lines = itemFulfill.getLineCount({ sublistId: 'item' });
