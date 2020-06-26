@@ -16,3 +16,9 @@ https://secure.shippingapis.com/ShippingAPI.dll?API=ZipCodeLookup&XML=<ZipCodeLo
 
 ## City / State Lookup
 https://secure.shippingapis.com/ShippingAPI.dll?API=CityStateLookup&XML=<CityStateLookupRequest USERID="681SUAVE2769"><ZipCode ID="0"><Zip5>92703</Zip5></ZipCode></CityStateLookupRequest>
+
+
+
+
+## Test
+https://secure.shippingapis.com/shippingapi.dll?API=RateV4&XML=<RateV4Request USERID="681SUAVE2769"><Revision>2</Revision><Package ID="1ST"><Service>PRIORITY COMMERCIAL</Service><ZipOrigination>92703</ZipOrigination><ZipDestination>92843</ZipDestination><Pounds>0</Pounds><Ounces>2</Ounces><Container></Container><Width>6</Width><Length>9</Length><Height>3</Height><Girth></Girth><ClassID>1</ClassID><Machinable>false</Machinable></Package></RateV4Request>
