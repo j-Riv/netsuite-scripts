@@ -56,7 +56,7 @@ define(['N/record', 'N/https', 'N/xml', 'N/log', './xmlToJson'],
           text: response.body
         });
 
-        var jsonObj = xmlToJson.parseXML(xmlDocument.documentElement);
+        var jsonObj = xmlToJson._parse(xmlDocument.documentElement);
 
         if ('Error' in jsonObj.Address) {
           throw new Error(jsonObj.Address.Error.Description['#text']);
@@ -156,7 +156,7 @@ define(['N/record', 'N/https', 'N/xml', 'N/log', './xmlToJson'],
           text: response.body
         });
 
-        var jsonObj = xmlToJson.parseXML(xmlDocument.documentElement);
+        var jsonObj = xmlToJson._parse(xmlDocument.documentElement);
         var rate;
         var mailService;
         
@@ -228,7 +228,7 @@ define(['N/record', 'N/https', 'N/xml', 'N/log', './xmlToJson'],
           text: response.body
         });
 
-        var jsonObj = xmlToJson.parseXML(xmlDocument.documentElement);
+        var jsonObj = xmlToJson._parse(xmlDocument.documentElement);
         var postage = [];
         jsonObj.Package.Postage.forEach(function(p){
           var rate;

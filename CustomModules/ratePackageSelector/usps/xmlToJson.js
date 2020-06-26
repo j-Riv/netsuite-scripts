@@ -53,7 +53,7 @@ define(['N/xml'], function (xmlMod) {
   };
 
   return {
-    parseXML: xmlToJson
+    _parse: xmlToJson
   }
 
 });

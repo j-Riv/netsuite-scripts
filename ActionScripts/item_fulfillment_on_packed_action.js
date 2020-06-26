@@ -5,13 +5,13 @@
  * @NModuleScope public
  *
 */
-define(['N/log', './packageSetter'],
-  function (log, packageSetter) {
+define(['N/log', './ratePackageSelector/setPackage'],
+  function (log, setPackage) {
 
     function onAction(context) {
       try {
         var itemFulfill = context.newRecord;
-        packageSetter.setPackage(itemFulfill);
+        setPackage._set(itemFulfill);
 
         log.debug({
           title: 'ON PACKED SCRIPT',

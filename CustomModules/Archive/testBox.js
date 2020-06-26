@@ -225,13 +225,8 @@ define(['N/log'],
       return box;
     }
 
-    function clone(obj) {
-      return JSON.parse(JSON.stringify(obj));
-    }
-
     function set_box_orientation(largest_product, box) {
-      // const oriented_box = Object.assign({}, box)
-      var oriented_box = clone(box);
+      var oriented_box = JSON.parse(JSON.stringify(box));
       if (largest_product[0] > oriented_box.y) {
         // Turn the box
         var x = oriented_box.y;
