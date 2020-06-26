@@ -8,12 +8,13 @@ define(['N/log'],
   function (log) {
 
     /**
-     * Calculates the total item fulfillment weight as well
-     * as the total item count.
+     * Calculates the total item fulfillment weight as well as the total item count.
      * @param {Object} itemFulfill - The Item Fulfillment record
+     * @returns {boolean}
      */
     function calculate(itemFulfill) {
       try {
+        // Get line count
         var lines = itemFulfill.getLineCount({ sublistId: 'item' });
         var totalWeight = 0;
         var totalItems = 0;
@@ -22,14 +23,15 @@ define(['N/log'],
           log.debug({
             details: 'Checking Items'
           });
+
           var itemType = itemFulfill.getSublistValue({ sublistId: 'item', fieldId: 'custcol_sp_item_type', line: i });
           if (itemType != 'Kit/Package') {
-            // get weight unit (lb, oz, kg, g)
+            // Get weight unit (lb, oz, kg, g)
             var quantity = itemFulfill.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
             var weight = itemFulfill.getSublistValue({ sublistId: 'item', fieldId: 'custcol_sp_item_weight', line: i });
 
-            // check if line item has quantity
-            // custom line items like discount and subtotal should not -- these will be skipped
+            // Check if line item has quantity
+            // Custom line items like discount and subtotal should not -- these will be skipped
             if (quantity) {
               var unit = itemFulfill.getSublistValue({ sublistId: 'item', fieldId: 'custcol_sp_item_weight_units', line: i });
               log.debug({
@@ -37,29 +39,29 @@ define(['N/log'],
                 details: 'converting ' + unit + ' to lb... with qty: ' + quantity
               });
               if (unit === 'oz') {
-                // convert oz to lbs
+                // Convert oz to lbs
                 weight = weight * 0.0625;
               } else if (unit === 'kg') {
-                // convert oz to kg
+                // Convert oz to kg
                 weight = weight * 2.20462;
               } else if (unit === 'g') {
-                // convert oz to g
+                // Convert oz to g
                 weight = weight * 0.00220462;
               } else {
                 weight = weight * 1;
               }
 
-              // set line weight
+              // Set line weight
               var convertedWeight = round(weight, 3);
               var currentLine = itemFulfill.selectLine({ sublistId: 'item', line: i });
               currentLine.setCurrentSublistValue({ sublistId: 'item', fieldId: 'custcol_sp_converted_item_weight', value: convertedWeight, ignoreFieldChange: false });
               itemFulfill.commitLine({ sublistId: 'item' });
 
-              // calculate total item count
+              // Calculate total item count
               totalItems = parseInt(totalItems) + parseInt(quantity);
-              // calculate line weight
+              // Calculate line weight
               var lineWeight = weight * quantity;
-              // calculate total weight
+              // Calculate total weight
               totalWeight = parseFloat(totalWeight) + parseFloat(lineWeight);
 
               log.debug({
@@ -76,11 +78,11 @@ define(['N/log'],
             });
           }
         }
-        // set total weight
+        // Set total weight
         totalWeight = round(totalWeight, 2);
-        // set fields
+        // Set fields
         itemFulfill.setValue({ fieldId: 'custbody_sp_total_items_weight', value: totalWeight });
-        // set total item count
+        // Set total item count
         itemFulfill.setValue({ fieldId: 'custbody_sp_total_items', value: totalItems });
 
         log.debug({
@@ -91,8 +93,8 @@ define(['N/log'],
         return true;
 
       } catch (e) {
-        log.debug({
-          title: 'ERROR!',
+        log.error({
+          title: 'ERROR CALCULATING ORDER WEIGHT + ITEM COUNT!',
           details: e.message
         });
 

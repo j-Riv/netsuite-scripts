@@ -5,8 +5,8 @@
  * @NModuleScope public
  *
 */
-define(['N/record', 'N/log', './ratePackageSelector/run', './ratePackageSelector/orderTotals'],
-  function (record, log, main, orderTotals) {
+define(['N/log', './ratePackageSelector/main', './ratePackageSelector/orderTotals'],
+  function (log, main, orderTotals) {
 
     /**
      * Does some cool shit.
@@ -16,12 +16,7 @@ define(['N/record', 'N/log', './ratePackageSelector/run', './ratePackageSelector
       // Get item fulfillment record
       var itemFulfill = context.newRecord;
       try {
-        // Calculate total weight & item count
-        log.debug({
-          title: 'RUNNING CALCULATE TOTAL WEIGHT COUNT',
-          details: 'Will calculate total weight and item count...'
-        });
-
+        // Calculate total order weight (lb) & item count
         orderTotals._calc(itemFulfill);
 
         // Testing output -- can delete this later
@@ -33,16 +28,16 @@ define(['N/record', 'N/log', './ratePackageSelector/run', './ratePackageSelector
         for (var i = 0; i < lines; i++) {
           var quantity = itemFulfill.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
           var itemName = itemFulfill.getSublistValue({ sublistId: 'item', fieldId: 'itemname', line: i });
-          log.debug({
-            title: 'LINE ' + i,
-            details: itemName + ' x ' + quantity
-          });
+          // Log only fulfilled items
+          if (quantity < 0) {
+            log.debug({
+              title: 'LINE ' + i,
+              details: itemName + ' x ' + quantity
+            });
+          }
         }
-        // End of Testing output
 
-        // Set package
-        // Which should call box selection algo
-        // Which should call setShipMethod
+        // Run main package selector func
         main._run(itemFulfill);
 
       } catch (e) {
@@ -57,12 +52,13 @@ define(['N/record', 'N/log', './ratePackageSelector/run', './ratePackageSelector
         itemFulfill.setValue('shipstatus', 'B', true);
         // Log ship method (should no longer be 'manual') + ship status.
         log.debug({
-          title: 'CATCH',
-          details: itemFulfill.getValue('shipmethod') + ' | ' + itemFulfill.getValue('shipstatus')
+          title: 'CATCH SHIP METHOD',
+          details: 'Ship Method: ' + itemFulfill.getValue('shipmethod') + 
+            ' | Ship Status:' + itemFulfill.getValue('shipstatus')
         })
-        // Log package list should be usps
+        // Log package lists should contain the usps package sublist
         log.debug({
-          title: 'PACKAGE',
+          title: 'LISTS',
           details: itemFulfill.getSublists()
         });
 

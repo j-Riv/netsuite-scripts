@@ -6,15 +6,20 @@
 
 define(['N/log'],
   function (log) {
-
+    /**
+     * Sets the ship method's carrier packaging & custom box dimensions
+     * @param {Object} itemFulfill - The item fulfillment record
+     */
     function setPackage(itemFulfill) {
       log.debug({
         title: 'SETTING PACKAGE',
         details: 'Running set package'
       });
 
+      // Get and parse box data
       var boxData = itemFulfill.getValue('custbody_sp_box_data');
       boxData = JSON.parse(boxData);
+
       log.debug({
         title: 'BOX DATA',
         details: JSON.stringify(boxData)
@@ -56,20 +61,19 @@ define(['N/log'],
               fieldId: 'packageheightusps',
               value: boxData.customBoxDimensions.height
             });
-            // references
-            // customer
+            // Get Customer
             var customer = itemFulfill.getValue('entity');
             itemFulfill.setCurrentSublistValue({
               sublistId: 'packageusps',
               fieldId: 'reference1usps',
               value: customer
             });
-            // sales order
-            var salesOrder = itemFulfill.getValue('custbody_sp_order_number');
+            // Get Saales Order Number
+            var salesOrderNum = itemFulfill.getValue('custbody_sp_order_number');
             itemFulfill.setCurrentSublistValue({
               sublistId: 'packageusps',
               fieldId: 'reference2usps',
-              value: salesOrder
+              value: salesOrderNum
             });
 
             // Commit Line
@@ -77,34 +81,24 @@ define(['N/log'],
               sublistId: 'packageusps'
             });
 
-            log.debug({
-              title: 'Sublists',
-              details: itemFulfill.getSublists()
-            });
+            // Update transaction date
+            var date = new Date();
+            itemFulfill.setValue('trandate', date);
 
             log.debug({
-              title: 'Package List',
-              details: itemFulfill.getSublist({
-                sublistId: 'packageusps'
-              })
-            });
-
-            // update trans date
-
-            log.debug({
-              title: 'Ship Status Changed',
+              title: 'DONE: SHIP STATUS CHANGED',
               details: 'Please check record for appropriate values'
             });
           }
 
         } catch (e) {
-          log.debug({
-            title: 'ERROR!',
+          log.error({
+            title: 'SET PACKAGE ERROR!',
             details: e.message
           });
         }
       } else {
-        // Set manual fulfillment required
+        // Set manual ship flag
         itemFulfill.setValue('custbody_sp_manual_fulfillment_req', true);
       }
     }

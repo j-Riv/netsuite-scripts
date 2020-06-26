@@ -6,7 +6,7 @@
 
 define(['N/xml'], function (xmlMod) {
   /**
-   * Converts xml to json.
+   * Converts xml to json
    * refer to https://davidwalsh.name/convert-xml-json
    * @param {*} xmlNode 
    * @returns {json}
@@ -16,7 +16,7 @@ define(['N/xml'], function (xmlMod) {
     var obj = Object.create(null);
 
     if (xmlNode.nodeType == xmlMod.NodeType.ELEMENT_NODE) { // element
-      // do attributes
+      // Do attributes
       if (xmlNode.hasAttributes()) {
         obj['@attributes'] = Object.create(null);
         for (var j in xmlNode.attributes) {
@@ -31,7 +31,7 @@ define(['N/xml'], function (xmlMod) {
       obj = xmlNode.nodeValue;
     }
 
-    // do children
+    // Do children
     if (xmlNode.hasChildNodes()) {
       for (var i = 0, childLen = xmlNode.childNodes.length; i < childLen; i++) {
         var childItem = xmlNode.childNodes[i];

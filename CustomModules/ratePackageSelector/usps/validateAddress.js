@@ -4,24 +4,26 @@
  * @NModuleScope Public
  */
 
-define(['N/record', 'N/https', 'N/xml', 'N/log', './xmlToJson'],
-  function (record, https, xml, log, xmlToJson) {
+define(['N/https', 'N/xml', 'N/log', './xmlToJson'],
+  function (https, xml, log, xmlToJson) {
     var uspsUser = '681SUAVE2769';
 
     /**
-        * Validates the customer's address via USPS web services
-        * @param {string} addr1 
-        * @param {string} addr2 
-        * @param {string} city 
-        * @param {string} state 
-        * @param {string} zip
-        * @param {string} country
-        */
+      * Validates the customer's address via USPS web services
+      * @param {string} addr1 
+      * @param {string} addr2 
+      * @param {string} city 
+      * @param {string} state 
+      * @param {string} zip
+      * @param {string} country
+      * @returns {boolean}
+      */
     function validateAddress(addr1, addr2, city, state, zip, country) {
 
       log.debug({
         title: 'VALIDATING ADDRESS',
-        details: addr1 + ' ' + addr2 + ' ' + city + ', ' + state + ' ' + zip + ', ' + country
+        details: addr1 + ' ' + addr2 + ' ' + city 
+          + ', ' + state + ' ' + zip + ', ' + country
       });
 
       var url = 'https://secure.shippingapis.com/ShippingAPI.dll?API=Verify&XML='
@@ -52,26 +54,21 @@ define(['N/record', 'N/https', 'N/xml', 'N/log', './xmlToJson'],
           details: response.body
         });
 
+        // Parse response to xml object
         var xmlDocument = xml.Parser.fromString({
           text: response.body
         });
-
+        // Parse xml to json
         var jsonObj = xmlToJson._parse(xmlDocument.documentElement);
-
+        // If error throw error
         if ('Error' in jsonObj.Address) {
           throw new Error(jsonObj.Address.Error.Description['#text']);
         } else {
           return true;
         }
-
       } catch (e) {
-        log.error({
-          title: 'ADDRESS VALIDATION ERROR!',
-          details: e.message
-        });
         throw new Error(e.message);
       }
-
     }
 
     return {

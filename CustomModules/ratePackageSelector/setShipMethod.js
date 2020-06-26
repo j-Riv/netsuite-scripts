@@ -7,7 +7,7 @@
 define(['N/record', 'N/log', './usps/getRateByService'],
   function (record, log, uspsGetRates) {
 
-    // Shipping Methods - Production
+    // Shipping Methods
     var shipMethods = {
       uspsFirstClass: {
         id: '22000',
@@ -44,14 +44,7 @@ define(['N/record', 'N/log', './usps/getRateByService'],
         weightMaxLB: 70,
         packaging: 23
       }
-    }
-    var shipMethodNames = [
-      'uspsFirstClass',
-      'uspsPriority',
-      'uspsPriorityEnvelope',
-      'uspsPriorityLegalEnvelope',
-      'uspsPriorityMdFlatRateBox'
-    ];
+    };
 
     /**
      * Sets the shipping method on the Item Fulfillment Record.
@@ -68,67 +61,78 @@ define(['N/record', 'N/log', './usps/getRateByService'],
         title: 'RUNNING SET SHIP METHOD',
         details: 'Running setShipMethod'
       });
+
       try {
         var rate = parseFloat(uspsGetRates._get(method.service, method.container, zip, weightPounds, boxDimensions));
       } catch (e) {
         throw new Error(e.message);
       }
-      // check box dimensions
-      // compare rate vs flat rate
+
       var flatRateEnvelopeCost = 7.15;
       var flatRateLegalEnvelopeCost = 7.45;
       var flatRateMdBoxCost = 13.20;
       shippingCost = parseFloat(shippingCost);
-      // load record
+      // Load attached sales record
       var createdFrom = itemFulfill.getValue('createdfrom');
       var salesOrder = loadRecord(createdFrom, 'SALES_ORDER');
       var subtotal = parseFloat(salesOrder.getValue('subtotal'));
+
       log.debug({
         title: 'PAID SHIPPING COST | RATE | SUBTOTAL',
-        details: shippingCost + ' | ' + rate + ' | ' + subtotal
+        details: 'Customer paid shipping cost: ' + shippingCost + 
+          ' | Rate: ' + rate + ' | Order Subtotal: ' + subtotal
       });
-      // fails because md box is 13.20
-      // if customer paid shipping cost >= rate or if subtotal >= $25
+
       var sm = method.id;
       var pkg = method.packaging;
+
       if (rate <= flatRateEnvelopeCost && boxDimensions.name == 'Membership') {
-        // set flat rate ship method
+        // rate <= USPS Priority Envelope Cost & selected box is 'Membership'
+        // Set ship method to either USPS First-Class or USPS Priority (Non Flat Rate < $7.15)
         sm = method.id;
+        // Set ship method packaging (parcel)
         pkg = method.packaging;
       } else if (rate >= flatRateEnvelopeCost && boxDimensions.name == 'Membership') {
+        // rate >= USPS Priority Envelope Cost & selected box is 'Membership'
+        // Set ship method to USPS Priority Flat Rate Envelope
         sm = shipMethods['uspsPriorityEnvelope'].id;
+        // Set ship method packaging (Flat Rate Envelope)
         pkg = shipMethods['uspsPriorityEnvelope'].packaging;
       } else if (rate >= flatRateEnvelopeCost && boxDimensions.name == 'Membership Large') {
+        // rate >= flatRateEnvelopeCost & selected box is 'Membership Large'
+        // Large Membership box doesn't fit into Flat Rate Envelopes use Legal
+        // Set ship method to USPS Priority Legal Flat Rate Envelope
         sm = shipMethods['uspsPriorityLegalEnvelope'].id;
+        // Set ship method packaging (Legal Flat Rate Envelope)
         pkg = shipMethods['uspsPriorityLegalEnvelope'].packaging;
       }
 
-      // Set box data
-      // Set custom box dimensions if not using flat rate
-      // add flat rate dimensions
+      // Set box data for on packed action
+      // Set custom box dimensions if not using a 'Flat Rate' service
+      // NetSuite should ignore custom dimensions
       var boxData = {
         carrierPackaging: pkg,
         customBoxDimensions: boxDimensions
       }
+
       itemFulfill.setValue('custbody_sp_box_data', JSON.stringify(boxData));
 
+      // Change ship method from 'Manual'
+      // Changing the ship method will cause an error,  
+      // catch the error so we can log it and continue
       try {
         itemFulfill.setValue('shipmethod', sm);
       } catch (e) {
-        log.debug({
-          title: 'ERROR SETTING SHIP METHOD',
-          details: JSON.stringify(e.message)
-        });
         throw new Error(e.message);
       }
     }
 
     /**
- * Loads a Record.
- * @param {string} id - The Record's Internal ID
- * @param {string} type - The Record's Type
- * @returns {Object} - The Record
- */
+     * Loads a standard record.
+     * @param {string} id - The Record's Internal ID
+     * @param {string} type - The Record's Type
+     * @returns {Object} - The Record
+     */
     function loadRecord(id, type) {
       var objRecord = record.load({
         type: record.Type[type],

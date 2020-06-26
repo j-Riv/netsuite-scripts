@@ -4,13 +4,19 @@
  * @NModuleScope Public
  */
 
-define(['N/record', 'N/https', 'N/xml', 'N/log', './xmlToJson'],
-  function (record, https, xml, log, xmlToJson) {
+define(['N/https', 'N/xml', 'N/log', './xmlToJson'],
+  function (https, xml, log, xmlToJson) {
     var uspsUser = '681SUAVE2769';
-
+    /**
+     * Gets all available USPS services & rates
+     * @param {string} zipDestination 
+     * @param {string} weightPounds 
+     * @param {string} boxDimensions 
+     */
     function getAllRates(zipDestination, weightPounds, boxDimensions) {
       var weightOunces = 0;
       var containerType = '';
+
       var url = 'https://secure.shippingapis.com/shippingapi.dll?API=RateV4&XML='
         + '<RateV4Request USERID="' + uspsUser + '">'
         + '<Revision>2</Revision>'
@@ -45,11 +51,13 @@ define(['N/record', 'N/https', 'N/xml', 'N/log', './xmlToJson'],
           details: response.body
         });
 
+        // Parse response to xml object
         var xmlDocument = xml.Parser.fromString({
           text: response.body
         });
-
+        // Parse xml to json
         var jsonObj = xmlToJson._parse(xmlDocument.documentElement);
+        // Build postage list
         var postage = [];
         jsonObj.Package.Postage.forEach(function (p) {
           var rate;
@@ -78,13 +86,8 @@ define(['N/record', 'N/https', 'N/xml', 'N/log', './xmlToJson'],
         });
 
       } catch (e) {
-        log.error({
-          title: 'ERROR GETTING ALL USPS RATES!',
-          details: JSON.stringify(e.message)
-        });
         throw new Error(JSON.stringify(e.message));
       }
-
     }
 
     return {

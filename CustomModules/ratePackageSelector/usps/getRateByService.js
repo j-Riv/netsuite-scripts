@@ -4,33 +4,31 @@
  * @NModuleScope Public
  */
 
-define(['N/record', 'N/https', 'N/xml', 'N/log', './xmlToJson'],
-  function (record, https, xml, log, xmlToJson) {
+define(['N/https', 'N/xml', 'N/log', './xmlToJson'],
+  function (https, xml, log, xmlToJson) {
     var uspsUser = '681SUAVE2769';
     /**
-     * Gets USPS package Rates via USPS web services.
+     * Gets USPS package Rates via USPS web services*
      * @param {string} method 
      * @param {string} containerType 
      * @param {string} zipDestination
      * @param {string} weightPounds 
      * @param {string} boxDimensions 
+     * @returns {decimal} - The service's commercial rate
      */
     function getRateByService(method, containerType, zipDestination, weightPounds, boxDimensions) {
-      // PRIORITY CONTAINER TYPES:
-      // Valid Containers are: FLAT RATE ENVELOPE, LEGAL FLAT RATE ENVELOPE, 
-      // PADDED FLAT RATE ENVELOPE, SM FLAT RATE ENVELOPE, WINDOW FLAT RATE 
-      // ENVELOPE, GIFT CARD FLAT RATE ENVELOPE, SM FLAT RATE BOX, MD FLAT 
-      // RATE BOX, LG FLAT RATE BOX and VARIABLE.
-      // var method = 'PRIORITY';
-      // var zipDestination = '92843';
-      // var weightPounds = 1;
+      /**
+       * Valid USPS Priority Container Types:
+       * FLAT RATE ENVELOPE, LEGAL FLAT RATE ENVELOPE, PADDED FLAT RATE ENVELOPE, 
+       * SM FLAT RATE ENVELOPE, WINDOW FLAT RATE, ENVELOPE, GIFT CARD FLAT RATE ENVELOPE, 
+       * SM FLAT RATE BOX, MD FLAT, RATE BOX, LG FLAT RATE BOX and VARIABLE.
+       */
+
       var weightOunces = 0;
-      // var containerType = 'BOX';
-      // var width = 6;
-      // var length = 9;
-      // var height = 3;
       var url;
+
       if (method.service == 'PRIORITY COMMERCIAL') {
+        // USPS Priority Mail
         url = 'https://secure.shippingapis.com/shippingapi.dll?API=RateV4&XML='
           + '<RateV4Request USERID="' + uspsUser + '">'
           + '<Revision>2</Revision>'
@@ -49,6 +47,7 @@ define(['N/record', 'N/https', 'N/xml', 'N/log', './xmlToJson'],
           + '</Package>'
           + '</RateV4Request>';
       } else {
+        // USPS First-Class Mail
         url = 'https://secure.shippingapis.com/shippingapi.dll?API=RateV4&XML='
           + '<RateV4Request USERID="' + uspsUser + '">'
           + '<Revision>2</Revision>'
@@ -85,37 +84,28 @@ define(['N/record', 'N/https', 'N/xml', 'N/log', './xmlToJson'],
           details: response.body
         });
 
+        // Parse response to xml object
         var xmlDocument = xml.Parser.fromString({
           text: response.body
         });
-
+        // Parse xml to json
         var jsonObj = xmlToJson._parse(xmlDocument.documentElement);
-        var rate;
-        var mailService;
 
         if ('Error' in jsonObj.Package) {
-          log.error({
-            title: 'USPS GET RATE ERROR!',
-            details: jsonObj.Package.Error.Description['#text']
-          });
           throw new Error(jsonObj.Package.Error.Description['#text']);
         } else {
-          rate = jsonObj.Package.Postage.CommercialRate['#text'];
-          mailService = jsonObj.Package.Postage.MailService['#text'];
+          var rate = jsonObj.Package.Postage.CommercialRate['#text'];
+          var mailService = jsonObj.Package.Postage.MailService['#text'];
 
           log.debug({
-            title: 'Package',
-            details: rate + '|' + mailService
+            title: 'USPS GET RATE BY METHOD RATE',
+            details: 'Service: ' + mailService + ' | Rate: ' + rate
           });
         }
 
         return rate;
 
       } catch (e) {
-        log.error({
-          title: 'ERROR!',
-          details: JSON.stringify(e.message)
-        });
         throw new Error(JSON.stringify(e.message));
       }
     }

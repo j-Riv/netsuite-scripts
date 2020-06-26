@@ -10,13 +10,9 @@ define(['N/log', './ratePackageSelector/setPackage'],
 
     function onAction(context) {
       try {
+        // Get item fulfillment
         var itemFulfill = context.newRecord;
         setPackage._set(itemFulfill);
-
-        log.debug({
-          title: 'ON PACKED SCRIPT',
-          details: 'HELLO THERE SIR'
-        });
 
       } catch (e) {
         log.error({
