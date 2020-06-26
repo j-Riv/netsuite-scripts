@@ -3,7 +3,6 @@
 
 ## Workflow Action Script + Custom Module(s)
 ```markdown
-# Changes / Updates
 - /ratePackageSelector
   - /testBox
     - addToBox.js
