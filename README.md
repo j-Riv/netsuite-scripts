@@ -2,11 +2,11 @@
 > SuiteScript 2.x
 
 ### Contents:
-- [SuiteScripts](/SuiteScripts)
+- [Suite Scripts](/SuiteScripts)
 - [RESTlets](/RESTlets)
-- [ActionScripts](/ActionScripts)
+- [Action Scripts](/ActionScripts)
 - [Suitelets](/Suitelets)
-- [CustomModules](/CustomModules)
+- [Custom Modules](/CustomModules)
 - [Sample Responses](/SampleResponses)
 - [Manual Tools - Used for Migration from Zoho](/ManualTools)
 
