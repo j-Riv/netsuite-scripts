@@ -1,13 +1,12 @@
 # NETSUITE
-> SuiteScript 2.0
-
-Future home for SuiteScripts & RESTlets
+> SuiteScript 2.x
 
 ### Contents:
 - [SuiteScripts](/SuiteScripts)
 - [RESTlets](/RESTlets)
 - [ActionScripts](/ActionScripts)
 - [Suitelets](/Suitelets)
+- [CustomModules](/CustomModules)
 - [Sample Responses](/SampleResponses)
 - [Manual Tools - Used for Migration from Zoho](/ManualTools)
 
