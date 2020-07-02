@@ -1,5 +1,5 @@
 # SUITELETS
-> NetSuite Custom Pages
+> NetSuite Server Side Scripts
 
 ## Post Item To Shopify
 > post_item_to_shopify.js
@@ -16,6 +16,7 @@ Expects paramater <i>custscript_servername</i> to be set. On script creation cre
 
 ## Get Retail Store Replenishment
 > get_retail_replenishment_items.js
+
 ### Setup
 #### Saved Search
 Create a saved search and make sure you make it public. Use the following.
@@ -54,7 +55,7 @@ Create a saved search and make sure you make it public. Use the following.
   </tr>
 </table>
 
-###### Results
+##### Results
 <table>
   <tr>
     <th>Field</th>

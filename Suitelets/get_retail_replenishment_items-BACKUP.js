@@ -57,11 +57,12 @@ define(['N/search', 'N/file', 'N/log'],
       });
 
       // build array of objects for csv
+      // create a copy and parse
+      var retailStoreResultsJSON = JSON.stringify(retailStoreResults);
+      retailStoreResultsJSON = JSON.parse(retailStoreResultsJSON);
       var items = [];
-      for (var j in retailStoreResults) {
-        // create copy & parse
-        var item = JSON.stringify(retailStoreResults[j]);
-        item = JSON.parse(item);
+      for (var j in retailStoreResultsJSON) {
+        var item = retailStoreResultsJSON[j];
         var itemName = item.values.displayname;
         var sku = item.values.itemid;
         sku = sku.split(':');
@@ -80,7 +81,7 @@ define(['N/search', 'N/file', 'N/log'],
           var replenish = {
             id: item.id,
             sku: sku,
-            name: itemName,
+            name: itemName.replace(',', ''),
             storeQuantityAvailable: storeQuantityAvailable,
             storeQuantityMax: storeQuantityMax,
             warehouseItemID: itemSearchValues[j],
@@ -98,7 +99,11 @@ define(['N/search', 'N/file', 'N/log'],
       var csvFileId = createCSV(items);
 
       // write data object to browser
-      response.write(JSON.stringify({ fileID: csvFileId, itemCount: items.length, items: items }));
+      response.write(JSON.stringify({
+        fileID: csvFileId,
+        itemCount: items.length,
+        items: items
+      }));
 
     }
 
@@ -166,7 +171,7 @@ define(['N/search', 'N/file', 'N/log'],
       // create the csv file
       var csvFile = file.create({
         name: 'retail-store-replenishment-' + today + '_' + rnd + '.csv',
-        contents: 'id,sku,name,storeQuantityAvailable,storeQuantityMax,'
+        contents: 'transferName,id,sku,name,storeQuantityAvailable,storeQuantityMax,'
           + 'warehouseQuantityAvailable,quantityNeeded,date\n',
         folder: 2708,
         fileType: 'CSV'
@@ -176,7 +181,7 @@ define(['N/search', 'N/file', 'N/log'],
       for (i in items) {
         var item = items[i];
         csvFile.appendLine({
-          value: item.id + ',' + item.sku + ',' + item.name + ',' + item.storeQuantityAvailable + ','
+          value: 'Retail Store - ' + today + ',' + item.id + ',' + item.sku + ',' + item.name + ',' + item.storeQuantityAvailable + ','
             + item.storeQuantityMax + ',' + item.warehouseQuantityAvailable + ',' + item.quantityNeeded
             + ',' + today
         });

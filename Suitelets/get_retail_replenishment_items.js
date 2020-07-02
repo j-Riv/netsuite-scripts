@@ -4,8 +4,8 @@
  * @NModuleScope SameAccount
  */
 
-define(['N/search', 'N/file', 'N/log'],
-  function (search, file, log) {
+define(['N/runtime', 'N/search', 'N/file', 'N/log'],
+  function (runtime, search, file, log) {
 
     /**
      * Handles Suitelet request
@@ -24,9 +24,21 @@ define(['N/search', 'N/file', 'N/log'],
      */
     function onGet(response) {
       // Load saved search
+      var retailReplenishmentSavedSearch = runtime.getCurrentScript().getParameter('custscript_retail_replenishment_search');
       var retailStoreSearch = search.load({
-        id: 'customsearch_sp_retail_store_rf_smart__2'
+        id: retailReplenishmentSavedSearch
       });
+
+      // add apparel filter
+      // var defaultFilters = retailStoreSearch.filters;
+      // var newFilter = {
+      //   'name': 'custitem_sp_item_sku',
+      //   'operator': search.Operator.STARTSWITH,
+      //   'values': 'S'
+      // };
+
+      // defaultFilters.push(newFilter);
+      // retailStoreSearch.filters = defaultFilters;
 
       var retailStoreResultSet = retailStoreSearch.run();
       var retailStoreResults = retailStoreResultSet.getRange(0, 1000);
@@ -64,9 +76,7 @@ define(['N/search', 'N/file', 'N/log'],
       for (var j in retailStoreResultsJSON) {
         var item = retailStoreResultsJSON[j];
         var itemName = item.values.displayname;
-        var sku = item.values.itemid;
-        sku = sku.split(':');
-        sku = sku[1].replace(' ', '');
+        var sku = item.values.custitem_sp_item_sku;
         // get warehouse available from item search object
         var warehouseQuantityAvailable = itemSearchValues[item.id].warehouseAvailable;
         // calculate
@@ -166,6 +176,7 @@ define(['N/search', 'N/file', 'N/log'],
      * @returns {string} - The file's internal id
      */
     function createCSV(items) {
+      var dir = parseInt(runtime.getCurrentScript().getParameter('custscript_retail_replenishment_dir'));
       var today = todaysDate();
       var rnd = generateRandomString();
       // create the csv file
@@ -173,7 +184,7 @@ define(['N/search', 'N/file', 'N/log'],
         name: 'retail-store-replenishment-' + today + '_' + rnd + '.csv',
         contents: 'transferName,id,sku,name,storeQuantityAvailable,storeQuantityMax,'
           + 'warehouseQuantityAvailable,quantityNeeded,date\n',
-        folder: 2708,
+        folder: dir,
         fileType: 'CSV'
       });
 
@@ -226,6 +237,7 @@ define(['N/search', 'N/file', 'N/log'],
   });
 
 // Result Object
+// This could change as it depends on the loaded saved search results structure
 var ex = [
   {
     recordType: "inventoryitem", // the item type
