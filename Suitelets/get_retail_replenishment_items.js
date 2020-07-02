@@ -4,8 +4,8 @@
  * @NModuleScope SameAccount
  */
 
-define(['N/runtime', 'N/search', 'N/file', 'N/log'],
-  function (runtime, search, file, log) {
+define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
+  function (runtime, serverWidget, search, file, log) {
 
     /**
      * Handles Suitelet request
@@ -44,7 +44,7 @@ define(['N/runtime', 'N/search', 'N/file', 'N/log'],
       var retailStoreResults = retailStoreResultSet.getRange(0, 1000);
 
       log.debug({
-        title: 'Results Found!',
+        title: 'RESULTS FOUND!',
         details: JSON.stringify(retailStoreResults.length)
       });
 
@@ -108,12 +108,20 @@ define(['N/runtime', 'N/search', 'N/file', 'N/log'],
       // create CSV and save to file cabinet
       var csvFileId = createCSV(items);
 
-      // write data object to browser
-      response.write(JSON.stringify({
-        fileID: csvFileId, 
-        itemCount: items.length, 
-        items: items 
-      }));
+      // uncomment to write data object to browser (unformatted dump)
+      // response.write(JSON.stringify({
+      //   fileID: csvFileId, 
+      //   itemCount: items.length, 
+      //   items: items 
+      // }));
+
+      // uncomment to write html table
+      // var html = createResultsPage(items.length, csvFileId, items);
+      // response.write(html);
+
+      // uncomment to create list and write to page
+      var page = createPage(items);
+      response.writePage(page);
 
     }
 
@@ -228,6 +236,114 @@ define(['N/runtime', 'N/search', 'N/file', 'N/log'],
      */
     function generateRandomString() {
       return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);;
+    }
+
+    /**
+     * Creates an html table for results page
+     * @param {string} itemCount 
+     * @param {string} csvID 
+     * @param {Object} items 
+     * @returns {string} - The html to render
+     */
+    function createResultsPage(itemCount, csvID, items) {
+      var head = '<tr><th>ID</th>'
+        + '<th>SKU</th>'
+        + '<th>NAME</th>'
+        + '<th>STORE QTY AVAILABLE</th>'
+        + '<th>STORE QTY MAX</th>'
+        + '<th>WAREHOUSE QTY AVAILABLE</th>'
+        + '<th>QTY NEEDED</th></tr>';
+
+      var tableData;
+      for (i in items) {
+        var item = items[i];
+        var tr = '<tr></tr><td> ' + item.id +  '</td>'
+          + '<td> ' + item.sku + '</td>'
+          + '<td> ' + item.name + '</td>'
+          + '<td> ' + item.storeQuantityAvailable + '</td>'
+          + '<td> ' + item.storeQuantityMax + '</td>'
+          + '<td> ' + item.warehouseQuantityAvailable + '</td>'
+          + '<td> ' + item.quantityNeeded + '</td></tr>';
+        tableData += tr;
+      }
+
+      var html = '<p>Results: ' + itemCount + '</p>'
+        + '<p>CSV File ID: ' + csvID + '</p>'
+        + '<table>'
+        + head
+        + tableData
+        + '</table>';
+
+      return html;
+    }
+
+    /**
+     * Creates a list widget for the results page
+     * @param {Object} items
+     * @returns {Object} - The Page to render 
+     */
+    function createPage(items) {
+      var list = serverWidget.createList({ title: 'Retail Replenishment - ' + todaysDate() + ' | Total: ' + items.length });
+
+      list.addColumn({
+        id: 'column_id',
+        type: serverWidget.FieldType.TEXT,
+        label: 'ID',
+        align: serverWidget.LayoutJustification.LEFT
+      });
+      list.addColumn({
+        id: 'column_sku',
+        type: serverWidget.FieldType.TEXT,
+        label: 'SKU',
+        align: serverWidget.LayoutJustification.LEFT
+      });
+      list.addColumn({
+        id: 'column_name',
+        type: serverWidget.FieldType.TEXT,
+        label: 'Name',
+        align: serverWidget.LayoutJustification.LEFT
+      });
+      list.addColumn({
+        id: 'column_store_qty_available',
+        type: serverWidget.FieldType.TEXT,
+        label: 'Store Qty Available',
+        align: serverWidget.LayoutJustification.LEFT
+      });
+      list.addColumn({
+        id: 'column_store_qty_max',
+        type: serverWidget.FieldType.TEXT,
+        label: 'Store Qty Max',
+        align: serverWidget.LayoutJustification.LEFT
+      });
+      list.addColumn({
+        id: 'column_warehouse_qty_available',
+        type: serverWidget.FieldType.TEXT,
+        label: 'Warehouse Qty Available',
+        align: serverWidget.LayoutJustification.LEFT
+      });
+      list.addColumn({
+        id: 'column_qty_needed',
+        type: serverWidget.FieldType.TEXT,
+        label: 'Quantity Needed',
+        align: serverWidget.LayoutJustification.LEFT
+      });
+
+      for (i in items) {
+        var item = items[i];
+        list.addRow({
+          row: {
+            column_id: item.id,
+            column_sku: item.sku,
+            column_name: item.name,
+            column_store_qty_available: String(item.storeQuantityAvailable),
+            column_store_qty_max: String(item.storeQuantityMax),
+            column_warehouse_qty_available: String(item.warehouseQuantityAvailable),
+            column_qty_needed: String(item.quantityNeeded)
+          }
+        });
+      }
+
+      return list;
     }
 
 

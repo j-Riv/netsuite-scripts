@@ -18,6 +18,25 @@ Expects paramater <i>custscript_servername</i> to be set. On script creation cre
 > get_retail_replenishment_items.js
 
 ### Setup
+#### Script Deployment
+Script requires 2 paramaters.
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Type</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>_retail_replenishment_search</td>
+    <td>Free-Form-Text</td>
+    <td>The saved search to use</td>
+  </tr>
+  <tr>
+    <td>_retail_replenishment_dir</td>
+    <td>Free-Form-Text</td>
+    <td>The directory to save the CSV file to</td>
+  </tr>
+</table>
 #### Saved Search
 Create a saved search and make sure you make it public. Use the following.
 
