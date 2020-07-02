@@ -7,6 +7,10 @@
 define(['N/search', 'N/file', 'N/log'],
   function (search, file, log) {
 
+    /**
+     * Handles Suitelet request
+     * @param {object} context 
+     */
     function onRequest(context) {
 
       var request = context.request;
@@ -14,6 +18,10 @@ define(['N/search', 'N/file', 'N/log'],
       onGet(response);
     }
 
+    /**
+     * Handles Get Request and loads the saved search
+     * @param {Object} response 
+     */
     function onGet(response) {
       // Load saved search
       var retailStoreSearch = search.load({
@@ -28,7 +36,7 @@ define(['N/search', 'N/file', 'N/log'],
         details: JSON.stringify(retailStoreResults.length)
       });
 
-      // get ids to use with search
+      // get ids to use with main warehouse item search
       var ids = [];
       for (var i in retailStoreResults) {
         // push id
@@ -40,17 +48,71 @@ define(['N/search', 'N/file', 'N/log'],
         details: JSON.stringify(ids)
       });
 
-      // create item search
+      // create main warehouse item search and return object
+      var itemSearchValues = mainWarehouseSearch(ids);
+
+      log.debug({
+        title: 'MAIN WAREHOUSE ITEM SEARCH OBJECT',
+        details: JSON.stringify(itemSearchValues)
+      });
+
+      // build array of objects for csv
+      var items = [];
+      for (var j in retailStoreResults) {
+        // create copy & parse
+        var item = JSON.stringify(retailStoreResults[j]);
+        item = JSON.parse(item);
+        var itemName = item.values.displayname;
+        var sku = item.values.itemid;
+        sku = sku.split(':');
+        sku = sku[1].replace(' ', '');
+        // get warehouse available from item search object
+        var warehouseQuantityAvailable = itemSearchValues[item.id].warehouseAvailable;
+        // calculate
+        var storeQuantityAvailable = parseInt(item.values.formulanumeric);
+        var storeQuantityMax = parseInt(item.values.formulanumeric_1);
+        var quantityNeeded = storeQuantityMax - storeQuantityAvailable;
+
+        if (warehouseQuantityAvailable != '' && warehouseQuantityAvailable > 0) {
+          if (quantityNeeded > warehouseQuantityAvailable) {
+            quantityNeeded = warehouseQuantityAvailable;
+          }
+          var replenish = {
+            id: item.id,
+            sku: sku,
+            name: itemName,
+            storeQuantityAvailable: storeQuantityAvailable,
+            storeQuantityMax: storeQuantityMax,
+            warehouseItemID: itemSearchValues[j],
+            warehouseQuantityAvailable: warehouseQuantityAvailable,
+            quantityNeeded: quantityNeeded
+          };
+
+          itemToReplenish = replenish;
+
+          items.push(itemToReplenish);
+        }
+      }
+
+      // create CSV and save to file cabinet
+      var csvFileId = createCSV(items);
+
+      // write data object to browser
+      response.write(JSON.stringify({ fileID: csvFileId, itemCount: items.length, items: items }));
+
+    }
+
+    /**
+     * Creates an item search and retrieves the Main Warehouse
+     * Location Availability for each item.
+     * @param {array} ids - The internal ids for items to search for
+     * @returns {Object} - Returns the object returned from createItemSearchObj
+     */
+    function mainWarehouseSearch(ids) {
       var itemSearch = search.create({
         type: 'item',
-        // columns: [
-        //   'locationquantityavailable'
-        // ]
         columns: [
-          search.createColumn({
-            name: 'locationquantityavailable',
-            sort: search.Sort.ASC
-          })
+          'locationquantityavailable'
         ]
       });
       itemSearch.filters = [
@@ -67,64 +129,43 @@ define(['N/search', 'N/file', 'N/log'],
       ];
       var itemSearchResultSet = itemSearch.run();
       var itemSearchResults = itemSearchResultSet.getRange(0, 1000);
-      // make a copy
+      // make a copy & parse
       var itemSearchValues = JSON.stringify(itemSearchResults);
       itemSearchValues = JSON.parse(itemSearchValues);
-
-      log.debug({
-        title: 'ITEM SEARCH VALUES',
-        details: JSON.stringify(itemSearchValues)
-      });
-
-      // build object
-      var items = [];
-      for (var j in retailStoreResults) {
-        // create copy
-        var item = JSON.stringify(retailStoreResults[j]);
-        item = JSON.parse(item);
-        var itemName = item.values.displayname;
-        var sku = item.values.itemid;
-        sku = sku.split(':');
-        var warehouseQuantityAvailable = parseInt(itemSearchValues[j].values.locationquantityavailable);
-        // needed values
-        var storeQuantityAvailable = parseInt(item.values.formulanumeric);
-        var storeQuantityMax = parseInt(item.values.formulanumeric_1);
-
-        var quantityNeeded = storeQuantityMax - storeQuantityAvailable;
-
-        if (warehouseQuantityAvailable) {
-          if (quantityNeeded > warehouseQuantityAvailable) {
-            quantityNeeded = warehouseQuantityAvailable;
-          }
-          var replenish = {
-            id: item.id,
-            sku: sku[1],
-            name: itemName,
-            storeQuantityAvailable: storeQuantityAvailable,
-            storeQuantityMax: storeQuantityMax,
-            warehouseItemID: itemSearchValues[j],
-            warehouseQuantityAvailable: warehouseQuantityAvailable,
-            quantityNeeded: quantityNeeded
-          };
-
-          itemToReplenish = replenish;
-
-          items.push(itemToReplenish);
-        }
-      }
-
-      // var csvFileId = createCSV(items);
-      var csvFileId = 'no';
-
-      response.write(JSON.stringify({ fileID: csvFileId, itemCount: items.length, items: items }));
-
+      // create the object
+      return createItemSearchObj(itemSearchValues);
     }
 
+    /**
+     * Creates an the Main Warehouse Location Availability Object,
+     * uses the internal id of the item as the key.
+     * @param {array} items 
+     * @returns {Object}
+     */
+    function createItemSearchObj(items) {
+      var obj = {};
+      for (var i in items) {
+        var item = items[i];
+        var warehouseAvailable = parseInt(item.values.locationquantityavailable);
+        obj[item.id] = {
+          warehouseAvailable: warehouseAvailable
+        }
+      }
+      return obj;
+    }
+
+    /**
+     * Creates a CSV file to be used to import and create a Transfer Order for
+     * Retail Store Item Replenishment.
+     * @param {Object} items 
+     * @returns {string} - The file's internal id
+     */
     function createCSV(items) {
       var today = todaysDate();
+      var rnd = generateRandomString();
       // create the csv file
       var csvFile = file.create({
-        name: 'retail-store-replenishment-' + today + '.csv',
+        name: 'retail-store-replenishment-' + today + '_' + rnd + '.csv',
         contents: 'id,sku,name,storeQuantityAvailable,storeQuantityMax,'
           + 'warehouseQuantityAvailable,quantityNeeded,date\n',
         folder: 2708,
@@ -135,8 +176,8 @@ define(['N/search', 'N/file', 'N/log'],
       for (i in items) {
         var item = items[i];
         csvFile.appendLine({
-          value: item.id + ',' + item.sku + ',' + item.name + ',' + item.storeQuantityAvailable + ',' 
-            + item.storeQuantityMax + item.warehouseQuantityAvailable + ',' + item.quantityNeeded
+          value: item.id + ',' + item.sku + ',' + item.name + ',' + item.storeQuantityAvailable + ','
+            + item.storeQuantityMax + ',' + item.warehouseQuantityAvailable + ',' + item.quantityNeeded
             + ',' + today
         });
       }
@@ -146,6 +187,10 @@ define(['N/search', 'N/file', 'N/log'],
       return csvFileId;
     }
 
+    /**
+     * Generates today's date in format DD/MM/YYYY
+     * @returns {string} - Today's date
+     */
     function todaysDate() {
       var today = new Date();
       var dd = today.getDate();
@@ -158,6 +203,15 @@ define(['N/search', 'N/file', 'N/log'],
         mm = '0' + mm;
       }
       return mm + '/' + dd + '/' + yyyy
+    }
+
+    /**
+     * Generates a random string to be used during
+     * CSV file naming as to not overwrite existing file.
+     * @returns {string} - The random string
+     */
+    function generateRandomString() {
+      return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);;
     }
 
 
