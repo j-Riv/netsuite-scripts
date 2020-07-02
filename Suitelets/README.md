@@ -1,7 +1,7 @@
 # SUITELETS
 > NetSuite Server Side Scripts
 
-## Post Item To Shopify
+## POST ITEM TO SHOPIFY
 > post_item_to_shopify.js
 
 ### Setup
@@ -16,7 +16,7 @@ Expects paramater <i>custscript_servername</i> to be set. On script creation cre
 - Save Shopify ID to NetSuite?
 - Update NetSuite FarApp item record fields upon item creation?
 
-## Get Retail Store Replenishment
+## GET RETAIL STORE ITEM REPLENISHMENT
 > get_retail_replenishment_items.js
 
 ### Setup
@@ -44,7 +44,7 @@ Script requires 2 paramaters.
 
 #### Saved Search
 
-Create a saved search and make sure you make it public. Use the following.
+Create a saved (item) search and make sure you make it public. Use the following.
 
 ##### Standard
 
