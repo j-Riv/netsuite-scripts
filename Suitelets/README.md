@@ -3,7 +3,9 @@
 
 ## Post Item To Shopify
 > post_item_to_shopify.js
+
 ### Setup
+
 Expects paramater <i>custscript_servername</i> to be set. On script creation create paramater of type text with name <i>_servername</i>. On script deployment set parameter to the API server's name/url.
 
 ### To Do
@@ -19,7 +21,9 @@ Expects paramater <i>custscript_servername</i> to be set. On script creation cre
 
 ### Setup
 #### Script Deployment
+
 Script requires 2 paramaters.
+
 <table>
   <tr>
     <th>ID</th>
@@ -37,10 +41,13 @@ Script requires 2 paramaters.
     <td>The directory to save the CSV file to</td>
   </tr>
 </table>
+
 #### Saved Search
+
 Create a saved search and make sure you make it public. Use the following.
 
 ##### Standard
+
 <table>
   <tr>
     <th>Filter</th>
@@ -75,6 +82,7 @@ Create a saved search and make sure you make it public. Use the following.
 </table>
 
 ##### Results
+
 <table>
   <tr>
     <th>Field</th>
@@ -148,7 +156,9 @@ Create a saved search and make sure you make it public. Use the following.
 </table>
 
 ### Create Saved Import
+
 Use the following settings.
+
 <table>
   <tr>
     <th>Setting</th>
@@ -173,6 +183,7 @@ Use the following settings.
 </table>
 
 Use the following mappings.
+
 <table>
   <tr>
     <th>CSV Field or <i>Default Value</i></th>
@@ -221,6 +232,7 @@ Use the following mappings.
 </table>
 
 ### Run the Suitelet
+
 > You can find the internal link via the script deployment attached to the script record
 
 A CSV file containing all transfer order import data will be generated and saved to the File Cabinet under the <i>Retail Store Replenishments</i> directory.
