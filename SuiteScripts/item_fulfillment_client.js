@@ -12,12 +12,6 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
     var uspsPriorityEnvelope = '31089';
     var uspsPriorityLegalEnvelope = '31094';
     var uspsPriorityMdFlatRateBox = '31136';
-    // Shipping Methods - SB
-    // var fedEx2Day = '30588';
-    // var uspsPriority = '22001';
-    // var uspsFirstClass = '22000';
-    // var uspsPriorityEnvelope = '';
-    // var uspsPriorityMdFlatRateBox = '';
 
     /**
      * On page load it checks the item fulfillment ship method

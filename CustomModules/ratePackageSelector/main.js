@@ -57,7 +57,7 @@ define(['N/log', './usps/validateAddress', './setShipMethod', './testBox/selectB
      * Sets the package on the Item Fulfillment Record
      * @param {Object} itemFulfill - The Item Fulfillment Record
      */
-    function main(itemFulfill) {
+    function main(uspsUser, itemFulfill) {
       log.debug({
         title: 'RUNNING MAIN',
         details: 'Running main function ...'
@@ -116,7 +116,7 @@ define(['N/log', './usps/validateAddress', './setShipMethod', './testBox/selectB
         // Once the box is set check the ship country. If it is international, ship it manually.
         if (country == 'US') {
           // Validate US address via USPS
-          var addressOk = uspsValidateAddress._validate(addr1, addr2, city, state, zip, country);
+          var addressOk = uspsValidateAddress._validate(uspsUser, addr1, addr2, city, state, zip, country);
           // Get marketplace selected ship method
           var marketShipMethod = selectShipMethod(itemFulfill);
           // If address is ok, continue, else set manual ship flag
@@ -142,7 +142,7 @@ define(['N/log', './usps/validateAddress', './setShipMethod', './testBox/selectB
             // Get ship method from method list
             var method = shipMethods[shipMethodNames[i]];
 
-            setShipMethod._set(itemFulfill, method, shippingCost, zip, weightPounds, boxDimensions, i);
+            setShipMethod._set(uspsUser, itemFulfill, method, shippingCost, zip, weightPounds, boxDimensions, i);
 
           } else { // This order will have to be shipped manually
             log.error({

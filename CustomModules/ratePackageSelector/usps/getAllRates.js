@@ -6,14 +6,13 @@
 
 define(['N/https', 'N/xml', 'N/log', './xmlToJson'],
   function (https, xml, log, xmlToJson) {
-    var uspsUser = '681SUAVE2769';
     /**
      * Gets all available USPS services & rates
      * @param {string} zipDestination 
      * @param {string} weightPounds 
      * @param {string} boxDimensions 
      */
-    function getAllRates(zipDestination, weightPounds, boxDimensions) {
+    function getAllRates(uspsUser, zipDestination, weightPounds, boxDimensions) {
       var weightOunces = 0;
       var containerType = '';
 

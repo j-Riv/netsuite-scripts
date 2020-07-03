@@ -6,7 +6,6 @@
 
 define(['N/https', 'N/xml', 'N/log', './xmlToJson'],
   function (https, xml, log, xmlToJson) {
-    var uspsUser = '681SUAVE2769';
     /**
      * Gets USPS package Rates via USPS web services*
      * @param {string} method 
@@ -16,7 +15,7 @@ define(['N/https', 'N/xml', 'N/log', './xmlToJson'],
      * @param {string} boxDimensions 
      * @returns {decimal} - The service's commercial rate
      */
-    function getRateByService(method, containerType, zipDestination, weightPounds, boxDimensions) {
+    function getRateByService(uspsUser, method, containerType, zipDestination, weightPounds, boxDimensions) {
       /**
        * Valid USPS Priority Container Types:
        * FLAT RATE ENVELOPE, LEGAL FLAT RATE ENVELOPE, PADDED FLAT RATE ENVELOPE, 

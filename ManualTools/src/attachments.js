@@ -10,7 +10,7 @@ dotenv.config();
 const createAttachFile = async () => {
 
   // csv to json
-  const jsonArray = await csv().fromFile('../public/csv/contacts/netsuite-contact-attachments-v2.csv');
+  const jsonArray = await csv().fromFile('../public/csv/contacts/NETSUITE_CONTACT_ATTACHMENTS_TO_UPLOAD.csv');
   console.log('READING CSV & CONVERTING TO JSON ARRAY');
   console.log(jsonArray);
 

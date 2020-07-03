@@ -1,18 +1,18 @@
 /**
-*
-@NApiVersion 2.1
+ * @NApiVersion 2.1
  * @NScriptType WorkflowActionScript
  * @NModuleScope public
  *
 */
-define(['N/log', './ratePackageSelector/main', './ratePackageSelector/orderTotals'],
-  function (log, main, orderTotals) {
+define(['N/runtime', 'N/log', './ratePackageSelector/main', './ratePackageSelector/orderTotals'],
+  function (runtime, log, main, orderTotals) {
 
     /**
      * Does some cool shit.
      * @param {Object} context 
      */
     function onAction(context) {
+      var uspsUser = runtime.getCurrentScript().getParameter('custscript_usps_web_user');
       // Get item fulfillment record
       var itemFulfill = context.newRecord;
       try {
@@ -38,7 +38,7 @@ define(['N/log', './ratePackageSelector/main', './ratePackageSelector/orderTotal
         }
 
         // Run main package selector func
-        main._run(itemFulfill);
+        main._run(uspsUser, itemFulfill);
 
       } catch (e) {
         // Changing the ship method should cause an error
