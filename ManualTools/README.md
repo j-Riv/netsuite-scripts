@@ -1,17 +1,12 @@
 # Manual Tools
-> Uses CSV's to map data / files to appropriate records in NetSuite.
+> Manual tools created to import data into NetSuite. Uses CSV's to map data / files to appropriate records in NetSuite.
 
 ## Dependencies
 - Node
 - Yarn
 
-## Setup
-```bash
-yarn install
-```
-
 ## Config
-> Project expects a `.env` file in the root directory with the following:
+> Project expects a `.env` file with the following:
 ```javascript
 // Netsuite Production
 NETSUITE_ACCT_ID="NETSUITE SPRODUCTION ACCT ID"
@@ -26,15 +21,7 @@ NETSUITE_GET_PICKING_TICKET_IDS_RESTLET_URL="NETSUITE PRODUCTION RESTLET URL" //
 NETSUITE_PRINT_PICKING_TICKET_RESTLET_URL="NETSUITE PRODUCTION RESTLET URL" // Callback RESTlet URL
 ```
 
-Resources:
-- [NetSuite RESTlet Web Service](https://community.boomi.com/s/article/howtocallanetsuiterestletwebservice)
-- [NetSuite Token-based Authenication](https://medium.com/@morrisdev/netsuite-token-based-authentication-tba-342c7df56386)
-- [Postman Setup](https://leacc.com.ph/2019/07/02/using-postman-to-test-your-first-netsuite-restlet/)
-- [NetSuite RESTlet](https://community.boomi.com/s/article/howtocallanetsuiterestletwebservice)
-> NetSuite
-- [N/record Module](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=section_4267255811.html)
-  - [record.Type](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=section_4273205732.html)
-  - [record.create](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=section_4267258059.html)
-  - [record.attach](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=section_4267284169.html)
-- [N/file Module](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=section_4205693274.html)
-- [N/render Module](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=section_4412042824.html)
+## Setup
+```bash
+yarn install
+```

@@ -8,7 +8,7 @@ dotenv.config();
 const createNote = async () => {
 
   // csv to json
-  const jsonArray = await csv().fromFile('../public/csv/NOTES_FINAL_UPLOAD_DAY2.csv');
+  const jsonArray = await csv().fromFile('../public/csv/NOTES_TO_UPLOAD.csv');
   console.log('READING CSV & CONVERTING TO JSON ARRAY');
   console.log(jsonArray);
 

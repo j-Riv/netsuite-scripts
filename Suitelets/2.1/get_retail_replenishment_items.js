@@ -30,8 +30,8 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
       });
 
       // add apparel filter
-      // var defaultFilters = retailStoreSearch.filters;
-      // var newFilter = {
+      // let defaultFilters = retailStoreSearch.filters;
+      // const newFilter = {
       //   'name': 'custitem_sp_item_sku',
       //   'operator': search.Operator.STARTSWITH,
       //   'values': 'S'

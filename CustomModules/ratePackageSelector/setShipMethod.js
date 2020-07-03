@@ -56,14 +56,14 @@ define(['N/record', 'N/log', './usps/getRateByService'],
      * @param {Object} boxDimensions - Box Dimensions
      * @param {integer} i - Current index
      */
-    function setShipMethod(itemFulfill, method, shippingCost, zip, weightPounds, boxDimensions, i) {
+    function setShipMethod(uspsUser, itemFulfill, method, shippingCost, zip, weightPounds, boxDimensions, i) {
       log.debug({
         title: 'RUNNING SET SHIP METHOD',
         details: 'Running setShipMethod'
       });
 
       try {
-        var rate = parseFloat(uspsGetRates._get(method.service, method.container, zip, weightPounds, boxDimensions));
+        var rate = parseFloat(uspsGetRates._get(uspsUser, method.service, method.container, zip, weightPounds, boxDimensions));
       } catch (e) {
         throw new Error(e.message);
       }
