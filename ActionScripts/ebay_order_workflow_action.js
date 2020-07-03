@@ -1,6 +1,5 @@
 /**
-*
-@NApiVersion 2.x
+ * @NApiVersion 2.x
  * @NScriptType WorkflowActionScript
  * @NModuleScope public
  *

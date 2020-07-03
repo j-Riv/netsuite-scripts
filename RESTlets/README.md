@@ -1,7 +1,7 @@
 # RESTlets
 ### NetSuite Rest API (beta):
 #### Use Case
->NetSuite RESTlets allow you to develop custom RESTful web services from your NetSuite account developed using SuiteScript. RESTlets are an alternative to the standard SuiteTalk SOAP-based APIs. They use JSON payloads and can be used to create services optimized for specific use case such as an item inventory lookup or account balance query without the overhead of retrieving the entire record. The also provide an opportunity to execute logic such as multiple lookups/actions on the server side vs. making multiple round trip calls from AtomSphere.
+> NetSuite RESTlets allow you to develop custom RESTful web services from your NetSuite account developed using SuiteScript. RESTlets are an alternative to the standard SuiteTalk SOAP-based APIs. They use JSON payloads and can be used to create services optimized for specific use case such as an item inventory lookup or account balance query without the overhead of retrieving the entire record. The also provide an opportunity to execute logic such as multiple lookups/actions on the server side vs. making multiple round trip calls from AtomSphere.
 
 Connecting to RESTlets uses the generic HTTP Client Connector, not the NetSuite Connector. RESTlets can GET, POST, PUT, and DELETE data with NetSuite.
 

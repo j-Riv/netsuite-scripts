@@ -6,10 +6,10 @@
 
 define(['N/https', 'N/xml', 'N/log', './xmlToJson'],
   function (https, xml, log, xmlToJson) {
-    var uspsUser = '681SUAVE2769';
 
     /**
       * Validates the customer's address via USPS web services
+      * 
       * @param {string} addr1 
       * @param {string} addr2 
       * @param {string} city 
@@ -18,7 +18,7 @@ define(['N/https', 'N/xml', 'N/log', './xmlToJson'],
       * @param {string} country
       * @returns {boolean}
       */
-    function validateAddress(addr1, addr2, city, state, zip, country) {
+    function validateAddress(uspsUser, addr1, addr2, city, state, zip, country) {
 
       log.debug({
         title: 'VALIDATING ADDRESS',

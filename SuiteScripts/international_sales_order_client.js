@@ -10,6 +10,9 @@ define(['N/currentRecord', 'N/ui/dialog'],
       console.log('International Sales Order Client Script Loaded');
     }
 
+    /**
+     * Opens the 'Pro-Forma' Invoice using a different form.
+     */
     function printProForma() {
       // get record
       var salesRecord = currentRecord.get();

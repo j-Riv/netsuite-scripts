@@ -11,11 +11,11 @@
 - [Manual Tools - Used for Migration from Zoho](/ManualTools)
 
 ### Documentation:
-- [RESTlets](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=chapter_N2970114.html)
-- [SuiteScript](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=set_1502135122.html)
-- [SuiteScript 2.0](https://5657911.app.netsuite.com/app/help/helpcenter.nl?topic=DOC_SS2_API)
-- [Supported Records](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=preface_3710625923.html)
-- [Records Browser](https://5657911.app.netsuite.com/help/helpcenter/en_US/srbrowser/Browser2019_1/script/record/lead.html)
+- [RESTlets](https://system.netsuite.com/app/help/helpcenter.nl?fid=chapter_N2970114.html)
+- [SuiteScript](https://system.netsuite.com/app/help/helpcenter.nl?fid=set_1502135122.html)
+- [SuiteScript 2.0](https://system.netsuite.com/app/help/helpcenter.nl?topic=DOC_SS2_API)
+- [Supported Records](https://system.netsuite.com/app/help/helpcenter.nl?fid=preface_3710625923.html)
+- [Records Browser](https://system.netsuite.com/help/helpcenter/en_US/srbrowser/Browser2019_1/script/record/lead.html)
 
 ## Token Based Authentication (TBA)
 > Setting up Token-Based Authentication for a RESTlet
@@ -61,16 +61,29 @@ III. Testing with Postman
 
 SuiteScript 2.1 will become the default in NetSuite 2020.1 Release.
 
-(SuiteScript 2.1)[https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=chapter_156042690639.html]
+(SuiteScript 2.1)[https://system.netsuite.com/app/help/helpcenter.nl?fid=chapter_156042690639.html]
 
-Resources:
+### General Setup
+
+1. Create File
+2. Save Files to File Cabinet<br/>
+  `Documents > Files > New`
+3. Create SuiteScript Record<br/>
+  `Customization > Scripting > Scripts > New`<br/>
+  <i>Save & Deploy to skip next step</i>
+4. Deploy<br/>
+  `Customization > Scripting > Script Deployments`
+
+### Resources:
 - [NetSuite RESTlet Web Service](https://community.boomi.com/s/article/howtocallanetsuiterestletwebservice)
 - [NetSuite Token-based Authenication](https://medium.com/@morrisdev/netsuite-token-based-authentication-tba-342c7df56386)
 - [Postman Setup](https://leacc.com.ph/2019/07/02/using-postman-to-test-your-first-netsuite-restlet/)
 - [NetSuite RESTlet](https://community.boomi.com/s/article/howtocallanetsuiterestletwebservice)
 > NetSuite
-- [N/record Module](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=section_4267255811.html)
-  - [record.Type](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=section_4273205732.html)
-  - [record.create](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=section_4267258059.html)
-  - [record.attach](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=section_4267284169.html)
-- [N/file Module](https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=section_4205693274.html)
+- [N/record Module](https://system.netsuite.com/app/help/helpcenter.nl?fid=section_4267255811.html)
+  - [record.Type](https://system.netsuite.com/app/help/helpcenter.nl?fid=section_4273205732.html)
+  - [record.create](https://system.netsuite.com/app/help/helpcenter.nl?fid=section_4267258059.html)
+  - [record.attach](https://system.netsuite.com/app/help/helpcenter.nl?fid=section_4267284169.html)
+- [N/file Module](https://system.netsuite.com/app/help/helpcenter.nl?fid=section_4205693274.html)
+
+- [Rhino JavaScript Engine](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino)
