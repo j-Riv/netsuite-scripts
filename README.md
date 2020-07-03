@@ -59,6 +59,10 @@ III. Testing with Postman
    6. Enter the NetSutie Account ID under `Advanced > Realm`.
    7. Test
 
+SuiteScript 2.1 will become the default in NetSuite 2020.1 Release.
+
+(SuiteScript 2.1)[https://5657911.app.netsuite.com/app/help/helpcenter.nl?fid=chapter_156042690639.html]
+
 Resources:
 - [NetSuite RESTlet Web Service](https://community.boomi.com/s/article/howtocallanetsuiterestletwebservice)
 - [NetSuite Token-based Authenication](https://medium.com/@morrisdev/netsuite-token-based-authentication-tba-342c7df56386)
