@@ -59,9 +59,7 @@ III. Testing with Postman
    6. Enter the NetSutie Account ID under `Advanced > Realm`.
    7. Test
 
-SuiteScript 2.1 will become the default in NetSuite 2020.1 Release.
-
-(SuiteScript 2.1)[https://system.netsuite.com/app/help/helpcenter.nl?fid=chapter_156042690639.html]
+[SuiteScript 2.1](https://system.netsuite.com/app/help/helpcenter.nl?fid=chapter_156042690639.html) will become the default in NetSuite 2020.1 Release
 
 ### General Setup
 
@@ -75,15 +73,6 @@ SuiteScript 2.1 will become the default in NetSuite 2020.1 Release.
   `Customization > Scripting > Script Deployments`
 
 ### Resources:
-- [NetSuite RESTlet Web Service](https://community.boomi.com/s/article/howtocallanetsuiterestletwebservice)
 - [NetSuite Token-based Authenication](https://medium.com/@morrisdev/netsuite-token-based-authentication-tba-342c7df56386)
 - [Postman Setup](https://leacc.com.ph/2019/07/02/using-postman-to-test-your-first-netsuite-restlet/)
-- [NetSuite RESTlet](https://community.boomi.com/s/article/howtocallanetsuiterestletwebservice)
-> NetSuite
-- [N/record Module](https://system.netsuite.com/app/help/helpcenter.nl?fid=section_4267255811.html)
-  - [record.Type](https://system.netsuite.com/app/help/helpcenter.nl?fid=section_4273205732.html)
-  - [record.create](https://system.netsuite.com/app/help/helpcenter.nl?fid=section_4267258059.html)
-  - [record.attach](https://system.netsuite.com/app/help/helpcenter.nl?fid=section_4267284169.html)
-- [N/file Module](https://system.netsuite.com/app/help/helpcenter.nl?fid=section_4205693274.html)
-
 - [Rhino JavaScript Engine](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino)
