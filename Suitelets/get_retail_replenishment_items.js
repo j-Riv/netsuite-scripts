@@ -4,8 +4,8 @@
  * @NModuleScope SameAccount
  */
 
-define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
-  function (runtime, serverWidget, search, file, log) {
+define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './spTransferOrder'],
+  function (runtime, serverWidget, search, file, log, spTransferOrder) {
 
     /**
      * Handles Suitelet request
@@ -107,6 +107,10 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
 
       // create CSV and save to file cabinet
       var csvFileId = createCSV(items);
+
+      // create transfer order
+      var memo = 'Retail Store - ' + todaysDate();
+      spTransferOrder.create(3, 1, items, memo);
 
       // uncomment to write data object to browser (unformatted dump)
       // response.write(JSON.stringify({
