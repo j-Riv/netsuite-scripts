@@ -4,8 +4,8 @@
  * @NModuleScope SameAccount
  */
 
-define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
-  (runtime, serverWidget, search, file, log) => {
+define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/log', 'N/record'],
+  (runtime, serverWidget, search, log, record) => {
 
     /**
      * Handles Suitelet request
@@ -48,70 +48,137 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
      * @param {object} response 
      */
     const onPost = (request, response) => {
-      // Handle getting the bin internal id
-      const binSearch = search.create({
-        type: 'bin',
-        columns: [
-          'internalid',
-          'location'
-        ]
-      });
-      binSearch.filters = [
-        search.createFilter({
-          name: 'binnumber',
-          operator: search.Operator.IS,
-          values: request.parameters.bin_number
-        })
-      ];
-      const searchResults = binSearch.run();
-      const searchValues = searchResults.getRange({
-        start: 0,
-        end: 1
-      });
 
-      const savedSearchID = runtine.getCurrentScript().getParameter('custscript_bin_available_items_search_id');
+      /**
+       * Load the saved search
+       */
+      const savedSearchID = runtime.getCurrentScript().getParameter('custscript_bin_available_items_search_id');
       const savedSearch = search.load({
         id: savedSearchID
       });
+
+      /**
+       * Filter the saved search
+       */
+      const searchFilter = {
+        name: 'formulanumeric',
+        operator: search.Operator.EQUALTO,
+        values: [1],
+        formula: `CASE WHEN {binonhand.binnumber} = '${request.parameters.bin_number}' THEN 1 ELSE 0 END`
+      }
+      const savedSearchFilters = savedSearch.filters;
+      savedSearchFilters.push(searchFilter);
+      savedSearch.filters = savedSearchFilters;
+
+      /**
+       * Get the results of the saved search
+       */
+      const savedSearchResults = savedSearch.run().getRange(0, 1000);
+      const savedSearchJSON = JSON.parse(JSON.stringify(savedSearchResults));
+
+      log.debug({
+        title: 'Saved Search',
+        details: savedSearchResults
+      });
+
+      /**
+       * Create Inventory Adjustment
+       */
+      const adjustInventory = () => {
+        const adjustmentRecord = record.create({
+          type: record.Type.INVENTORY_ADJUSTMENT,
+          isDynamic: true
+        });
+        adjustmentRecord.setValue({
+          fieldId: 'account',
+          value: 213
+        });
+        adjustmentRecord.selectNewLine({
+          sublistId: 'inventory'
+        });
+        adjustmentRecord.setCurrentSublistValue({
+          sublistId: 'inventory',
+          fieldId: 'item',
+          value: 24867
+        });
+        adjustmentRecord.setCurrentSublistValue({
+          sublistId: 'inventory',
+          fieldId: 'adjustqtyby',
+          value: -1
+        });
+        adjustmentRecord.setCurrentSublistValue({
+          sublistId: 'inventory',
+          fieldId: 'location',
+          value: 1
+        });
+        const subRecord = adjustmentRecord.getCurrentSublistSubrecord({
+          sublistId: 'inventory',
+          fieldId: 'inventorydetail'
+        });
+        subRecord.setCurrentSublistValue({
+          sublistId: 'inventorydetail',
+          fieldId: 'location',
+          value: 1
+        });
+        subRecord.setCurrentSublistValue({
+          sublistId: 'inventorydetail',
+          fieldId: 'quantity',
+          value: -1
+        });
+        const subSubRecord = subRecord.getCurrentSublistSubrecord({
+          sublistId: 'inventoryassignment'
+        });
+        subSubRecord.setCurrentSublistValue({
+          sublistId: 'inventoryassignment',
+          fieldId: 'binnumber',
+          value: 4113
+        });
+        subSubRecord.setCurrentSublistValue({
+          sublistId: 'inventoryassignment',
+          fieldId: 'quantity',
+          value: -1
+        })
+      }
+      adjustInventory();
+
+      /**
+       * Create the form
+       */
       const Form = serverWidget.createForm({
         title: `Clear Bin's Available Inventory`
       });
-      const FormFieldGroup = Form.addFieldGroup({
-        id: 'group_1',
-        label: 'The Form'
+      const Button = Form.addSubmitButton({
+        label: 'Submit'
       });
       const DataFieldGroup = Form.addFieldGroup({
         id: 'group_2',
         label: 'The Data'
       });
-      const BinField = Form.addField({
-        id: 'bin_number',
-        label: 'Bin Number',
-        type: serverWidget.FieldType.TEXT,
-        container: 'group_1'
-      });
-      const Button = Form.addSubmitButton({
-        label: 'Submit',
-        container: 'group_1'
-      });
-      const P = Form.addField({
-        id: 'p1',
-        label: 'A paragraph',
+      const Table = Form.addField({
+        id: 'table',
+        label: 'The table data',
         type: serverWidget.FieldType.INLINEHTML,
         container: 'group_2'
       });
-      const ID = Form.addField({
-        id:'p2',
-        label: 'Bin ID',
-        type: serverWidget.FieldType.INLINEHTML,
-        container: 'group_2'
-      });
-      P.defaultValue = `<p>Hello, World!</p>`;
-      ID.defaultValue = `<p>${searchValues[0].id}</p>`;
-      log.debug({
-        title: 'Search Result Values',
-        details: searchValues
-      });
+      Table.defaultValue = `
+        <table style="width: 100%">
+          <tr>
+            <td>SKU</td>
+            <td>On Hand</td>
+            <td>Available</td>
+            <td> New On Hand</td>
+          </tr>
+          ${savedSearchJSON.map(record => 
+            `<tr>
+              <td>${record.values.itemid}</td>
+              <td>${record.values['binOnHand.quantityonhand']}</td>
+              <td>${record.values['binOnHand.quantityavailable']}</td>
+              <td>${parseInt(record.values['binOnHand.quantityonhand']) - parseInt(record.values['binOnHand.quantityavailable'])}</td>
+             </tr>
+            `
+          )}
+        </table>
+      `;
       response.writePage(Form);
     }
 
