@@ -27,7 +27,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/log', 'N/record'],
      */
     const onGet = (response) => {
       const Form = serverWidget.createForm({
-        title: `Get Bin's Available Inventory`
+        title: `Clear Bin's Available Inventory`
       });
       const BinField = Form.addField({
         id: 'bin_number',
@@ -83,8 +83,9 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/log', 'N/record'],
 
       /**
        * Create Inventory Adjustment
+       * @param {object} list - JSON from saved search
        */
-      const adjustInventory = () => {
+      const adjustInventory = (list) => {
         const adjustmentRecord = record.create({
           type: record.Type.INVENTORY_ADJUSTMENT,
           isDynamic: true
@@ -93,66 +94,82 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/log', 'N/record'],
           fieldId: 'account',
           value: 213
         });
-        adjustmentRecord.selectNewLine({
-          sublistId: 'inventory'
+
+        for(const item of list) {
+          const availableQuantity = parseInt(item.values['binOnHand.quantityavailable']);
+          if(availableQuantity > 0) {
+            adjustmentRecord.selectNewLine({
+              sublistId: 'inventory'
+            });
+            adjustmentRecord.setCurrentSublistValue({
+              sublistId: 'inventory',
+              fieldId: 'item',
+              value: parseInt(item.id)
+            });
+            adjustmentRecord.setCurrentSublistValue({
+              sublistId: 'inventory',
+              fieldId: 'adjustqtyby',
+              value: availableQuantity * -1
+            });
+            adjustmentRecord.setCurrentSublistValue({
+              sublistId: 'inventory',
+              fieldId: 'location',
+              value: parseInt(item.values['binOnHand.location'][0].value)
+            });
+            const subRecord = adjustmentRecord.getCurrentSublistSubrecord({
+              sublistId: 'inventory',
+              fieldId: 'inventorydetail'
+            });
+            subRecord.selectNewLine({
+              sublistId: 'inventoryassignment'
+            });
+            subRecord.setCurrentSublistValue({
+              sublistId: 'inventoryassignment',
+              fieldId: 'binnumber',
+              value: parseInt(item.values['binOnHand.binnumber'][0].value)
+            });
+            subRecord.setCurrentSublistValue({
+              sublistId: 'inventoryassignment',
+              fieldId: 'status',
+              value: 1
+            });
+            // set quantity
+            subRecord.setCurrentSublistValue({
+              sublistId: 'inventoryassignment',
+              fieldId: 'quantity',
+              value: availableQuantity * -1
+            });
+            // commit line
+            subRecord.commitLine({
+              sublistId: 'inventoryassignment'
+            });
+            adjustmentRecord.commitLine({
+              sublistId: 'inventory'
+            });
+          }
+        }
+
+        const recordId = adjustmentRecord.save({
+          enableSourcing: false,
+          ignoreMandatoryFields: false
         });
-        adjustmentRecord.setCurrentSublistValue({
-          sublistId: 'inventory',
-          fieldId: 'item',
-          value: 24867
+        log.debug({
+          title: 'Record ID',
+          details: recordId
         });
-        adjustmentRecord.setCurrentSublistValue({
-          sublistId: 'inventory',
-          fieldId: 'adjustqtyby',
-          value: -1
-        });
-        adjustmentRecord.setCurrentSublistValue({
-          sublistId: 'inventory',
-          fieldId: 'location',
-          value: 1
-        });
-        const subRecord = adjustmentRecord.getCurrentSublistSubrecord({
-          sublistId: 'inventory',
-          fieldId: 'inventorydetail'
-        });
-        subRecord.setCurrentSublistValue({
-          sublistId: 'inventorydetail',
-          fieldId: 'location',
-          value: 1
-        });
-        subRecord.setCurrentSublistValue({
-          sublistId: 'inventorydetail',
-          fieldId: 'quantity',
-          value: -1
-        });
-        const subSubRecord = subRecord.getCurrentSublistSubrecord({
-          sublistId: 'inventoryassignment'
-        });
-        subSubRecord.setCurrentSublistValue({
-          sublistId: 'inventoryassignment',
-          fieldId: 'binnumber',
-          value: 4113
-        });
-        subSubRecord.setCurrentSublistValue({
-          sublistId: 'inventoryassignment',
-          fieldId: 'quantity',
-          value: -1
-        })
+        return { id: recordId };
       }
-      adjustInventory();
+      const inventoryAdjustment = adjustInventory(savedSearchJSON);
 
       /**
        * Create the form
        */
       const Form = serverWidget.createForm({
-        title: `Clear Bin's Available Inventory`
-      });
-      const Button = Form.addSubmitButton({
-        label: 'Submit'
+        title: `Inventory Adjustment ${inventoryAdjustment.id} Complete`
       });
       const DataFieldGroup = Form.addFieldGroup({
         id: 'group_2',
-        label: 'The Data'
+        label: `Adjusted Bin ${request.parameters.bin_number} Contents: On Hand - Available = New On Hand`
       });
       const Table = Form.addField({
         id: 'table',
