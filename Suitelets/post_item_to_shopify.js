@@ -289,8 +289,14 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
             successForm.addPageInitMessage({
               type: message.Type.CONFIRMATION,
               title: 'SUCCESS!',
-              message: 'Product Created/Updated in Shopify (' + newProduct.product.id + '). View link by clicking on MORE on the right. Please make sure the description is formatted correctly'
+              message: 'Product Created/Updated in Shopify!'
             });
+
+            successForm.addField({
+              id: 'custpage_message',
+              type: serverWidget.FieldType.INLINEHTML,
+              label: ' '
+            }).defaultValue = 'Product Created/Updated in Shopify (<a href="' + storeURL + newProduct.product.id + '" target="_blank">' + newProduct.product.id + '</a>).<br/>Please make sure the description is formatted correctly.';
 
             response.writePage(successForm);
 
