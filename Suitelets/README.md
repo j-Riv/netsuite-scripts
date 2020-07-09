@@ -5,16 +5,22 @@
 > post_item_to_shopify.js
 
 ### Setup
+#### Script Deployment
 
-Expects paramater <i>custscript_servername</i> to be set. On script creation create paramater of type text with name <i>_servername</i>. On script deployment set parameter to the API server's name/url.
+Script requires a paramater.
 
-### To Do
-- Update / Optimize - error forms could probably be merged.
-- Add compare at pricing.
-
-### Maybe
-- Save Shopify ID to NetSuite?
-- Update NetSuite FarApp item record fields upon item creation?
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Type</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>_servername</td>
+    <td>Free-Form-Text</td>
+    <td>API server url</td>
+  </tr>
+</table>
 
 ## GET RETAIL STORE ITEM REPLENISHMENT
 > get_retail_replenishment_items.js
@@ -93,25 +99,21 @@ Create a saved (item) search and make sure you make it public. Use the following
     <td>Formula (Date)</td>
     <td>{today}</td>
     <td>Date</td>
-
   </tr>
   <tr>
     <td>Formula (Text)</td>
     <td>CONCAT(CONCAT({inventorylocation},'-'),{today})</td>
     <td>Transfer Name</td>
-
   </tr>
-    <tr>
+  <tr>
     <td>Inventory Location</td>
     <td></td>
     <td></td>
-
   </tr>
   <tr>
     <td>Formula (Numeric)</td>
     <td>NVL({locationquantityavailable},0)</td>
     <td>Store Qty Available</td>
-
   </tr>
   <tr>
     <td>Formula (Text)</td>
@@ -236,3 +238,88 @@ Use the following mappings.
 > You can find the internal link via the script deployment attached to the script record
 
 A CSV file containing all transfer order import data will be generated and saved to the File Cabinet under the <i>Retail Store Replenishments</i> directory.
+
+## CLEAR BIN AVAILABLE INVENTORY
+> clear_bin_available_inventory.js
+
+### Setup
+#### Script Deployment
+
+Script requires a paramater.
+
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Type</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>_bin_available_items_search_id</td>
+    <td>Free-Form-Text</td>
+    <td>The saved search to use</td>
+  </tr>
+</table>
+
+#### Saved Search
+
+Create a saved (item) search and make sure you make it public. Use the following.
+
+##### Standard
+
+<table>
+  <tr>
+    <th>Filter</th>
+    <th>Description</th>
+    <th>Formula</th>
+  </tr>
+  <tr>
+    <td>Bin On Hand: On Hand</td>
+    <td>is not 0</td>
+    <td></td>
+  </tr>
+</table>
+
+##### Results
+
+<table>
+  <tr>
+    <th>Field</th>
+    <th>Formula</th>
+    <th>Custom Label</th>
+  </tr>
+  <tr>
+    <td>Name</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Item SKU (Custom)</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Bin On Hand: Available</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Bin On Hand: Location</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Bin On Hand: On Hand</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Bin On Hand: Bin Number</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Formula(Text)</td>
+    <td>{binonhand.binnumber.id}</td>
+    <td>Bin Id</td>
+  </tr>
+</table>

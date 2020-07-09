@@ -102,15 +102,21 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
       var pricelevel;
       var storeURL;
       var productDescription;
+      var shopifyTags;
+      var compareAtPrice;
 
       if (store == 'retail') {
         pricelevel = 'baseprice';
         storeURL = 'https://suavecito.myshopify.com/admin/products/';
         productDescription = 'custitem_fa_shpfy_prod_description';
+        shopifyTags = 'custitem_fa_shpfy_tags';
+        compareAtPrice = 'custitem_fa_shpfy_compare_at_price';
       } else {
         pricelevel = 'price2';
         storeURL = 'https://suavecito-wholesale.myshopify.com/admin/products/';
         productDescription = 'custitem_fa_shpfy_prod_description_ws';
+        shopifyTags = 'custitem_fa_shpfy_tags_ws';
+        compareAtPrice = 'custitem_fa_shpfy_compare_at_price_ws';
       }
 
       // item search
@@ -167,6 +173,8 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
           weight: itemRecord.getValue('weight'),
           weight_unit: itemRecord.getText('weightunit'),
           product_type: itemRecord.getText('custitem_fa_shpfy_prodtype'),
+          tags: itemRecord.getValue(shopifyTags),
+          compare_at_price: itemRecord.getValue(compareAtPrice).toString(),
           description: stripInlineStyles(itemRecord.getValue(productDescription))
         }
 
@@ -193,7 +201,9 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
               'price2',
               'description',
               'custitem_sp_size',
-              'custitem_sp_color'
+              'custitem_sp_color',
+              'custitem_fa_shpfy_compare_at_price',
+              'custitem_fa_shpfy_compare_at_price_ws'
             ]
           });
 
@@ -238,7 +248,8 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
               weight: item.getValue('weight'),
               weight_unit: item.getText('weightunit'),
               barcode: item.getValue('upccode'),
-              inventory_management: 'Shopify'
+              inventory_management: 'Shopify',
+              compare_at_price: item.getValue(compareAtPrice).toString()
             });
           });
 
@@ -251,6 +262,12 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
           itemObj.hasVariants = false;
           itemObj.price = results[0].getValue(pricelevel);
         }
+
+        // before send log body
+        log.debug({
+          title: 'THE BODY',
+          details: JSON.stringify(itemObj)
+        });
 
         // https - send data to server
         var url = 'https://' + serverURL + '/api/shopify/' + store + '/create-item';
@@ -289,8 +306,14 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
             successForm.addPageInitMessage({
               type: message.Type.CONFIRMATION,
               title: 'SUCCESS!',
-              message: 'Product Created/Updated in Shopify (' + newProduct.product.id + '). View link by clicking on MORE on the right. Please make sure the description is formatted correctly'
+              message: 'Product Created/Updated in Shopify!'
             });
+
+            successForm.addField({
+              id: 'custpage_message',
+              type: serverWidget.FieldType.INLINEHTML,
+              label: ' '
+            }).defaultValue = 'Product Created/Updated in Shopify (<a href="' + storeURL + newProduct.product.id + '" target="_blank">' + newProduct.product.id + '</a>).<br/>Please make sure the description is formatted correctly.';
 
             response.writePage(successForm);
 
