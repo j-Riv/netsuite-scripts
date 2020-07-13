@@ -27,6 +27,8 @@ Script requires 2 paramaters.
   </tr>
 </table>
 
+Depends on [Forge](https://github.com/digitalbazaar/forge) for HMAC creation.
+
 ## GET RETAIL STORE ITEM REPLENISHMENT
 > get_retail_replenishment_items.js
 
