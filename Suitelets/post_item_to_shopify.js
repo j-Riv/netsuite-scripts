@@ -4,8 +4,8 @@
  * @NModuleScope SameAccount
  */
 
-define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message', 'N/https', 'N/log'],
-  function (runtime, record, search, serverWidget, message, https, log) {
+define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message', 'N/https', 'N/log', './libs/forge.min.js'],
+  function (runtime, record, search, serverWidget, message, https, log, forge) {
 
     /**
      * Creates the product form on a GET request.
@@ -96,7 +96,6 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
      */
     function onPost(request, response) {
       var serverURL = runtime.getCurrentScript().getParameter('custscript_servername');
-      var is = runtime.getCurrentScript().getParameter('custscript_is');
       var store = request.parameters.custpage_shopify_store;
       var SKU = request.parameters.custpage_product_sku;
       var pricelevel;
@@ -165,7 +164,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
 
         // create item obj for shopify
         var itemObj = {
-          is: is,
+          // is: is,
           brand: itemRecord.getText('custitem_sp_brand'),
           title: itemRecord.getValue('displayname'),
           sku: itemRecord.getValue('itemid'),
@@ -263,19 +262,21 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
           itemObj.price = results[0].getValue(pricelevel);
         }
 
-        // before send log body
-        log.debug({
-          title: 'THE BODY',
-          details: JSON.stringify(itemObj)
-        });
-
         // https - send data to server
         var url = 'https://' + serverURL + '/api/shopify/' + store + '/create-item';
         try {
+
+          var itemObjHmac = createHmac(itemObj);
+
           var headersObj = {
-            name: 'Content-Type',
-            value: 'application/json'
+            name: 'X-NetSuite-Hmac-Sha256',
+            value: itemObjHmac,
           };
+
+          log.debug({
+            title: 'HMAC',
+            details: itemObjHmac
+          });
 
           var res = https.post({
             url: url,
@@ -313,7 +314,9 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
               id: 'custpage_message',
               type: serverWidget.FieldType.INLINEHTML,
               label: ' '
-            }).defaultValue = 'Product Created/Updated in Shopify (<a href="' + storeURL + newProduct.product.id + '" target="_blank">' + newProduct.product.id + '</a>).<br/>Please make sure the description is formatted correctly.';
+            }).defaultValue = 'Product Created/Updated in Shopify (<a href="' + 
+              storeURL + newProduct.product.id + '" target="_blank">' + 
+              newProduct.product.id + '</a>).<br/>Please make sure the description is formatted correctly.';
 
             response.writePage(successForm);
 
@@ -364,6 +367,26 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
     function stripInlineStyles(html) {
       var regex = /style=(\'|\")([ -0-9a-zA-Z:]*[ 0-9a-zA-Z;]*)*\1/g;
       return html.replace(regex, '');
+    }
+
+    /**
+     * Creates HMAC, for data integrity verification.
+     * @param {Object} itemObj 
+     * @returns {string} - hmac
+     */
+    function createHmac(itemObj) {
+      var item = itemObj.brand + 
+        itemObj.title + 
+        itemObj.sku + 
+        itemObj.weight + 
+        itemObj.weight_unit + 
+        itemObj.product_type + 
+        itemObj.tags;
+      var secret = runtime.getCurrentScript().getParameter('custscript_netsuite_to_shopify_secret');
+      var hmac = forge.hmac.create();
+      hmac.start('sha256', secret);
+      hmac.update(item);
+      return hmac.digest().toHex();
     }
 
     return {
