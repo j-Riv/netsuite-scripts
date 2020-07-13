@@ -7,7 +7,7 @@
 ### Setup
 #### Script Deployment
 
-Script requires a paramater.
+Script requires 2 paramaters.
 
 <table>
   <tr>
@@ -19,6 +19,11 @@ Script requires a paramater.
     <td>_servername</td>
     <td>Free-Form-Text</td>
     <td>API server url</td>
+  </tr>
+  <tr>
+    <td>_secret</td>
+    <td>Free-Form-Text</td>
+    <td>Secret used for HMAC</td>
   </tr>
 </table>
 

@@ -29,6 +29,7 @@ Temporary Items
 Saved/*
 node_modules
 .env
+CustomModules/libraries/
 
 # Manual Tools
 # exclude directories
