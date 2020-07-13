@@ -4,7 +4,7 @@
  * @NModuleScope SameAccount
  */
 
-define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message', 'N/https', 'N/log', './forge.min.js'],
+define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message', 'N/https', 'N/log', './libs/forge.min.js'],
   function (runtime, record, search, serverWidget, message, https, log, forge) {
 
     /**
@@ -96,7 +96,6 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
      */
     function onPost(request, response) {
       var serverURL = runtime.getCurrentScript().getParameter('custscript_servername');
-      var is = runtime.getCurrentScript().getParameter('custscript_is');
       var store = request.parameters.custpage_shopify_store;
       var SKU = request.parameters.custpage_product_sku;
       var pricelevel;
