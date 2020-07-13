@@ -21,7 +21,7 @@ Script requires 2 paramaters.
     <td>API server url</td>
   </tr>
   <tr>
-    <td>_secret</td>
+    <td>_netsuite_to_shopify_secret</td>
     <td>Free-Form-Text</td>
     <td>Secret used for HMAC</td>
   </tr>
