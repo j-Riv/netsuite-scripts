@@ -16,12 +16,12 @@ Script requires 2 paramaters.
     <th>Description</th>
   </tr>
   <tr>
-    <td>_servername</td>
+    <td>custscript_servername</td>
     <td>Free-Form-Text</td>
     <td>API server url</td>
   </tr>
   <tr>
-    <td>_netsuite_to_shopify_secret</td>
+    <td>custscript_netsuite_to_shopify_secret</td>
     <td>Free-Form-Text</td>
     <td>Secret used for HMAC</td>
   </tr>
@@ -44,12 +44,12 @@ Script requires 2 paramaters.
     <th>Description</th>
   </tr>
   <tr>
-    <td>_retail_replenishment_search</td>
+    <td>custscript_retail_replenishment_search</td>
     <td>Free-Form-Text</td>
     <td>The saved search to use</td>
   </tr>
   <tr>
-    <td>_retail_replenishment_dir</td>
+    <td>custscript_retail_replenishment_dir</td>
     <td>Free-Form-Text</td>
     <td>The directory to save the CSV file to</td>
   </tr>
