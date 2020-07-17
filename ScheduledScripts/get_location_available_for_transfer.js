@@ -4,26 +4,21 @@
  */
 define(['N/runtime', 'N/search', 'N/email'],
   function (runtime, search, email) {
+    // Get Params from Runtime
+    var location1Search = runtime.getCurrentScript().getParameter('custscript_loc_avail_trans_search_1');
+    var location2Search = runtime.getCurrentScript().getParameter('custscript_loc_avail_trans_search_2');
+    var location1 = runtime.getCurrentScript().getParameter('custscript_loc_avail_trans_loc_1');
+    var location2 = runtime.getCurrentScript().getParameter('custscript_loc_avail_trans_loc_2');
+    var emailRecipient = runtime.getCurrentScript().getParameter('custscript_loc_avail_trans_email_id');
+    var emailList = runtime.getCurrentScript().getParameter('custscript_loc_avail_trans_email_list').split(',');
 
     /**
      * Executes scheduled script
      */
     function execute() {
-      // get params
-      var location1 = runtime.getCurrentScript().getParameter('custscript_location_1');
-      var location2 = runtime.getCurrentScript().getParameter('custscript_location_2');
-      var location1Formula1 = "CASE WHEN {inventorylocation} = '" + location1 + "' AND NVL({locationquantityavailable},0) = 0 THEN 1 ELSE 0 END";
-      var location1Formula2 = "CASE WHEN (LENGTH({custrecord_rfs_replenishment_rule_item.custrecord_rfs_replenishment_rule_bin}) != 4)" + 
-      " AND (NVL(LENGTH(REGEXP_REPLACE(SUBSTR({custrecord_rfs_replenishment_rule_item.custrecord_rfs_replenishment_rule_bin},3,2), '^[0-9]*')), 0) != 0)" +
-      " AND {custrecord_rfs_replenishment_rule_item.custrecord_rfs_replenishment_rule_bin} != 'Production - TWNSND'" +
-      " AND {custrecord_rfs_replenishment_rule_item.custrecord_rfs_replenishment_rule_bin} != 'Receiving - TWNSND'" +
-      " AND {custrecord_rfs_replenishment_rule_item.custrecord_rfs_replenishment_rule_bin} NOT LIKE '%TWSND%'" +
-      " AND {custrecord_rfs_replenishment_rule_item.custrecord_rfs_replenishment_rule_bin} NOT LIKE '%Townsend%'" +
-      " AND {custrecord_rfs_replenishment_rule_item.custrecord_rfs_replenishment_rule_bin} != 'Receiving - RNA' THEN 1 ELSE 0 END";
-      var location2Formula1 = "CASE WHEN {inventorylocation} = '" + location2 + "' AND NVL({locationquantityavailable},0) > 0 THEN 1 ELSE 0 END";
       // create searches
-      var location1Items = createSearch(location1Formula1, location1Formula2);
-      var location2Items = createSearch(location2Formula1);
+      var location1Items = loadSearch(location1Search);
+      var location2Items = loadSearch(location2Search);
       // create item obj
       var itemsObj = createItemsObj(location2Items);
 
@@ -49,49 +44,25 @@ define(['N/runtime', 'N/search', 'N/email'],
     }
 
     /**
-     * Creates an item search and returns the results.
-     * @param {string} formula - The SQL formula to use
+     * Loads an item search and returns the results.
+     * @param {string} searchID - The saved search's ID
      * @returns {array}
      */
-    function createSearch(formula1, formula2) {
+    function loadSearch(searchID) {
       // create search
-      var itemSearch = search.create({
-        type: 'item',
-        columns: [
-          'custitem_sp_item_sku',
-          'displayname',
-          'locationquantityavailable'
-        ]
+      var itemSearch = search.load({
+        id: searchID
       });
-      // create filters
-      itemSearch.filters = [
-        search.createFilter({
-          name: 'formulanumeric',
-          operator: search.Operator.EQUALTO,
-          values: [1],
-          formula: formula1
-        })
-      ];
-      if (formula2 != undefined) {
-        // has second formula, add it to filters
-        itemSearch.filters.push(
-          search.createFilter({
-            name: 'formulanumeric',
-            operator: search.Operator.EQUALTO,
-            values: [1],
-            formula: formula2
-          })
-        );
-      }
+
       // run search
       var pagedData = itemSearch.runPaged({
         pageSize: 1000
       });
 
       var itemResults = [];
-      pagedData.pageRanges.forEach(function(pageRange){
-        var page = pagedData.fetch({index: pageRange.index});
-        page.data.forEach(function(result){
+      pagedData.pageRanges.forEach(function (pageRange) {
+        var page = pagedData.fetch({ index: pageRange.index });
+        page.data.forEach(function (result) {
           itemResults.push({
             'custitem_sp_item_sku': result.getValue({ name: 'custitem_sp_item_sku' }),
             'displayname': result.getValue({ name: 'displayname' }),
@@ -141,8 +112,8 @@ define(['N/runtime', 'N/search', 'N/email'],
      */
     function sendEmail(location1, location2, items) {
 
-      var html = '<p>The following items do not have available quantities at ' 
-        + location1 + ', but are available at ' + location2 + '</p>'
+      var html = '<p>The following items do not have available quantities at '
+        + location1 + ', but are available at ' + location2 + '.</p>'
         + '<table><tr><th>SKU</th><th>Name</th><th>Available</th></tr>';
       items.forEach(function (item) {
         html += '<tr><td>' + item.sku + '</td><td>' + item.displayName + '</td><td>' + item.available + '</td></tr>'
@@ -156,9 +127,11 @@ define(['N/runtime', 'N/search', 'N/email'],
 
       email.send({
         author: 207,
-        recipients: 258,
+        recipients: emailRecipient,
+        // recipients: 259,
         replyTo: 'jriv@suavecito.com',
-        bcc: [207,-5],
+        // bcc: [207, -5],
+        bcc: emailList,
         subject: 'The following items can be transfered from ' + location2,
         body: html
       });
