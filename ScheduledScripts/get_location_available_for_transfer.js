@@ -128,9 +128,7 @@ define(['N/runtime', 'N/search', 'N/email'],
       email.send({
         author: 207,
         recipients: emailRecipient,
-        // recipients: 259,
         replyTo: 'jriv@suavecito.com',
-        // bcc: [207, -5],
         bcc: emailList,
         subject: 'The following items can be transfered from ' + location2,
         body: html
