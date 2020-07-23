@@ -63,7 +63,7 @@ define(['N/runtime', 'N/search', 'N/email', 'N/file'],
       const dir = runtime.getCurrentScript().getParameter('custscript_out_of_stock_dir');
 
       // create new sent item file
-      createJsonFile(JSON.stringify(dir, sentItemsObj));
+      createJsonFile(dir, JSON.stringify(sentItemsObj));
 
       // create attachment csv
       let csvId = false;
