@@ -4,7 +4,7 @@
  * @NModuleScope SameAccount
  */
 
-define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './spTransferOrder'],
+define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './createTransferOrder'],
   function (runtime, serverWidget, search, file, log, spTransferOrder) {
 
     /**
