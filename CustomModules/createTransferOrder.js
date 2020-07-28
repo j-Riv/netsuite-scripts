@@ -65,6 +65,8 @@ define(['N/record', 'N/log'],
         details: 'ID: ' + recordId
       });
 
+      return recordId;
+
     }
 
     return {
