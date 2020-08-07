@@ -330,3 +330,19 @@ Create a saved (item) search and make sure you make it public. Use the following
     <td>Bin Id</td>
   </tr>
 </table>
+
+## DISCONTINUE ITEMS
+> discontinue_items.js
+
+### Setup
+The search depends on a custom item field <i>(custitem_sp_item_sku)</i>. This is because the item name / number field <i>(itemid)</i> 
+for a matrix item during a search will show up as <i>parent item name / number : child item name / number</i> for example: 
+<i>og-black-tee : S001BS OG Black Tee - S</i>.
+
+Set this field to default to the following formula.
+```
+CASE WHEN INSTR({itemid},' : ') != 0 THEN SUBSTR({itemid}, INSTR({itemid},' : ') + 3) ELSE {itemid} END
+```
+
+
+Searches for all SKU(s) that match the provided partial SKU. It then creates a "zero" inventory adjustment and sets the item to inactive.
