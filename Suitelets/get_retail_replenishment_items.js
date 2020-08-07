@@ -15,14 +15,54 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './crea
 
       var request = context.request;
       var response = context.response;
-      onGet(response);
+
+      if (request.method == 'GET') {
+        onGet(response);
+      } else {
+        onPost(response);
+      }
+      
     }
 
     /**
-     * Handles Get Request and loads the saved search
+     * Handles the Get Request
      * @param {Object} response 
      */
     function onGet(response) {
+      var items = getReplenishment();
+      var page = createPage(items);
+      response.writePage(page);
+    }
+
+    /**
+     * Handles the Post Request
+     * @param {Object} response 
+     */
+    function onPost(response) {
+      var items = getReplenishment();
+      // create CSV and save to file cabinet
+      var csvFileId = createCSV(items);
+
+      // create transfer order
+      var memo = 'Retail Store - ' + todaysDate();
+      var transferOrderId = spTransferOrder.create(3, 1, items, memo);
+
+      // create form
+      var form = serverWidget.createForm({ title: 'Retail Replenishment - ' + todaysDate() + ' | Total: ' + items.length });
+
+      form.addField({
+        id: 'custpage_message',
+        type: serverWidget.FieldType.INLINEHTML,
+        label: ' '
+      }).defaultValue = 'Transfer Order created: <a href="https://system.netsuite.com/app/accounting/transactions/trnfrord.nl?id=' + transferOrderId + '&whence=" target="_blank">' + transferOrderId + '</a>.';
+      response.writePage(form);
+    }
+
+    /**
+     * Creates the retail replenishment results list.
+     * @returns {array}
+     */
+    function getReplenishment() {
       // Load saved search
       var retailReplenishmentSavedSearch = runtime.getCurrentScript().getParameter('custscript_retail_replenishment_search');
       var retailStoreSearch = search.load({
@@ -105,27 +145,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './crea
         }
       }
 
-      // create CSV and save to file cabinet
-      var csvFileId = createCSV(items);
-
-      // create transfer order
-      var memo = 'Retail Store - ' + todaysDate();
-      spTransferOrder.create(3, 1, items, memo);
-
-      // uncomment to write data object to browser (unformatted dump)
-      // response.write(JSON.stringify({
-      //   fileID: csvFileId, 
-      //   itemCount: items.length, 
-      //   items: items 
-      // }));
-
-      // uncomment to write html table
-      // var html = createResultsPage(items.length, csvFileId, items);
-      // response.write(html);
-
-      // uncomment to create list and write to page
-      var page = createPage(items);
-      response.writePage(page);
+      return items;
 
     }
 
@@ -243,113 +263,108 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './crea
     }
 
     /**
-     * Creates an html table for results page
-     * @param {string} itemCount 
-     * @param {string} csvID 
-     * @param {Object} items 
-     * @returns {string} - The html to render
-     */
-    function createResultsPage(itemCount, csvID, items) {
-      var head = '<tr><th>ID</th>'
-        + '<th>SKU</th>'
-        + '<th>NAME</th>'
-        + '<th>STORE QTY AVAILABLE</th>'
-        + '<th>STORE QTY MAX</th>'
-        + '<th>WAREHOUSE QTY AVAILABLE</th>'
-        + '<th>QTY NEEDED</th></tr>';
-
-      var tableData;
-      for (i in items) {
-        var item = items[i];
-        var tr = '<tr></tr><td> ' + item.id +  '</td>'
-          + '<td> ' + item.sku + '</td>'
-          + '<td> ' + item.name + '</td>'
-          + '<td> ' + item.storeQuantityAvailable + '</td>'
-          + '<td> ' + item.storeQuantityMax + '</td>'
-          + '<td> ' + item.warehouseQuantityAvailable + '</td>'
-          + '<td> ' + item.quantityNeeded + '</td></tr>';
-        tableData += tr;
-      }
-
-      var html = '<p>Results: ' + itemCount + '</p>'
-        + '<p>CSV File ID: ' + csvID + '</p>'
-        + '<table>'
-        + head
-        + tableData
-        + '</table>';
-
-      return html;
-    }
-
-    /**
      * Creates a list widget for the results page
      * @param {Object} items
      * @returns {Object} - The Page to render 
      */
     function createPage(items) {
-      var list = serverWidget.createList({ title: 'Retail Replenishment - ' + todaysDate() + ' | Total: ' + items.length });
+      log.debug({
+        title: 'CREATING PAGE',
+        details: 'There are ' + items.length
+      });
+      var form = serverWidget.createForm({ title: 'Retail Replenishment - ' + todaysDate() + ' | Total: ' + items.length });
 
-      list.addColumn({
-        id: 'column_id',
-        type: serverWidget.FieldType.TEXT,
-        label: 'ID',
-        align: serverWidget.LayoutJustification.LEFT
-      });
-      list.addColumn({
-        id: 'column_sku',
-        type: serverWidget.FieldType.TEXT,
-        label: 'SKU',
-        align: serverWidget.LayoutJustification.LEFT
-      });
-      list.addColumn({
-        id: 'column_name',
-        type: serverWidget.FieldType.TEXT,
-        label: 'Name',
-        align: serverWidget.LayoutJustification.LEFT
-      });
-      list.addColumn({
-        id: 'column_store_qty_available',
-        type: serverWidget.FieldType.TEXT,
-        label: 'Store Qty Available',
-        align: serverWidget.LayoutJustification.LEFT
-      });
-      list.addColumn({
-        id: 'column_store_qty_max',
-        type: serverWidget.FieldType.TEXT,
-        label: 'Store Qty Max',
-        align: serverWidget.LayoutJustification.LEFT
-      });
-      list.addColumn({
-        id: 'column_warehouse_qty_available',
-        type: serverWidget.FieldType.TEXT,
-        label: 'Warehouse Qty Available',
-        align: serverWidget.LayoutJustification.LEFT
-      });
-      list.addColumn({
-        id: 'column_qty_needed',
-        type: serverWidget.FieldType.TEXT,
-        label: 'Quantity Needed',
-        align: serverWidget.LayoutJustification.LEFT
+      form.addSubmitButton({
+        label: 'Create Transfer Order'
       });
 
-      for (i in items) {
+      var sublist = form.addSublist({
+        id: 'custpage_retial_replenishment_sublist',
+        type: serverWidget.SublistType.LIST,
+        label: 'Retail Replenishment'
+      });
+
+      var fieldID = sublist.addField({
+        id: 'custpage_field_id',
+        type: serverWidget.FieldType.TEXT,
+        label: 'ID'
+      });
+      var fieldSku = sublist.addField({
+        id: 'custpage_field_sku',
+        type: serverWidget.FieldType.TEXT,
+        label: 'SKU'
+      });
+      var fieldName = sublist.addField({
+        id: 'custpage_field_name',
+        type: serverWidget.FieldType.TEXT,
+        label: 'Name'
+      });
+      var fieldStoreQtyAvailable = sublist.addField({
+        id: 'custpage_field_store_qty_available',
+        type: serverWidget.FieldType.TEXT,
+        label: 'Store Qty Available'
+      });
+      var fieldStoreQtyMax = sublist.addField({
+        id: 'custpage_field_store_qty_max',
+        type: serverWidget.FieldType.TEXT,
+        label: 'Store Qty Max'
+      });
+      var fieldWarehouseQtyAvailbable = sublist.addField({
+        id: 'custpage_field_warehouse_qty_available',
+        type: serverWidget.FieldType.TEXT,
+        label: 'Warehouse Qty Available'
+      });
+      var fieldQtyNeeded = sublist.addField({
+        id: 'custpage_field_qty_needed',
+        type: serverWidget.FieldType.TEXT,
+        label: 'Qty Needed'
+      });
+
+      for (var i = 0; i < items.length; i++) {
         var item = items[i];
-        list.addRow({
-          row: {
-            column_id: item.id,
-            column_sku: item.sku,
-            column_name: item.name,
-            column_store_qty_available: String(item.storeQuantityAvailable),
-            column_store_qty_max: String(item.storeQuantityMax),
-            column_warehouse_qty_available: String(item.warehouseQuantityAvailable),
-            column_qty_needed: String(item.quantityNeeded)
-          }
+        log.debug({
+          title: 'Item: ' + i,
+          details: item.id
+        });
+        sublist.setSublistValue({
+          id: 'custpage_field_id',
+          line: i,
+          value: item.id
+        });
+        sublist.setSublistValue({
+          id: 'custpage_field_sku',
+          line: i,
+          value: item.sku
+        });
+        sublist.setSublistValue({
+          id: 'custpage_field_name',
+          line: i,
+          value: item.name
+        });
+        sublist.setSublistValue({
+          id: 'custpage_field_store_qty_available',
+          line: i,
+          value: String(item.storeQuantityAvailable)
+        });
+        sublist.setSublistValue({
+          id: 'custpage_field_store_qty_max',
+          line: i,
+          value: String(item.storeQuantityMax)
+        });
+        sublist.setSublistValue({
+          id: 'custpage_field_warehouse_qty_available',
+          line: i,
+          value: String(item.warehouseQuantityAvailable)
+        });
+        sublist.setSublistValue({
+          id: 'custpage_field_qty_needed',
+          line: i,
+          value: String(item.quantityNeeded)
         });
       }
 
-      return list;
+      return form;
     }
-
 
     return {
       onRequest: onRequest
