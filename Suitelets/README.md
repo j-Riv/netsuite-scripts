@@ -337,7 +337,7 @@ Create a saved (item) search and make sure you make it public. Use the following
 ### Setup
 The search depends on a custom item field <i>(custitem_sp_item_sku)</i>. This is because the item name / number field <i>(itemid)</i> 
 for a matrix item during a search will show up as <i>parent item name / number : child item name / number</i> for example: 
-<i>og-black-tee : S001BS OG Black Tee - S</i>.
+<i>og-black-tee : S001BS</i>.
 
 Set this field to default to the following formula.
 ```
