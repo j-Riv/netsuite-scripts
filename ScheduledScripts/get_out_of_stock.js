@@ -102,6 +102,11 @@ define(['N/runtime', 'N/search', 'N/email', 'N/file'],
           name: 'matrix',
           operator: search.Operator.IS,
           values: false
+        }),
+        search.createFilter({
+          name: 'isinactive',
+          operator: search.Operator.IS,
+          values: false
         })
       ];
       // run search
