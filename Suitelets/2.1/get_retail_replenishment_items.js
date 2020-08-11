@@ -40,19 +40,28 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
       // defaultFilters.push(newFilter);
       // retailStoreSearch.filters = defaultFilters;
 
-      const retailStoreResultSet = retailStoreSearch.run();
-      const retailStoreResults = retailStoreResultSet.getRange(0, 1000);
+      const pagedData = retailStoreSearch.runPaged({
+        pageSize: 1000
+      });
+      
+      const itemResults = [];
+      pagedData.pageRanges.forEach(function (pageRange) {
+        let page = pagedData.fetch({ index: pageRange.index });
+        page.data.forEach(function (result) {
+          itemResults.push(result);
+        });
+      });
 
       log.debug({
         title: 'RESULTS FOUND!',
-        details: JSON.stringify(retailStoreResults.length)
+        details: JSON.stringify(itemResults.length)
       });
 
       // get ids to use with main warehouse item search
       const ids = [];
-      for (i in retailStoreResults) {
+      for (i in itemResults) {
         // push id
-        ids.push(retailStoreResults[i].id);
+        ids.push(itemResults[i].id);
       }
 
       log.debug({

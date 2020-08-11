@@ -115,9 +115,9 @@ define(['N/runtime', 'N/search', 'N/email', 'N/file'],
       });
 
       const itemResults = [];
-      pagedData.pageRanges.forEach(function (pageRange) {
+      pagedData.pageRanges.forEach(function(pageRange) {
         let page = pagedData.fetch({ index: pageRange.index });
-        page.data.forEach(function (result) {
+        page.data.forEach(function(result) {
           itemResults.push({
             'custitem_sp_item_sku': result.getValue({ name: 'custitem_sp_item_sku' }),
             'displayname': result.getValue({ name: 'displayname' }),
@@ -136,7 +136,7 @@ define(['N/runtime', 'N/search', 'N/email', 'N/file'],
      */
     const createItemsObj = items => {
       const itemsObj = {};
-      items.forEach(function (item) {
+      items.forEach(function(item) {
         let sku = item.custitem_sp_item_sku;
         let displayName = item.displayname;
         itemsObj[sku] = {
@@ -179,7 +179,7 @@ define(['N/runtime', 'N/search', 'N/email', 'N/file'],
         html = '<p>The following items have 0 Availability at Main Warehouse as of (' + new Date() + ')</p>' +
           '<p>Full Report attached.</p>' +
           '<table><tr><th>SKU</th><th>Name</th></tr>';
-        items.forEach(function (item) {
+        items.forEach(function(item) {
           html += '<tr><td>' + item.sku + '</td><td>' + item.displayName + '</td></tr>'
         });
         html += '</table>';
