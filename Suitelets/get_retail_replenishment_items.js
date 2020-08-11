@@ -80,19 +80,28 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './crea
       // defaultFilters.push(newFilter);
       // retailStoreSearch.filters = defaultFilters;
 
-      var retailStoreResultSet = retailStoreSearch.run();
-      var retailStoreResults = retailStoreResultSet.getRange(0, 1000);
+      var pagedData = retailStoreSearch.runPaged({
+        pageSize: 1000
+      });
+
+      var itemResults = [];
+      pagedData.pageRanges.forEach(function(pageRange) {
+        var page = pagedData.fetch({ index: pageRange.index });
+        page.data.forEach(function(result) {
+          itemResults.push(result);
+        });
+      });
 
       log.debug({
         title: 'RESULTS FOUND!',
-        details: JSON.stringify(retailStoreResults.length)
+        details: JSON.stringify(itemResults.length)
       });
 
       // get ids to use with main warehouse item search
       var ids = [];
-      for (var i in retailStoreResults) {
+      for (var i in itemResults) {
         // push id
-        ids.push(retailStoreResults[i].id);
+        ids.push(itemResults[i].id);
       }
 
       log.debug({
@@ -110,7 +119,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './crea
 
       // build array of objects for csv
       // create a copy and parse
-      var retailStoreResultsJSON = JSON.stringify(retailStoreResults);
+      var retailStoreResultsJSON = JSON.stringify(itemResults);
       retailStoreResultsJSON = JSON.parse(retailStoreResultsJSON);
       var items = [];
       for (var j in retailStoreResultsJSON) {
