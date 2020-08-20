@@ -56,7 +56,7 @@ define(['N/runtime', 'N/search', 'N/email', 'N/file'],
       });
 
       log.debug({
-        title: 'ADDING SKUS T SENt & EMAIL',
+        title: 'ADDING SKUS T SENT & EMAIL',
         details: addingSku
       });
 
