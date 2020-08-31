@@ -1,5 +1,5 @@
 /**
- * @NApiVersion 2.x
+ * @NApiVersion 2.1
  * @NScriptType Suitelet
  * @NModuleScope SameAccount
  */
@@ -11,26 +11,26 @@ define(['N/record', 'N/redirect', 'N/ui/serverWidget', 'N/search', 'N/log'],
      * Handles Suitelet request
      * @param {object} context 
      */
-    function onRequest(context) {
+    const onRequest = context => {
 
-      var request = context.request;
-      var response = context.response;
+      const request = context.request;
+      const response = context.response;
 
       if (request.method == 'GET') {
         onGet(response);
       } else {
         onPost(request, response);
       }
-      
+
     }
 
     /**
      * Handles the Get Request
      * @param {Object} response 
      */
-    function onGet(response) {
+    const onGet = response => {
       // create search form
-      var searchForm = serverWidget.createForm({
+      const searchForm = serverWidget.createForm({
         title: 'Discontinued Item(s)'
       });
 
@@ -41,15 +41,15 @@ define(['N/record', 'N/redirect', 'N/ui/serverWidget', 'N/search', 'N/log'],
       }).updateLayoutType({
         layoutType: serverWidget.FieldLayoutType.OUTSIDEABOVE
       }).updateBreakType({
-        breakType: serverWidget.FieldBreakType.STARTROW 
+        breakType: serverWidget.FieldBreakType.STARTROW
       }).defaultValue = 'Use a partial SKU below to find all matching items. This will then create an Inventory Adjustment to "zero" out all remaining quantities not in a "Picked" bin.';
 
-      var partialSku = searchForm.addField({
+      const partialSku = searchForm.addField({
         id: 'custpage_partial_sku',
         type: serverWidget.FieldType.TEXT,
         label: 'Partial SKU'
       }).updateLayoutType({
-        layoutType: serverWidget.FieldLayoutType.OUTSIDEABOVE 
+        layoutType: serverWidget.FieldLayoutType.OUTSIDEABOVE
       }).updateBreakType({
         breakType: serverWidget.FieldBreakType.STARTROW
       });
@@ -72,16 +72,16 @@ define(['N/record', 'N/redirect', 'N/ui/serverWidget', 'N/search', 'N/log'],
      * @param {Object} request 
      * @param {Object} response 
      */
-    function onPost(request, response) {
+    const onPost = (request, response) => {
       if (request.parameters.custpage_partial_sku) {
-        var partialSku = request.parameters.custpage_partial_sku.toUpperCase();
+        const partialSku = request.parameters.custpage_partial_sku.toUpperCase();
         log.debug({
           title: 'SEARCHING FOR PARTIAL SKU',
           details: partialSku
         });
 
-        var items = getItems(partialSku);
-        var page = createPage(partialSku, items);
+        const items = getItems(partialSku);
+        const page = createPage(partialSku, items);
         response.writePage(page);
       } else {
         log.debug({
@@ -89,11 +89,11 @@ define(['N/record', 'N/redirect', 'N/ui/serverWidget', 'N/search', 'N/log'],
           details: 'IS NOT SET'
         });
         // process
-        var items = getItems(request.parameters.custpage_set_partial_sku);
+        const items = getItems(request.parameters.custpage_set_partial_sku);
         // make active if inactive
         isInactive(items, false);
         // create inventory adjustment
-        var invAdjId = inventoryAdjustment(request.parameters.custpage_set_partial_sku, items);
+        const invAdjId = inventoryAdjustment(request.parameters.custpage_set_partial_sku, items);
         // make inactive
         isInactive(items, true);
         // redirect
@@ -110,8 +110,8 @@ define(['N/record', 'N/redirect', 'N/ui/serverWidget', 'N/search', 'N/log'],
      * @param {string} partialSku
      * @returns {array}
      */
-    function getItems(partialSku) {
-      var itemSearch = search.create({
+    const getItems = partialSku => {
+      const itemSearch = search.create({
         type: 'item',
         columns: [
           'internalid',
@@ -144,15 +144,15 @@ define(['N/record', 'N/redirect', 'N/ui/serverWidget', 'N/search', 'N/log'],
           name: 'formulanumeric',
           operator: search.Operator.EQUALTO,
           values: [1],
-          formula: "CASE WHEN NVL({locationquantityavailable},0) > 0 " + 
-            "AND NVL({binonhand.quantityavailable},0) > 0 " + 
-            "AND {binonhand.binnumber} NOT LIKE '%Picked-%' " + 
+          formula: "CASE WHEN NVL({locationquantityavailable},0) > 0 " +
+            "AND NVL({binonhand.quantityavailable},0) > 0 " +
+            "AND {binonhand.binnumber} NOT LIKE '%Picked-%' " +
             "AND {binonhand.binnumber} NOT LIKE '%Returns%' THEN 1 ELSE 0 END"
         }),
       ];
 
-      var resultSet = itemSearch.run();
-      var results = resultSet.getRange({
+      const resultSet = itemSearch.run();
+      const results = resultSet.getRange({
         start: 0,
         end: 100
       });
@@ -162,8 +162,8 @@ define(['N/record', 'N/redirect', 'N/ui/serverWidget', 'N/search', 'N/log'],
         details: results
       });
 
-      var items = [];
-      results.forEach(function(item) {
+      const items = [];
+      results.forEach(function (item) {
         items.push({
           id: item.getValue('internalid'),
           sku: item.getValue('custitem_sp_item_sku'),
@@ -186,29 +186,29 @@ define(['N/record', 'N/redirect', 'N/ui/serverWidget', 'N/search', 'N/log'],
      * @param {Array} items 
      * @param {boolean} value 
      */
-    function isInactive(items, value) {
-      var nsTypes = {
+    const isInactive = (items, value) => {
+      const nsTypes = {
         'Inventory Item': 'INVENTORY_ITEM',
         'Assembly/Bill of Materials': 'ASSEMBLY_ITEM'
       };
-      var ids = [];
-      var types = [];
-      items.forEach(function(item) {
+      const ids = [];
+      const types = [];
+      items.forEach((item) => {
         if (ids.indexOf(item.id) == -1) {
           ids.push(item.id);
           types.push(nsTypes[item.type]);
         }
       });
 
-      ids.forEach(function(id, index) {
-        var itemRecord = record.load({
+      ids.forEach((id, index) => {
+        const itemRecord = record.load({
           type: record.Type[types[index]],
           id: Number(id),
           isDynamic: true
         });
 
         itemRecord.setValue('isinactive', value);
-        var itemRecID = itemRecord.save();
+        const itemRecID = itemRecord.save();
 
         log.debug({
           title: 'UPDATING ITEM ' + itemRecID,
@@ -223,8 +223,8 @@ define(['N/record', 'N/redirect', 'N/ui/serverWidget', 'N/search', 'N/log'],
      * @param {Array} items 
      * @returns {string} - The Inventory Adjustment ID
      */
-    function inventoryAdjustment(partialSku, items) {
-      var adjustmentRecord = record.create({
+    const inventoryAdjustment = (partialSku, items) => {
+      const adjustmentRecord = record.create({
         type: record.Type.INVENTORY_ADJUSTMENT,
         isDynamic: true
       });
@@ -238,7 +238,7 @@ define(['N/record', 'N/redirect', 'N/ui/serverWidget', 'N/search', 'N/log'],
         value: 'Discontinued Items - ' + partialSku
       });
 
-      items.forEach(function(item) {
+      items.forEach(item => {
         adjustmentRecord.selectNewLine({
           sublistId: 'inventory'
         });
@@ -257,7 +257,7 @@ define(['N/record', 'N/redirect', 'N/ui/serverWidget', 'N/search', 'N/log'],
           fieldId: 'location',
           value: parseInt(item.locationId)
         });
-        var subRecord = adjustmentRecord.getCurrentSublistSubrecord({
+        const subRecord = adjustmentRecord.getCurrentSublistSubrecord({
           sublistId: 'inventory',
           fieldId: 'inventorydetail'
         });
@@ -287,10 +287,10 @@ define(['N/record', 'N/redirect', 'N/ui/serverWidget', 'N/search', 'N/log'],
         adjustmentRecord.commitLine({
           sublistId: 'inventory'
         });
-        
+
       });
 
-      var recordId = adjustmentRecord.save({
+      const recordId = adjustmentRecord.save({
         enableSourcing: false,
         ignoreMandatoryFields: false
       });
@@ -308,71 +308,71 @@ define(['N/record', 'N/redirect', 'N/ui/serverWidget', 'N/search', 'N/log'],
      * @param {Object} items
      * @returns {Object} - The Page to render 
      */
-    function createPage(partialSku, items) {
+    const createPage = (partialSku, items) => {
       log.debug({
         title: 'CREATING PAGE',
         details: 'There are ' + items.length
       });
-      var form = serverWidget.createForm({ title: 'Discontinue The Following SKU(s)' });
+      const form = serverWidget.createForm({ title: 'Discontinue The Following SKU(s)' });
 
       form.addSubmitButton({
         label: 'Create Inventory Adjustment'
       });
 
-      var sublist = form.addSublist({
+      const sublist = form.addSublist({
         id: 'custpage_item_sublist',
         type: serverWidget.SublistType.LIST,
         label: 'Results for ' + partialSku + '...'
       });
 
-      var fieldID = sublist.addField({
+      const fieldID = sublist.addField({
         id: 'custpage_field_id',
         type: serverWidget.FieldType.TEXT,
         label: 'ID'
       });
-      var fieldSku = sublist.addField({
+      const fieldSku = sublist.addField({
         id: 'custpage_field_sku',
         type: serverWidget.FieldType.TEXT,
         label: 'SKU'
       });
-      var fieldName = sublist.addField({
+      const fieldName = sublist.addField({
         id: 'custpage_field_name',
         type: serverWidget.FieldType.TEXT,
         label: 'Name'
       });
-      var fieldLocation = sublist.addField({
+      const fieldLocation = sublist.addField({
         id: 'custpage_field_location',
         type: serverWidget.FieldType.TEXT,
         label: 'Location'
       });
-      var fieldLocationId = sublist.addField({
+      const fieldLocationId = sublist.addField({
         id: 'custpage_field_location_id',
         type: serverWidget.FieldType.TEXT,
         label: 'Location (ID)'
       });
-      var fieldBinNumber = sublist.addField({
+      const fieldBinNumber = sublist.addField({
         id: 'custpage_field_bin_number',
         type: serverWidget.FieldType.TEXT,
         label: 'Bin Number'
       });
-      var fieldBinNumberId = sublist.addField({
+      const fieldBinNumberId = sublist.addField({
         id: 'custpage_field_bin_number_id',
         type: serverWidget.FieldType.TEXT,
         label: 'Bin Number (ID)'
       });
-      var fieldBinOnHandAvailable = sublist.addField({
+      const fieldBinOnHandAvailable = sublist.addField({
         id: 'custpage_field_bin_on_hand_available',
         type: serverWidget.FieldType.TEXT,
         label: 'Bin On Hand Available'
       });
-      var fieldType = sublist.addField({
+      const fieldType = sublist.addField({
         id: 'custpage_field_type',
         type: serverWidget.FieldType.TEXT,
         label: 'Type'
       });
 
-      for (var i = 0; i < items.length; i++) {
-        var item = items[i];
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
         sublist.setSublistValue({
           id: 'custpage_field_id',
           line: i,
@@ -420,7 +420,7 @@ define(['N/record', 'N/redirect', 'N/ui/serverWidget', 'N/search', 'N/log'],
         });
       }
 
-      var itemsField = form.addField({
+      const itemsField = form.addField({
         id: 'custpage_set_partial_sku',
         type: serverWidget.FieldType.TEXT,
         label: ' '

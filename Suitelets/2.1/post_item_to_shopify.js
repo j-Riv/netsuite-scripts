@@ -1,5 +1,5 @@
 /**
- * @NApiVersion 2.x
+ * @NApiVersion 2.1
  * @NScriptType Suitelet
  * @NModuleScope SameAccount
  */
@@ -12,10 +12,10 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
      * Sends data to the API on a post request.
      * @param {object} context 
      */
-    function onRequest(context) {
+    const onRequest = context => {
 
-      var request = context.request;
-      var response = context.response;
+      const request = context.request;
+      const response = context.response;
 
       if (request.method == 'GET') {
         onGet(response);
@@ -29,9 +29,9 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
      * Generates the product form.
      * @param {object} response 
      */
-    function onGet(response) {
+    const onGet = response => {
       // create product form
-      var productForm = serverWidget.createForm({
+      const productForm = serverWidget.createForm({
         title: 'Post Product to Shopify'
       });
 
@@ -40,7 +40,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
         label: 'Product Info'
       });
 
-      var storeSelect = productForm.addField({
+      const storeSelect = productForm.addField({
         id: 'custpage_shopify_store',
         label: 'Shopify Store',
         type: serverWidget.FieldType.SELECT,
@@ -68,7 +68,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
 
       storeSelect.isMandatory = true;
 
-      var productSku = productForm.addField({
+      const productSku = productForm.addField({
         id: 'custpage_product_sku',
         label: 'Product SKU',
         type: serverWidget.FieldType.TEXT,
@@ -94,15 +94,15 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
      * @param {object} request 
      * @param {object} response 
      */
-    function onPost(request, response) {
-      var serverURL = runtime.getCurrentScript().getParameter('custscript_servername');
-      var store = request.parameters.custpage_shopify_store;
-      var SKU = request.parameters.custpage_product_sku;
-      var pricelevel;
-      var storeURL;
-      var productDescription;
-      var shopifyTags;
-      var compareAtPrice;
+    const onPost = (request, response) => {
+      const serverURL = runtime.getCurrentScript().getParameter('custscript_servername');
+      const store = request.parameters.custpage_shopify_store;
+      const SKU = request.parameters.custpage_product_sku;
+      let pricelevel;
+      let storeURL;
+      let productDescription;
+      let shopifyTags;
+      let compareAtPrice;
 
       if (store == 'retail') {
         pricelevel = 'baseprice';
@@ -119,7 +119,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
       }
 
       // item search
-      var itemSearch = search.create({
+      const itemSearch = search.create({
         type: 'item',
         columns: [
           'internalid',
@@ -145,25 +145,25 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
         })
       ];
 
-      var resultSet = itemSearch.run();
-      var results = resultSet.getRange({
+      const resultSet = itemSearch.run();
+      const results = resultSet.getRange({
         start: 0,
         end: 1
       });
 
       // do stuff
       if (results.length > 0) {
-        var isMatrix = results[0].getValue('matrix');
+        const isMatrix = results[0].getValue('matrix');
 
         // load single record
-        var itemRecord = record.load({
+        const itemRecord = record.load({
           type: results[0].recordType,
           id: results[0].id,
           isDynamic: false
         });
 
         // create item obj for shopify
-        var itemObj = {
+        const itemObj = {
           // is: is,
           brand: itemRecord.getText('custitem_sp_brand'),
           title: itemRecord.getValue('displayname'),
@@ -185,7 +185,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
         // check if its a matrix
         if (isMatrix) {
           // do matrix shit
-          var childItemSearch = search.create({
+          const childItemSearch = search.create({
             type: 'item',
             columns: [
               'internalid',
@@ -214,21 +214,21 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
             })
           ];
 
-          var childResultSet = childItemSearch.run();
-          var childResults = childResultSet.getRange({
+          const childResultSet = childItemSearch.run();
+          const childResults = childResultSet.getRange({
             start: 0,
             end: 25
           });
 
           // loop through child items and create variant object(s)
-          var variants = [];
+          const variants = [];
 
-          childResults.forEach(function (item, index) {
-            var sku = item.getValue('itemid').split(' : ');
-            var color = item.getText('custitem_sp_color');
-            var size = item.getText('custitem_sp_size');
+          childResults.forEach((item, index) => {
+            const sku = item.getValue('itemid').split(' : ');
+            const color = item.getText('custitem_sp_color');
+            const size = item.getText('custitem_sp_size');
 
-            var optionName;
+            let optionName;
             if (size != '') {
               optionName = size;
               itemObj.option = 'Size';
@@ -263,12 +263,12 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
         }
 
         // https - send data to server
-        var url = 'https://' + serverURL + '/api/shopify/' + store + '/create-item';
+        const url = 'https://' + serverURL + '/api/shopify/' + store + '/create-item';
         try {
 
-          var itemObjHmac = createHmac(itemObj);
+          const itemObjHmac = createHmac(itemObj);
 
-          var headersObj = {
+          const headersObj = {
             name: 'X-NetSuite-Hmac-Sha256',
             value: itemObjHmac,
           };
@@ -278,7 +278,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
             details: itemObjHmac
           });
 
-          var res = https.post({
+          const res = https.post({
             url: url,
             body: itemObj,
             headers: headersObj
@@ -289,12 +289,12 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
             details: res.body
           });
 
-          var newProduct = JSON.parse(res.body);
+          const newProduct = JSON.parse(res.body);
 
           // if success
           if ('product' in newProduct) {
 
-            var successForm = serverWidget.createForm({
+            const successForm = serverWidget.createForm({
               title: 'Post Product to Shopify (' + store + ')'
             });
 
@@ -314,9 +314,9 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
               id: 'custpage_message',
               type: serverWidget.FieldType.INLINEHTML,
               label: ' '
-            }).defaultValue = 'Product Created/Updated in Shopify (<a href="' + 
-              storeURL + newProduct.product.id + '" target="_blank">' + 
-              newProduct.product.id + '</a>).<br/>Please make sure the description is formatted correctly.';
+            }).defaultValue = 'Product Created/Updated in Shopify (<a href="' +
+            storeURL + newProduct.product.id + '" target="_blank">' +
+            newProduct.product.id + '</a>).<br/>Please make sure the description is formatted correctly.';
 
             response.writePage(successForm);
 
@@ -325,20 +325,19 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
           }
 
         } catch (e) {
-          var errorMsg = JSON.parse(e.message);
           log.error({
             title: 'ERROR!',
-            details: unescape(errorMsg.error)
+            details: e.message
           });
 
-          var shopifyErrorForm = serverWidget.createForm({
+          const shopifyErrorForm = serverWidget.createForm({
             title: 'Post Product to Shopify'
           });
 
           shopifyErrorForm.addPageInitMessage({
             type: message.Type.ERROR,
-            title: "ERROR!",
-            message: unescape(errorMsg.error)
+            title: 'ERROR!',
+            message: e.message,
           });
 
           response.writePage(shopifyErrorForm);
@@ -346,7 +345,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
 
       } else {
 
-        var errorForm = serverWidget.createForm({
+        const errorForm = serverWidget.createForm({
           title: 'Post Product to Shopify'
         });
 
@@ -365,8 +364,8 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
      * Strips all inline styles from an html string.
      * @param {string} html 
      */
-    function stripInlineStyles(html) {
-      var regex = /style=(\'|\")([ -0-9a-zA-Z:]*[ 0-9a-zA-Z;]*)*\1/g;
+    const stripInlineStyles = html => {
+      const regex = /style=(\'|\")([ -0-9a-zA-Z:]*[ 0-9a-zA-Z;]*)*\1/g;
       return html.replace(regex, '');
     }
 
@@ -375,16 +374,16 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
      * @param {Object} itemObj 
      * @returns {string} - hmac
      */
-    function createHmac(itemObj) {
-      var item = itemObj.brand + 
-        itemObj.title + 
-        itemObj.sku + 
-        itemObj.weight + 
-        itemObj.weight_unit + 
-        itemObj.product_type + 
+    const createHmac = itemObj => {
+      const item = itemObj.brand +
+        itemObj.title +
+        itemObj.sku +
+        itemObj.weight +
+        itemObj.weight_unit +
+        itemObj.product_type +
         itemObj.tags;
-      var secret = runtime.getCurrentScript().getParameter('custscript_netsuite_to_shopify_secret');
-      var hmac = forge.hmac.create();
+      const secret = runtime.getCurrentScript().getParameter('custscript_netsuite_to_shopify_secret');
+      const hmac = forge.hmac.create();
       hmac.start('sha256', secret);
       hmac.update(item);
       return hmac.digest().toHex();
