@@ -325,9 +325,10 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
           }
 
         } catch (e) {
+          var errorMsg = JSON.parse(e.message);
           log.error({
             title: 'ERROR!',
-            details: e.message
+            details: unescape(errorMsg.error)
           });
 
           var shopifyErrorForm = serverWidget.createForm({
@@ -336,8 +337,8 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
 
           shopifyErrorForm.addPageInitMessage({
             type: message.Type.ERROR,
-            title: 'ERROR!',
-            message: e.message,
+            title: "ERROR!",
+            message: unescape(errorMsg.error)
           });
 
           response.writePage(shopifyErrorForm);
