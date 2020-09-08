@@ -10,7 +10,7 @@ define(['N/runtime', 'N/log', './ratePackageSelector/main', './ratePackageSelect
     /**
      * Calls the Rate / Package Selector and updates the status of the item fulfillment to shipped.
      * @param {Object} context 
-     * @returns{string} The Item Fulfillment ID
+     * @returns {string} The Item Fulfillment ID
      */
     function onAction(context) {
       var uspsUser = runtime.getCurrentScript().getParameter('custscript_usps_web_user');

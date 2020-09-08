@@ -221,7 +221,7 @@ define(['N/record', 'N/redirect', 'N/ui/serverWidget', 'N/search', 'N/log'],
      * Creates an Inventory Adjustment.
      * @param {string} partialSku 
      * @param {Array} items 
-     * @returns {string} - The Inventory Adjustment ID
+     * @returns {string} The Inventory Adjustment ID
      */
     function inventoryAdjustment(partialSku, items) {
       var adjustmentRecord = record.create({
@@ -306,7 +306,7 @@ define(['N/record', 'N/redirect', 'N/ui/serverWidget', 'N/search', 'N/log'],
     /**
      * Creates a list widget for the results page
      * @param {Object} items
-     * @returns {Object} - The Page to render 
+     * @returns {Object} The Page to render 
      */
     function createPage(partialSku, items) {
       log.debug({

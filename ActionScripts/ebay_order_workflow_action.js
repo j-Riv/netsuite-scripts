@@ -9,7 +9,7 @@ define(['N/record'],
     /**
      * Adds a 'black comb' for every product on an eBay Transaction.
      * @param {Object} context 
-     * @returns {boolean} true
+     * @returns {boolean}
      */    
     function addComb(context) {
       var salesRecord = context.newRecord;

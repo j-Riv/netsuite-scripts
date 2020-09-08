@@ -161,8 +161,8 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './crea
     /**
      * Creates an item search and retrieves the Main Warehouse
      * Location Availability for each item.
-     * @param {Array} ids - The internal ids for items to search for
-     * @returns {Object} - Returns the object returned from createItemSearchObj
+     * @param {Array} ids The internal ids for items to search for
+     * @returns {Object} Returns the object returned from createItemSearchObj
      */
     function mainWarehouseSearch(ids) {
       var itemSearch = search.create({
@@ -246,7 +246,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './crea
 
     /**
      * Generates today's date in format DD/MM/YYYY
-     * @returns {string} - Today's date
+     * @returns {string} Today's date
      */
     function todaysDate() {
       var today = new Date();
@@ -265,7 +265,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './crea
     /**
      * Generates a random string to be used during
      * CSV file naming as to not overwrite existing file.
-     * @returns {string} - The random string
+     * @returns {string} The random string
      */
     function generateRandomString() {
       return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);;
@@ -274,7 +274,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './crea
     /**
      * Creates a list widget for the results page
      * @param {Object} items
-     * @returns {Object} - The Page to render 
+     * @returns {Object} The Page to render 
      */
     function createPage(items) {
       log.debug({

@@ -8,8 +8,8 @@ define(['N/search'],
     /**
      * Gets sales order id(s) based on a saved search
      * Filters saved search based on marketplace
-     * @param {Object} context - the post body
-     * @returns {string[]} - the ids
+     * @param {Object} context The post body
+     * @returns {string[]} The ids
      */
 
     function getPickingTicketIds(context) {

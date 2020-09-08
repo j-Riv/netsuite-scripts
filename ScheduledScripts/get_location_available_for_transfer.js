@@ -45,8 +45,8 @@ define(['N/runtime', 'N/search', 'N/email'],
 
     /**
      * Loads an item search and returns the results.
-     * @param {string} searchID - The saved search's ID
-     * @returns {Array} - The results
+     * @param {string} searchID The saved search's ID
+     * @returns {Array} The results
      */
     function loadSearch(searchID) {
       // create search
@@ -81,7 +81,7 @@ define(['N/runtime', 'N/search', 'N/email'],
 
     /**
      * Creates an object with the items SKU as the key.
-     * @param {array} items - The Search Results
+     * @param {Array} items The Search Results
      * @returns {Object}
      */
     function createItemsObj(items) {
@@ -108,7 +108,7 @@ define(['N/runtime', 'N/search', 'N/email'],
      * Creates and sends the email.
      * @param {string} location1 
      * @param {string} location2 
-     * @param {array} items 
+     * @param {Array} items 
      */
     function sendEmail(location1, location2, items) {
 

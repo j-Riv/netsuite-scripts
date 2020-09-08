@@ -48,9 +48,9 @@ define(['N/currentRecord', 'N/record', 'N/ui/dialog', 'N/log'],
 
     /**
      * Rounds value to 2 decimals
-     * @param {decimal} value - the value you want to round to
-     * @param {integer} decimals - how many decimal places you want to round to 
-     * @returns {number} - the rounded number
+     * @param {decimal} value The value you want to round to
+     * @param {integer} decimals The decimal places you want to round to 
+     * @returns {number} The rounded number
      */
     function round(value, decimals) {
       return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
@@ -58,7 +58,7 @@ define(['N/currentRecord', 'N/record', 'N/ui/dialog', 'N/log'],
 
     /**
      * Calculates handling for manual Sales Orders
-     * @param {Object} context - form
+     * @param {Object} context The form data
      */
     function calculateHandling() {
       var salesRecord = currentRecord.get();
@@ -144,7 +144,7 @@ define(['N/currentRecord', 'N/record', 'N/ui/dialog', 'N/log'],
 
     /**
      * Calculates and sets the total order weight and total order item count
-     * @param {Object} context - form data 
+     * @param {Object} context The form data
      */
     function calculateTotalWeight() {
       try {

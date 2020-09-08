@@ -7,7 +7,7 @@ define(['N/record', 'N/log'], function (record, log) {
 
   /**
    * Sets the sales rep to the appropriate rep based on marketplace / channel
-   * @param {Object} context - form data
+   * @param {Object} context The form data
    */
   function beforeSubmit(context) {
     var currentRecord = context.newRecord;

@@ -12,7 +12,7 @@ define(['N/email', 'N/render'],
      * shipping methods of Curbside Pickup, In Store Pickup
      * and Will Call are set to status shipped.
      * @param {Object} context
-     * @returns {boolean} - true
+     * @returns {boolean}
      */
     function sendEmail(context) {
       // shipping methods

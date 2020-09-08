@@ -151,7 +151,6 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
         end: 1
       });
 
-      // do stuff
       if (results.length > 0) {
         const isMatrix = results[0].getValue('matrix');
 
@@ -372,7 +371,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
     /**
      * Creates HMAC, for data integrity verification.
      * @param {Object} itemObj 
-     * @returns {string} - hmac
+     * @returns {string} HMAC
      */
     const createHmac = itemObj => {
       const item = itemObj.brand +

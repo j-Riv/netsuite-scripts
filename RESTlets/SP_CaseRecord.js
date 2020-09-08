@@ -6,9 +6,9 @@ define(['N/record', 'N/error'],
   function (record, error) {
     /**
      * Validates arguments
-     * @param {Array} args - the record type and optional record id
-     * @param {Array} argNames - what to check against
-     * @param {string} methodName - (GET, DELETE, POST, PUT) 
+     * @param {Array} args The record type and optional record id
+     * @param {Array} argNames The arg names to check against
+     * @param {string} methodName (GET, DELETE, POST, PUT)
      */
     function doValidation(args, argNames, methodName) {
       for (var i = 0; i < args.length; i++)
@@ -21,7 +21,7 @@ define(['N/record', 'N/error'],
     /**
      * Creates a Case Record and generates contact note
      * @param {Object} context 
-     * @returns {string} - the case record id
+     * @returns {string} The case record id
      */
     function post(context) {
       doValidation([context.recordType], ['recordtype'], 'POST');

@@ -373,7 +373,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
     /**
      * Creates HMAC, for data integrity verification.
      * @param {Object} itemObj 
-     * @returns {string} - hmac
+     * @returns {string} HMAC
      */
     function createHmac(itemObj) {
       var item = itemObj.brand + 

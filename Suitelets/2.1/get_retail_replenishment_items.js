@@ -9,7 +9,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
 
     /**
      * Handles Suitelet request
-     * @param {object} context 
+     * @param {Object} context 
      */
     const onRequest = context => {
 
@@ -137,8 +137,8 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
     /**
      * Creates an item search and retrieves the Main Warehouse
      * Location Availability for each item.
-     * @param {array} ids - The internal ids for items to search for
-     * @returns {Object} - Returns the object returned from createItemSearchObj
+     * @param {Array} ids The internal ids for items to search for
+     * @returns {Object} Returns the object returned from createItemSearchObj
      */
     const mainWarehouseSearch = ids => {
       const itemSearch = search.create({
@@ -171,7 +171,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
     /**
      * Creates an the Main Warehouse Location Availability Object,
      * uses the internal id of the item as the key.
-     * @param {array} items 
+     * @param {Array} items 
      * @returns {Object}
      */
     const createItemSearchObj = items => {
@@ -190,7 +190,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
      * Creates a CSV file to be used to import and create a Transfer Order for
      * Retail Store Item Replenishment.
      * @param {Object} items 
-     * @returns {string} - The file's internal id
+     * @returns {string} The file's internal id
      */
     const createCSV = items => {
       const dir = parseInt(runtime.getCurrentScript().getParameter('custscript_retail_replenishment_dir'));
@@ -222,7 +222,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
 
     /**
      * Generates today's date in format DD/MM/YYYY
-     * @returns {string} - Today's date
+     * @returns {string} Today's date
      */
     const todaysDate = () => {
       const today = new Date();
@@ -241,7 +241,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
     /**
      * Generates a random string to be used during
      * CSV file naming as to not overwrite existing file.
-     * @returns {string} - The random string
+     * @returns {string} The random string
      */
     const generateRandomString = () => {
       return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);;
@@ -252,7 +252,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
      * @param {string} itemCount 
      * @param {string} csvID 
      * @param {Object} items 
-     * @returns {string} - The html to render
+     * @returns {string} The html to render
      */
     const createResultsPage = (itemCount, csvID, items) => {
       const head = '<tr><th>ID</th>'
@@ -289,7 +289,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
     /**
      * Creates a list widget for the results page
      * @param {Object} items
-     * @returns {Object} - The Page to render 
+     * @returns {Object} The Page to render 
      */
     const createPage = items => {
       const list = serverWidget.createList({ title: 'Retail Replenishment - ' + todaysDate() + ' | Total: ' + items.length });
@@ -360,36 +360,3 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
       onRequest: onRequest
     };
   });
-
-// Result Object
-// This could change as it depends on the loaded saved search results structure
-var ex = [
-  {
-    recordType: "inventoryitem", // the item type
-    id: "26727", // the internal id
-    values: {
-      formuladate: "7/1/2020", // date to be used for Transfer Order (today)
-      formulatext: "Retail Store-7/1/2020", // memo to be used
-      inventorylocation: [
-        {
-          value: "3",
-          text: "Retail Store"
-        }
-      ],
-      formulanumeric: "0", // store quantity available
-      formulatext_1: "Receiving - Store", // RF Smart Bin Name
-      formulanumeric_1: "4", // Store qty Max
-      itemid: "8-bit-kids-tee-black : S299BL", // SKU
-      displayname: "8-Bit Kid's Tee Black - L", // Display Name
-      type: [
-        {
-          value: "InvtPart", // type
-          text: "Inventory Item"
-        }
-      ],
-      formulanumeric_2: "15", // total available across all locations
-      formulanumeric_3: "4", // quantity to transfer based on need (Max - Available)
-      isavailable: true
-    },
-  }
-];
