@@ -6,7 +6,9 @@ define(['N/runtime', 'N/search', 'N/email'],
   function (runtime, search, email) {
 
     /**
-     * Executes scheduled script
+     * Executes the scheduled script.
+     * Compares the inventory across 2 locations and lists
+     * what can be transferred via an email.
      */
     function execute() {
       // get params
@@ -51,7 +53,7 @@ define(['N/runtime', 'N/search', 'N/email'],
     /**
      * Creates an item search and returns the results.
      * @param {string} formula - The SQL formula to use
-     * @returns {array}
+     * @returns {Array} - The results
      */
     function createSearch(formula1, formula2) {
       // create search

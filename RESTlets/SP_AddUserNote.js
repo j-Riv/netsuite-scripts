@@ -6,9 +6,9 @@ define(['N/record', 'N/error'],
   function (record, error) {
     /**
      * Validates arguments
-     * @param {array} args - the record type and optional record id
-     * @param {*} argNames - what to check against
-     * @param {*} methodName - (GET, DELETE, POST, PUT) 
+     * @param {Array} args - the record type and optional record id
+     * @param {Array} argNames - what to check against
+     * @param {string} methodName - (GET, DELETE, POST, PUT) 
      */
     function doValidation(args, argNames, methodName) {
       for (var i = 0; i < args.length; i++)
@@ -21,7 +21,8 @@ define(['N/record', 'N/error'],
 
     /**
      * Attaches note to entity
-     * @param {*} context - post body
+     * @param {Object} context - post body
+     * @returns{string} - the notes id
      */
     function post(context) {
       doValidation([context.recordtype], ['recordtype'], 'POST');

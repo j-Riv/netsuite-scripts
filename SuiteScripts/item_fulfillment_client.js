@@ -93,6 +93,10 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log'],
           }
         } catch (e) {
           console.log(e.message);
+          log.debug({
+            title: 'FAILED TO CHANGE SHIP STATUS',
+            details: e.message
+          });
         }
       }
       // USPS Priority

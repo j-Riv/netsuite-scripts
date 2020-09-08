@@ -9,7 +9,7 @@ define(['N/record', 'N/redirect', 'N/ui/serverWidget', 'N/search', 'N/log'],
 
     /**
      * Handles Suitelet request
-     * @param {object} context 
+     * @param {Object} context 
      */
     function onRequest(context) {
 
@@ -108,7 +108,7 @@ define(['N/record', 'N/redirect', 'N/ui/serverWidget', 'N/search', 'N/log'],
     /**
      * Creates a search for all Sku(s) containing the partial sku provided.
      * @param {string} partialSku
-     * @returns {array}
+     * @returns {Array}
      */
     function getItems(partialSku) {
       var itemSearch = search.create({

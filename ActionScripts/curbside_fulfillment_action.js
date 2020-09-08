@@ -5,13 +5,14 @@
  *
 */
 
-define(['N/email', 'N/record', 'N/render'], 
-  function (email, record, render) {
+define(['N/email', 'N/render'], 
+  function (email, render) {
     /**
      * Sends an email whenever an item fulfillment with
      * shipping methods of Curbside Pickup, In Store Pickup
      * and Will Call are set to status shipped.
-     * @param {*} context - Record Object
+     * @param {Object} context
+     * @returns {boolean} - true
      */
     function sendEmail(context) {
       // shipping methods

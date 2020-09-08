@@ -46,7 +46,7 @@ define(['N/runtime', 'N/search', 'N/email'],
     /**
      * Loads an item search and returns the results.
      * @param {string} searchID - The saved search's ID
-     * @returns {array}
+     * @returns {Array} - The results
      */
     function loadSearch(searchID) {
       // create search

@@ -6,9 +6,9 @@ define(['N/record', 'N/error'],
     function (record, error) {
         /**
          * Validates arguments
-         * @param {array} args - the record type and optional record id
-         * @param {*} argNames - what to check against
-         * @param {*} methodName - (GET, DELETE, POST, PUT) 
+         * @param {Array} args - the record type and optional record id
+         * @param {Array} argNames - what to check against
+         * @param {string} methodName - (GET, DELETE, POST, PUT) 
          */
         function doValidation(args, argNames, methodName) {
             for (var i = 0; i < args.length; i++)
@@ -19,8 +19,9 @@ define(['N/record', 'N/error'],
                     });
         }
         /**
-         * Get the lead record
+         * Gets a standard record by type and id
          * @param {Object} context - post body
+         * @returns {Object} - the record
          */
         function _get(context) {
             // Parse data passed to url ex: &recordtype=customer&id=1102
@@ -31,8 +32,9 @@ define(['N/record', 'N/error'],
             }));
         }
         /**
-         * Delete the lead record
+         * Deletes a standard record by type and id
          * @param {Object} context - post body 
+         * @returns {string} - the deleted id
          */
         function _delete(context) {
             doValidation([context.recordtype, context.id], ['recordtype', 'id'], 'DELETE');
@@ -43,8 +45,9 @@ define(['N/record', 'N/error'],
             return String(context.id);
         }
         /**
-         * Creates a Lead from the Wholesale Application Form
+         * Creates a Lead Record from the Wholesale Application Form
          * @param {Object} context - post body
+         * @returns {string} - the records id
          */
         function post(context) {
             doValidation([context.recordtype], ['recordtype'], 'POST');

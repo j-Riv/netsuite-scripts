@@ -10,7 +10,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
     /**
      * Creates the product form on a GET request.
      * Sends data to the API on a post request.
-     * @param {object} context 
+     * @param {Object} context 
      */
     function onRequest(context) {
 
@@ -27,7 +27,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
 
     /**
      * Generates the product form.
-     * @param {object} response 
+     * @param {Object} response 
      */
     function onGet(response) {
       // create product form
@@ -91,8 +91,8 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
     /**
      * Sends product data to the API to create a new
      * product in Shopify.
-     * @param {object} request 
-     * @param {object} response 
+     * @param {Object} request 
+     * @param {Object} response 
      */
     function onPost(request, response) {
       var serverURL = runtime.getCurrentScript().getParameter('custscript_servername');

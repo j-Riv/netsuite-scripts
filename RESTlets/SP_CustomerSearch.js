@@ -8,6 +8,7 @@ define(['N/search'],
     /**
      * Searches for customer by field name and value
      * @param {Object} context - the post body 
+     * @returns {Object} - the customers data
      */
     function post(context) {
       var customerSearchResult = search.create({
