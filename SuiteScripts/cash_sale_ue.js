@@ -3,36 +3,35 @@
  * @NScriptType UserEventScript
  * @NModuleScope SameAccount
  */
-define(['N/record', 'N/log'], function (record, log) {
+define(['N/log'], 
+  function (log) {
 
-  function afterSubmit(context) {
-    var giftCardId = 22021;
-    log.debug({
-      title: 'RUNNING CS AFTER SUBMIT',
-      details: 'shit ran'
-    });
-    var currentRecord = context.newRecord;
-    var lines = currentRecord.getLineCount({ sublistId: 'item' });
-    log.debug({
-      title: "LINES",
-      details: lines,
-    });
-    for (var i = 0; i < lines; i++) {
+    /**
+     * Adds gift certificate code to gift certificate line item.
+     * Still a work in progress.
+     * @param {Object} context 
+     */
+    function addGiftCertCode(context) {
+      var giftCardId = 22021;
+      var currentRecord = context.newRecord;
+      var lines = currentRecord.getLineCount({ sublistId: 'item' });
 
-      // currentRecord.selectLine({ sublistId: 'item', line: i });
-      var itemInternalId = currentRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
-      if (parseInt(itemInternalId) == giftCardId) {
-        var giftCardCode = currentRecord.getSublistValue({ sublistId: 'item', fieldId: 'giftcertnumber', line: i });
+      for (var i = 0; i < lines; i++) {
+        var itemInternalId = currentRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
+        if (parseInt(itemInternalId) == giftCardId) {
+          var giftCardCode = currentRecord.getSublistValue({ sublistId: 'item', fieldId: 'giftcertnumber', line: i });
 
-        if (giftCardCode == '') {
-          var giftCardCode = 'shopify1';
-          currentRecord.setSublistValue({ sublistId: 'item', fieldId: 'giftcertnumber', line: i, value: giftCardCode });
+          if (giftCardCode == '') {
+            // generated code will go here
+            var giftCardCode = 'shopify1';
+            currentRecord.setSublistValue({ sublistId: 'item', fieldId: 'giftcertnumber', line: i, value: giftCardCode });
+          }
         }
       }
     }
-  }
 
-  return {
-    beforeSubmit: afterSubmit
+    return {
+      beforeSubmit: addGiftCertCode
+    }
   }
-});
+);

@@ -5,7 +5,10 @@
 define(['N/currentRecord', 'N/ui/dialog'],
   function (currentRecord, dialog) {
 
-    function pageInit(context) {
+    /**
+     * Log script loaded
+     */
+    function pageInit() {
       // todo
       console.log('International Sales Order Client Script Loaded');
     }

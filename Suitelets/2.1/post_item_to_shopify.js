@@ -10,7 +10,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
     /**
      * Creates the product form on a GET request.
      * Sends data to the API on a post request.
-     * @param {object} context 
+     * @param {Object} context 
      */
     const onRequest = context => {
 
@@ -27,7 +27,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
 
     /**
      * Generates the product form.
-     * @param {object} response 
+     * @param {Object} response 
      */
     const onGet = response => {
       // create product form
@@ -91,8 +91,8 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
     /**
      * Sends product data to the API to create a new
      * product in Shopify.
-     * @param {object} request 
-     * @param {object} response 
+     * @param {Object} request 
+     * @param {Object} response 
      */
     const onPost = (request, response) => {
       const serverURL = runtime.getCurrentScript().getParameter('custscript_servername');
@@ -151,7 +151,6 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
         end: 1
       });
 
-      // do stuff
       if (results.length > 0) {
         const isMatrix = results[0].getValue('matrix');
 
@@ -372,7 +371,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
     /**
      * Creates HMAC, for data integrity verification.
      * @param {Object} itemObj 
-     * @returns {string} - hmac
+     * @returns {string} HMAC
      */
     const createHmac = itemObj => {
       const item = itemObj.brand +

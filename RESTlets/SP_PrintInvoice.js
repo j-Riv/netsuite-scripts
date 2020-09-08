@@ -7,7 +7,8 @@ define(['N/render'],
   function (render) {
     /**
      * Gets the picking ticket pdf
-     * @param {Object} context - post body
+     * @param {Object} context The post body
+     * @returns {string} The pdf data
      */
     function getPickingTicketPDF(context) {
 

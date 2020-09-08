@@ -7,6 +7,10 @@
 define(['N/log', './ratePackageSelector/setPackage'],
   function (log, setPackage) {
 
+    /**
+     * Calls Set Package 
+     * @param {Object} context
+     */
     function onAction(context) {
       try {
         // Get item fulfillment

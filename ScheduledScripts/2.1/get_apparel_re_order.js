@@ -77,7 +77,7 @@ define(['N/runtime', 'N/search', 'N/email', 'N/file'],
 
     /**
      * Loads an item search and returns the results.
-     * @returns {array}
+     * @returns {Array} The results
      */
     const loadSearch = () => {
       // create search
@@ -108,7 +108,7 @@ define(['N/runtime', 'N/search', 'N/email', 'N/file'],
 
     /**
      * Creates an object with the items SKU as the key.
-     * @param {array} items - The Search Results
+     * @param {Array} items The Search Results
      * @returns {Object}
      */
     const createItemsObj = items => {
@@ -176,7 +176,7 @@ define(['N/runtime', 'N/search', 'N/email', 'N/file'],
 
     /**
      * Creates a JSON file and saves it to the File Cabinet
-     * @param {string} data -  The content's for the file
+     * @param {string} data The content's for the file
      */
     const createJsonFile = (directory, data) => {
       const jsonFile = file.create({
@@ -212,7 +212,7 @@ define(['N/runtime', 'N/search', 'N/email', 'N/file'],
      * Creates a CSV file to be used to import and create a Transfer Order for
      * Retail Store Item Replenishment.
      * @param {Object} items 
-     * @returns {string} - The file's internal id
+     * @returns {string} The file's internal id
      */
     const createCSV = (directory, items) => {
       const dir = directory;
@@ -241,7 +241,7 @@ define(['N/runtime', 'N/search', 'N/email', 'N/file'],
 
     /**
      * Generates today's date in format DD/MM/YYYY
-     * @returns {string} - Today's date
+     * @returns {string} Today's date
      */
     const todaysDate = () => {
       const today = new Date();
@@ -260,7 +260,7 @@ define(['N/runtime', 'N/search', 'N/email', 'N/file'],
     /**
      * Generates a random string to be used during
      * CSV file naming as to not overwrite existing file.
-     * @returns {string} - The random string
+     * @returns {string} The random string
      */
     const generateRandomString = () => {
       return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);;

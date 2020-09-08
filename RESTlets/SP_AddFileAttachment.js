@@ -6,9 +6,9 @@ define(['N/file', 'N/record', 'N/error'],
   function (file, record, error) {
     /**
      * Validates arguments
-     * @param {array} args - the record type and optional record id
-     * @param {*} argNames - what to check against
-     * @param {*} methodName - (GET, DELETE, POST, PUT) 
+     * @param {Array} args The record type and optional record id
+     * @param {Array} argNames The arg names to check against
+     * @param {string} methodName (GET, DELETE, POST, PUT) 
      */
     function doValidation(args, argNames, methodName) {
       for (var i = 0; i < args.length; i++)
@@ -19,8 +19,9 @@ define(['N/file', 'N/record', 'N/error'],
           });
     }
     /**
-     * Attaches file to Record
-     * @param {*} context - post body
+     * Attaches file to Record.
+     * @param {Object} context The post body
+     * @returns {string} The file id
      */
     function post(context) {
       doValidation([context.recordType], ['recordtype'], 'POST');
