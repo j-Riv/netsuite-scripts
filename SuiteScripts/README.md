@@ -76,6 +76,8 @@ Generates buttons for flat rate shipping. These buttons will select the appropri
   </tr>
 </table>
 
+#### Cash Refund Client
+> cash_refund_client.js
 
 ## USER EVENT SCRIPTS
 
