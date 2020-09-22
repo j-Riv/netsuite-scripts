@@ -4,12 +4,12 @@
  * @NModuleScope SameAccount
  */
 
-define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './createTransferOrder'],
-  function (runtime, serverWidget, search, file, log, spTransferOrder) {
+define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', 'N/ui/message', './createTransferOrder'],
+  function (runtime, serverWidget, search, file, log, message, spTransferOrder) {
 
     /**
      * Handles Suitelet request
-     * @param {Object} context 
+     * @param {object} context 
      */
     function onRequest(context) {
 
@@ -21,7 +21,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './crea
       } else {
         onPost(response);
       }
-      
+
     }
 
     /**
@@ -50,6 +50,12 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './crea
       // create form
       var form = serverWidget.createForm({ title: 'Retail Replenishment - ' + todaysDate() + ' | Total: ' + items.length });
 
+      form.addPageInitMessage({
+        type: message.Type.CONFIRMATION,
+        title: 'SUCCESS!',
+        message: 'Transfer Order Created!'
+      });
+
       form.addField({
         id: 'custpage_message',
         type: serverWidget.FieldType.INLINEHTML,
@@ -60,7 +66,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './crea
 
     /**
      * Creates the retail replenishment results list.
-     * @returns {Array}
+     * @returns {array}
      */
     function getReplenishment() {
       // Load saved search
@@ -85,9 +91,9 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './crea
       });
 
       var itemResults = [];
-      pagedData.pageRanges.forEach(function(pageRange) {
+      pagedData.pageRanges.forEach(function (pageRange) {
         var page = pagedData.fetch({ index: pageRange.index });
-        page.data.forEach(function(result) {
+        page.data.forEach(function (result) {
           itemResults.push(result);
         });
       });
@@ -140,7 +146,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './crea
           var replenish = {
             id: item.id,
             sku: sku,
-            name: itemName.replace(',',''),
+            name: itemName.replace(',', ''),
             storeQuantityAvailable: storeQuantityAvailable,
             storeQuantityMax: storeQuantityMax,
             warehouseItemID: itemSearchValues[j],
@@ -161,8 +167,8 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './crea
     /**
      * Creates an item search and retrieves the Main Warehouse
      * Location Availability for each item.
-     * @param {Array} ids The internal ids for items to search for
-     * @returns {Object} Returns the object returned from createItemSearchObj
+     * @param {array} ids - The internal ids for items to search for
+     * @returns {Object} - Returns the object returned from createItemSearchObj
      */
     function mainWarehouseSearch(ids) {
       var itemSearch = search.create({
@@ -195,7 +201,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './crea
     /**
      * Creates an the Main Warehouse Location Availability Object,
      * uses the internal id of the item as the key.
-     * @param {Array} items 
+     * @param {array} items 
      * @returns {Object}
      */
     function createItemSearchObj(items) {
@@ -233,7 +239,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './crea
       for (i in items) {
         var item = items[i];
         csvFile.appendLine({
-          value: 'Retail Store - ' + today + ',' + item.id + ',' + item.sku + ',' + item.name + ',' + item.storeQuantityAvailable + ',' 
+          value: 'Retail Store - ' + today + ',' + item.id + ',' + item.sku + ',' + item.name + ',' + item.storeQuantityAvailable + ','
             + item.storeQuantityMax + ',' + item.warehouseQuantityAvailable + ',' + item.quantityNeeded
             + ',' + today
         });
@@ -246,7 +252,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './crea
 
     /**
      * Generates today's date in format DD/MM/YYYY
-     * @returns {string} Today's date
+     * @returns {string} - Today's date
      */
     function todaysDate() {
       var today = new Date();
@@ -265,16 +271,16 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', './crea
     /**
      * Generates a random string to be used during
      * CSV file naming as to not overwrite existing file.
-     * @returns {string} The random string
+     * @returns {string} - The random string
      */
     function generateRandomString() {
-      return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);;
+      return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     }
 
     /**
      * Creates a list widget for the results page
      * @param {Object} items
-     * @returns {Object} The Page to render 
+     * @returns {Object} - The Page to render 
      */
     function createPage(items) {
       log.debug({
