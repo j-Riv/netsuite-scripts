@@ -8,31 +8,31 @@ define(['N/runtime', 'N/search', 'N/record', 'N/email'],
     /**
      * Executes scheduled script
      */
-    function execute() {
+    const execute = () => {
       // load search
-      var searchID = runtime.getCurrentScript().getParameter('custscript_auto_create_task_search');
+      const searchID = runtime.getCurrentScript().getParameter('custscript_auto_create_task_search');
 
-      var customerSearch = search.load({
+      const customerSearch = search.load({
         id: searchID
       });
 
-      var pagedData = customerSearch.runPaged({
+      const pagedData = customerSearch.runPaged({
         pageSize: 1000
       });
 
-      var customerResults = [];
-      pagedData.pageRanges.forEach(function(pageRange) {
-        var page = pagedData.fetch({ index: pageRange.index });
-        page.data.forEach(function(result) {
+      const customerResults = [];
+      pagedData.pageRanges.forEach(pageRange => {
+        const page = pagedData.fetch({ index: pageRange.index });
+        page.data.forEach(result => {
 
           log.debug({
             title: 'RESULT',
             details: JSON.stringify(result)
           });
 
-          var salesRepId = result.getValue({ name: 'salesrep' });
-          var salesRep = result.getText({ name: 'salesrep' });
-          var repData = getDefaultRep(salesRep, salesRepId);
+          const salesRepId = result.getValue({ name: 'salesrep' });
+          const salesRep = result.getText({ name: 'salesrep' });
+          const repData = getDefaultRep(salesRep, salesRepId);
 
           customerResults.push({
             customerId: result.getValue({ name: 'internalid' }),
@@ -40,7 +40,7 @@ define(['N/runtime', 'N/search', 'N/record', 'N/email'],
             lastOrderDate: result.getValue({ name: 'lastorderdate' }),
             salesRep: repData.salesRep,
             salesRepId: repData.salesRepId,
-            followUpScheduled: result.getValue({ name: 'custentity_sp_follow_up_scheduled'})
+            followUpScheduled: result.getValue({ name: 'custentity_sp_follow_up_scheduled' })
           });
         });
       });
@@ -51,16 +51,16 @@ define(['N/runtime', 'N/search', 'N/record', 'N/email'],
       });
 
       // create tasks
-      var tasksCreated = [];
-      var customersUpdated = [];
-      customerResults.forEach(function(result) {
-        var taskId = createTask(result.salesRepId, result.customerId);
+      const tasksCreated = [];
+      const customersUpdated = [];
+      customerResults.forEach(result => {
+        const taskId = createTask(result.salesRepId, result.customerId);
         tasksCreated.push({
           taskId: taskId,
           salesRep: result.salesRep,
           name: result.name
         });
-        var customerId = updateCustomer(result.customerId);
+        const customerId = updateCustomer(result.customerId);
         customersUpdated.push({
           id: customerId,
           name: result.name
@@ -88,16 +88,16 @@ define(['N/runtime', 'N/search', 'N/record', 'N/email'],
      * @param {string} salesRepId - Sales Rem ID
      * @returns {Object} - Sales Rep Data (Name, ID)
      */
-    function getDefaultRep(salesRep, salesRepId) {
+    const getDefaultRep = (salesRep, salesRepId) => {
       // set defaults
-      var defaultRep = runtime.getCurrentScript().getParameter('custscript_auto_create_task_def_rep');
-      var defaultInternationalRep = runtime.getCurrentScript().getParameter('custscript_auto_create_task_def_int_rep');
-      var defaultWesternRep = runtime.getCurrentScript().getParameter('custscript_auto_create_task_def_wr_rep');
-      var defaultEasternRep = runtime.getCurrentScript().getParameter('custscript_auto_create_task_def_er_rep');
-      var defaultCentralRep = runtime.getCurrentScript().getParameter('custscript_auto_create_task_def_cr_rep');
-      var defaultEnterpriseRep = runtime.getCurrentScript().getParameter('custscript_auto_create_task_def_ent_rep');
-      var defaultFranchiseRep = runtime.getCurrentScript().getParameter('custscript_auto_create_task_def_fra_rep');
-      var regions = {
+      const defaultRep = runtime.getCurrentScript().getParameter('custscript_auto_create_task_def_rep');
+      const defaultInternationalRep = runtime.getCurrentScript().getParameter('custscript_auto_create_task_def_int_rep');
+      const defaultWesternRep = runtime.getCurrentScript().getParameter('custscript_auto_create_task_def_wr_rep');
+      const defaultEasternRep = runtime.getCurrentScript().getParameter('custscript_auto_create_task_def_er_rep');
+      const defaultCentralRep = runtime.getCurrentScript().getParameter('custscript_auto_create_task_def_cr_rep');
+      const defaultEnterpriseRep = runtime.getCurrentScript().getParameter('custscript_auto_create_task_def_ent_rep');
+      const defaultFranchiseRep = runtime.getCurrentScript().getParameter('custscript_auto_create_task_def_fra_rep');
+      const regions = {
         "International": {
           id: defaultInternationalRep,
           rep: "Default International"
@@ -123,7 +123,8 @@ define(['N/runtime', 'N/search', 'N/record', 'N/email'],
           rep: "Default Enterprise"
         }
       }
-      var regionKeys = Object.keys(regions);
+
+      const regionKeys = Object.keys(regions);
 
       if (regionKeys.includes(salesRep)) {
         return {
@@ -148,8 +149,8 @@ define(['N/runtime', 'N/search', 'N/record', 'N/email'],
      * @param {string} id - Customers ID
      * @returns {string} - Updated Customer's ID
      */
-    function updateCustomer(id) {
-      var customerRecord = record.load({
+    const updateCustomer = id => {
+      const customerRecord = record.load({
         type: 'customer',
         id: id,
         isDynamic: true
@@ -160,7 +161,7 @@ define(['N/runtime', 'N/search', 'N/record', 'N/email'],
         value: true
       });
 
-      var customerId = customerRecord.save({
+      const customerId = customerRecord.save({
         enableSourcing: false,
         ignoreMandatoryFields: false
       });
@@ -175,8 +176,8 @@ define(['N/runtime', 'N/search', 'N/record', 'N/email'],
      * @param {string} customerId - Sales Rep ID
      * @returns {string} - Task ID
      */
-    function createTask(salesRepId, customerId) {
-      var taskRecord = record.create({
+    const createTask = (salesRepId, customerId) => {
+      const taskRecord = record.create({
         type: record.Type.TASK,
         isDynamic: true
       });
@@ -216,7 +217,7 @@ define(['N/runtime', 'N/search', 'N/record', 'N/email'],
         value: true
       });
 
-      var taskId = taskRecord.save({
+      const taskId = taskRecord.save({
         enableSourcing: false,
         ignoreMandatoryFields: false
       });
@@ -229,10 +230,10 @@ define(['N/runtime', 'N/search', 'N/record', 'N/email'],
      * Generated due date 7 days from creation date.
      * @returns {string} - Due Date
      */
-    function dueDate() {
-      var days = runtime.getCurrentScript().getParameter('custscript_auto_create_task_due_in_days');
-      var today = new Date();
-      var dateDue = new Date(today.getFullYear(), today.getMonth(), today.getDate()+days);
+    const dueDate = () => {
+      const days = runtime.getCurrentScript().getParameter('custscript_auto_create_task_due_in_days');
+      const today = new Date();
+      const dateDue = new Date(today.getFullYear(), today.getMonth(), today.getDate() + days);
       return dateDue;
     }
 
@@ -240,13 +241,13 @@ define(['N/runtime', 'N/search', 'N/record', 'N/email'],
      * Sends an email with a list of tasks created.
      * @param {Array} tasksCreated - Task Data
      */
-    function sendEmail(tasksCreated) {
-      var emailRecipient = runtime.getCurrentScript().getParameter('custscript_auto_create_task_email_rec');
-      var emailList = runtime.getCurrentScript().getParameter('custscript_auto_create_task_email_list').split(',');
-      var html = '<p>The following tasks were automatically created: </p>' + 
+    const sendEmail = tasksCreated => {
+      const emailRecipient = runtime.getCurrentScript().getParameter('custscript_auto_create_task_email_rec');
+      const emailList = runtime.getCurrentScript().getParameter('custscript_auto_create_task_email_list').split(',');
+      let html = '<p>The following tasks were automatically created: </p>' +
         '<table><tr><th style="padding: 5px;"><b>ID</b></th><th style="padding: 5px;"><b>Customer</b></th><th style="padding: 5px;"><b>Sales Rep</b></th></tr>';
 
-      tasksCreated.forEach(function (task) {
+      tasksCreated.forEach(task => {
         html += '<tr><td style="padding: 5px;">' + task.taskId + '</td><td style="padding: 5px;">' + task.name + '</td><td style="padding: 5px;">' + task.salesRep + '</td></tr>'
       });
       html += '</table>';
