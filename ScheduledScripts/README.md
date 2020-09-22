@@ -149,3 +149,125 @@ Script requires 4 paramaters.
     <td>The id of the directory used to load and save files.</td>
   </tr>
 </table>
+
+## AUTO CREATE TASKS
+> auto_create_tasks.js
+
+Runs a search to get all Customers that have not ordered in the specified date range. It then creates a task / follow up for the Sales Rep attached to the Customer Record.
+
+### Setup
+#### Saved Search
+
+Customer Search
+
+Criteria:
+<table>
+  <tr>
+    <th>Filter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>Date of Last Order</td>
+    <td>is on or before same day three months ago</td>
+  </tr>
+  <tr>
+    <td>Sales Rep</td>
+    <td>Is none of (list reps to exclude)</td>
+  </tr>
+  <tr>
+    <td>Follow Up Scheduled (Custom)</td>
+    <td>is False</td>
+  </tr>
+</table>
+
+Results:
+<table>
+  <tr>
+    <th>Field</th>
+  </tr>
+  <tr>
+    <td>Internal ID</td>
+  </tr>
+  <tr>
+    <td>Name</td>
+  </tr>
+  <tr>
+    <td>Date of Last Order</td>
+  </tr>
+  <tr>
+    <td>Follow Up Scheduled (Custom)</td>
+  </tr>
+  <tr>
+    <td>Sales Rep</td>
+  </tr>
+  <tr>
+    <td>Sales Rep : Internal ID</td>
+  </tr>
+</table>
+
+#### Script Deployment
+
+Script requires 11 parameters.
+
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Type</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>custscript_auto_create_task_search</td>
+    <td>Free-Form-Text</td>
+    <td>The saved search to load.</td>
+  </tr>
+  <tr>
+    <td>custscript_auto_create_task_def_rep</td>
+    <td>Free-Form-Text</td>
+    <td>The default Rep ID to use if no other Rep exists.</td>
+  </tr>
+  <tr>
+    <td>custscript_auto_create_task_def_wr_rep</td>
+    <td>Free-Form-Text</td>
+    <td>The default Western Region Rep ID.</td>
+  </tr>
+  <tr>
+    <td>custscript_auto_create_task_def_er_rep</td>
+    <td>Free-Form-Text</td>
+    <td>The default Eastern Region Rep ID.</td>
+  </tr>
+  <tr>
+    <td>custscript_auto_create_task_def_cr_rep</td>
+    <td>Free-Form-Text</td>
+    <td>The default Central Region Rep ID.</td>
+  </tr>
+  <tr>
+    <td>custscript_auto_create_task_ent_rep</td>
+    <td>Free-Form-Text</td>
+    <td>The default Enterprise Rep ID.</td>
+  </tr>
+  <tr>
+    <td>custscript_auto_create_task_def_fran_rep</td>
+    <td>Free-Form-Text</td>
+    <td>The default Franchise Re ID.</td>
+  </tr>
+  <tr>
+    <td>custscript_auto_create_task_def_int_rep</td>
+    <td>Free-Form-Text</td>
+    <td>The default International Rep ID.</td>
+  </tr>
+  <tr>
+    <td>custscript_auto_create_task_email_rec</td>
+    <td>Free-Form-Text</td>
+    <td>The email recipient ID.</td>
+  </tr>
+  <tr>
+    <td>custscript_auto_create_task_email_list</td>
+    <td>Free-Form-Text</td>
+    <td>A comma seperated list of employee internal IDs with no spaces.</td>
+  </tr>
+  <tr>
+    <td>custscript_auto_create_task_due_in_days</td>
+    <td>Integer Number</td>
+    <td>The number of days from creation date used to set the due date on the task.</td>
+  </tr>
+</table>
