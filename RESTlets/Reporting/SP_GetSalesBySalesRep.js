@@ -2,16 +2,19 @@
  *@NApiVersion 2.1
  *@NScriptType Restlet
  */
-define(['N/record', 'N/search', 'N/error'],
-  function (record, search, error) {
-
-    function post(context) {
+define(['N/runtime', 'N/record', 'N/search', 'N/error'],
+  function (runtime, record, search, error) {
+    /**
+     * Executes the Search and returns the data.
+     * @param {Object} context - The Post Body
+     */
+    const post = context => {
       log.debug({
         title: 'THE POST BODY',
         details: 'Start Date: ' + context.start + ' | End Date: ' + context.end
       });
       // load search
-      const searchID = 'customsearch_sp_sales_by_rep';
+      const searchID = runtime.getCurrentScript().getParameter('custscript_get_sales_sales_rep_search');
       const transactionSearch = search.load({
         id: searchID
       });
@@ -26,19 +29,22 @@ define(['N/record', 'N/search', 'N/error'],
         details: 'Start Date: ' + start + ' | End Date: ' + end + 'New Start Date: ' + newStart + ' | New End Date: ' + newEnd
       });
 
-      // add column
+      // create columns
+      // current sales - date range = supplied dates
       const currentSales = search.createColumn({
         name: 'formulacurrency2',
         label: 'currentSales',
         formula: "NVL(sum(CASE WHEN {trandate} BETWEEN to_date('" + start + "', 'MM/DD/YYYY') AND to_date('" + end + "', 'MM/DD/YYYY') THEN {amount} END),0)",
         summary: search.Summary.MAX
       });
+      // last sales - date range = days between supplied dates - start day and end day
       const lastSales = search.createColumn({
         name: 'formulacurrency1',
         label: 'lastSales',
         formula: "NVL(sum(CASE WHEN {trandate} BETWEEN to_date('" + newStart + "', 'MM/DD/YYYY') AND to_date('" + newEnd + "', 'MM/DD/YYYY') THEN {amount} END),0)",
         summary: search.Summary.MAX
       });
+      // sales growth = current sales - last sales / last sales
       const salesGrowth = search.createColumn({
         name: 'formulapercent',
         // formula: "NVL(sum(CASE WHEN {trandate} BETWEEN to_date('8/31/2020', 'MM/DD/YYYY') AND to_date('9/4/2020', 'MM/DD/YYYY') THEN {amount} END),0)",
@@ -47,24 +53,24 @@ define(['N/record', 'N/search', 'N/error'],
           "NVL(sum(CASE WHEN {trandate} BETWEEN to_date('" + newStart + "', 'MM/DD/YYYY') AND to_date('" + newEnd + "', 'MM/DD/YYYY') THEN {amount} END),1))",
         summary: search.Summary.MAX
       });
+      // add columns to existing columns
       const transactionSearchColumns = transactionSearch.columns;
       transactionSearchColumns.push(lastSales);
       transactionSearchColumns.push(currentSales);
       transactionSearchColumns.push(salesGrowth);
 
-      // add filter
+      // create filters
       const startDate = search.createFilter({
         name: 'trandate',
         operator: search.Operator.ONORAFTER,
-        // values: ['8/31/2020']
         values: [newStart]
       });
       const endDate  = search.createFilter({
         name: 'trandate',
         operator: search.Operator.ONORBEFORE,
-        // values: ['9/4/2020']
         values: [end]
       });
+      // add filters to existing filters
       const transactionSearchFilters = transactionSearch.filters;
       transactionSearchFilters.push(startDate);
       transactionSearchFilters.push(endDate);
@@ -108,7 +114,14 @@ define(['N/record', 'N/search', 'N/error'],
 
     }
 
-    function dateDiff(start, end) {
+    /**
+     * Calculates the date difference between 2 dates and 
+     * returns 2 new dates.
+     * @param {string} start - The start date
+     * @param {string} end - The end date
+     * @returns {Object}
+     */
+    const dateDiff = (start, end) => {
       const date1 = new Date(start);
       const date2 = new Date(end);
       const diffTime = date2.getTime() - date1.getTime();
@@ -121,7 +134,12 @@ define(['N/record', 'N/search', 'N/error'],
 
     }
 
-    function formatDate(date) {
+    /**
+     * Formats a date to MM/DD/YYYY.
+     * @param {Object} date - The date object 
+     * @returns {string} - Formatted date
+     */
+    const formatDate = date => {
       const m = date.getMonth() + 1;
       const d = date.getDate();
       const y = date.getFullYear();
