@@ -4,7 +4,7 @@
 
 ## CLIENT SCRIPTS
 
-#### Sales Order Client
+#### SALES ORDER CLIENT
 > sales_order_client.js
 
 Calculates handling cost based on region, adds it to the shipping cost and 
@@ -40,7 +40,7 @@ Regions
   </tr>
 </table>
 
-#### Item Fulfillment Client
+#### ITEM FULFILLMENT CLIENT
 > item_fulfillment_client.js
 
 Generates buttons for flat rate shipping. These buttons will select the appropriate shipping method and packaging (box type, dimensions etc...).
@@ -76,12 +76,20 @@ Generates buttons for flat rate shipping. These buttons will select the appropri
   </tr>
 </table>
 
-#### Cash Refund Client
+#### CASH REFUND CLIENT
 > cash_refund_client.js
+
+Makes tax rate match attached Cash Sale.
+
+#### USER TASK CLIENT
+> user_task_client.js
+
+Generates a button on the Task Form that will set the status to complete and update the 'Follow Up Scheduled' field on the Customer Record.
+
 
 ## USER EVENT SCRIPTS
 
-#### Sales Order User Event
+#### SALES ORDER USER EVENT
 > sales_order_ue.js
 
 Sets the Sales Channel and Sales Rep fields, based on the FarApp Marketplace field value. If order was created in NetSuite the FarApp Marketplace field will be empty and NetSuite will select the Sales Rep attached to the customer record.
