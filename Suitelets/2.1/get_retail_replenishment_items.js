@@ -4,25 +4,71 @@
  * @NModuleScope SameAccount
  */
 
-define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
-  (runtime, serverWidget, search, file, log) => {
+define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log', 'N/ui/message', './createTransferOrder'],
+  function (runtime, serverWidget, search, file, log, message, spTransferOrder) {
 
     /**
      * Handles Suitelet request
-     * @param {Object} context 
+     * @param {object} context 
      */
     const onRequest = context => {
 
       const request = context.request;
       const response = context.response;
-      onGet(response);
+
+      if (request.method == 'GET') {
+        onGet(response);
+      } else {
+        onPost(response);
+      }
+
     }
 
     /**
-     * Handles Get Request and loads the saved search
+     * Handles the Get Request
      * @param {Object} response 
      */
     const onGet = response => {
+      const items = getReplenishment();
+      const page = createPage(items);
+      response.writePage(page);
+    }
+
+    /**
+     * Handles the Post Request
+     * @param {Object} response 
+     */
+    const onPost = response => {
+      const items = getReplenishment();
+      // create CSV and save to file cabinet
+      const csvFileId = createCSV(items);
+
+      // create transfer order
+      const memo = 'Retail Store - ' + todaysDate();
+      const transferOrderId = spTransferOrder.create(3, 1, items, memo);
+
+      // create form
+      const form = serverWidget.createForm({ title: 'Retail Replenishment - ' + todaysDate() + ' | Total: ' + items.length });
+
+      form.addPageInitMessage({
+        type: message.Type.CONFIRMATION,
+        title: 'SUCCESS!',
+        message: 'Transfer Order Created!'
+      });
+
+      form.addField({
+        id: 'custpage_message',
+        type: serverWidget.FieldType.INLINEHTML,
+        label: ' '
+      }).defaultValue = 'Transfer Order created: <a href="https://system.netsuite.com/app/accounting/transactions/trnfrord.nl?id=' + transferOrderId + '&whence=" target="_blank">' + transferOrderId + '</a>.';
+      response.writePage(form);
+    }
+
+    /**
+     * Creates the retail replenishment results list.
+     * @returns {array}
+     */
+    const getReplenishment = () => {
       // Load saved search
       const retailReplenishmentSavedSearch = runtime.getCurrentScript().getParameter('custscript_retail_replenishment_search');
       const retailStoreSearch = search.load({
@@ -30,8 +76,8 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
       });
 
       // add apparel filter
-      // let defaultFilters = retailStoreSearch.filters;
-      // const newFilter = {
+      // var defaultFilters = retailStoreSearch.filters;
+      // var newFilter = {
       //   'name': 'custitem_sp_item_sku',
       //   'operator': search.Operator.STARTSWITH,
       //   'values': 'S'
@@ -43,11 +89,11 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
       const pagedData = retailStoreSearch.runPaged({
         pageSize: 1000
       });
-      
+
       const itemResults = [];
-      pagedData.pageRanges.forEach(function (pageRange) {
-        let page = pagedData.fetch({ index: pageRange.index });
-        page.data.forEach(function (result) {
+      pagedData.pageRanges.forEach(pageRange => {
+        const page = pagedData.fetch({ index: pageRange.index });
+        page.data.forEach(result => {
           itemResults.push(result);
         });
       });
@@ -59,7 +105,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
 
       // get ids to use with main warehouse item search
       const ids = [];
-      for (i in itemResults) {
+      for (let i in itemResults) {
         // push id
         ids.push(itemResults[i].id);
       }
@@ -79,11 +125,11 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
 
       // build array of objects for csv
       // create a copy and parse
-      let retailStoreResultsJSON = JSON.stringify(retailStoreResults);
+      let retailStoreResultsJSON = JSON.stringify(itemResults);
       retailStoreResultsJSON = JSON.parse(retailStoreResultsJSON);
       const items = [];
-      for (j in retailStoreResultsJSON) {
-        let item = retailStoreResultsJSON[j];
+      for (let j in retailStoreResultsJSON) {
+        const item = retailStoreResultsJSON[j];
         const itemName = item.values.displayname;
         const sku = item.values.custitem_sp_item_sku;
         // get warehouse available from item search object
@@ -114,31 +160,15 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
         }
       }
 
-      // create CSV and save to file cabinet
-      const csvFileId = createCSV(items);
-
-      // uncomment to write data object to browser (unformatted dump)
-      // response.write(JSON.stringify({
-      //   fileID: csvFileId, 
-      //   itemCount: items.length, 
-      //   items: items 
-      // }));
-
-      // uncomment to write html table
-      // var html = createResultsPage(items.length, csvFileId, items);
-      // response.write(html);
-
-      // uncomment to create list and write to page
-      const page = createPage(items);
-      response.writePage(page);
+      return items;
 
     }
 
     /**
      * Creates an item search and retrieves the Main Warehouse
      * Location Availability for each item.
-     * @param {Array} ids The internal ids for items to search for
-     * @returns {Object} Returns the object returned from createItemSearchObj
+     * @param {array} ids - The internal ids for items to search for
+     * @returns {Object} - Returns the object returned from createItemSearchObj
      */
     const mainWarehouseSearch = ids => {
       const itemSearch = search.create({
@@ -171,13 +201,13 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
     /**
      * Creates an the Main Warehouse Location Availability Object,
      * uses the internal id of the item as the key.
-     * @param {Array} items 
+     * @param {array} items 
      * @returns {Object}
      */
     const createItemSearchObj = items => {
-      var obj = {};
-      for (i in items) {
-        let item = items[i];
+      const obj = {};
+      for (let i in items) {
+        const item = items[i];
         const warehouseAvailable = parseInt(item.values.locationquantityavailable);
         obj[item.id] = {
           warehouseAvailable: warehouseAvailable
@@ -190,14 +220,14 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
      * Creates a CSV file to be used to import and create a Transfer Order for
      * Retail Store Item Replenishment.
      * @param {Object} items 
-     * @returns {string} The file's internal id
+     * @returns {string} - The file's internal id
      */
     const createCSV = items => {
       const dir = parseInt(runtime.getCurrentScript().getParameter('custscript_retail_replenishment_dir'));
       const today = todaysDate();
       const rnd = generateRandomString();
       // create the csv file
-      let csvFile = file.create({
+      const csvFile = file.create({
         name: 'retail-store-replenishment-' + today + '_' + rnd + '.csv',
         contents: 'transferName,id,sku,name,storeQuantityAvailable,storeQuantityMax,'
           + 'warehouseQuantityAvailable,quantityNeeded,date\n',
@@ -207,7 +237,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
 
       // add the data
       for (i in items) {
-        let item = items[i];
+        var item = items[i];
         csvFile.appendLine({
           value: 'Retail Store - ' + today + ',' + item.id + ',' + item.sku + ',' + item.name + ',' + item.storeQuantityAvailable + ','
             + item.storeQuantityMax + ',' + item.warehouseQuantityAvailable + ',' + item.quantityNeeded
@@ -222,7 +252,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
 
     /**
      * Generates today's date in format DD/MM/YYYY
-     * @returns {string} Today's date
+     * @returns {string} - Today's date
      */
     const todaysDate = () => {
       const today = new Date();
@@ -241,120 +271,115 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/file', 'N/log'],
     /**
      * Generates a random string to be used during
      * CSV file naming as to not overwrite existing file.
-     * @returns {string} The random string
+     * @returns {string} - The random string
      */
     const generateRandomString = () => {
-      return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);;
-    }
-
-    /**
-     * Creates an html table for results page
-     * @param {string} itemCount 
-     * @param {string} csvID 
-     * @param {Object} items 
-     * @returns {string} The html to render
-     */
-    const createResultsPage = (itemCount, csvID, items) => {
-      const head = '<tr><th>ID</th>'
-        + '<th>SKU</th>'
-        + '<th>NAME</th>'
-        + '<th>STORE QTY AVAILABLE</th>'
-        + '<th>STORE QTY MAX</th>'
-        + '<th>WAREHOUSE QTY AVAILABLE</th>'
-        + '<th>QTY NEEDED</th></tr>';
-
-      let tableData;
-      for (let i in items) {
-        let item = items[i];
-        let tr = '<tr></tr><td> ' + item.id + '</td>'
-          + '<td> ' + item.sku + '</td>'
-          + '<td> ' + item.name + '</td>'
-          + '<td> ' + item.storeQuantityAvailable + '</td>'
-          + '<td> ' + item.storeQuantityMax + '</td>'
-          + '<td> ' + item.warehouseQuantityAvailable + '</td>'
-          + '<td> ' + item.quantityNeeded + '</td></tr>';
-        tableData += tr;
-      }
-
-      const html = '<p>Results: ' + itemCount + '</p>'
-        + '<p>CSV File ID: ' + csvID + '</p>'
-        + '<table>'
-        + head
-        + tableData
-        + '</table>';
-
-      return html;
+      return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     }
 
     /**
      * Creates a list widget for the results page
      * @param {Object} items
-     * @returns {Object} The Page to render 
+     * @returns {Object} - The Page to render 
      */
     const createPage = items => {
-      const list = serverWidget.createList({ title: 'Retail Replenishment - ' + todaysDate() + ' | Total: ' + items.length });
+      log.debug({
+        title: 'CREATING PAGE',
+        details: 'There are ' + items.length
+      });
+      const form = serverWidget.createForm({ title: 'Retail Replenishment - ' + todaysDate() + ' | Total: ' + items.length });
 
-      list.addColumn({
-        id: 'column_id',
-        type: serverWidget.FieldType.TEXT,
-        label: 'ID',
-        align: serverWidget.LayoutJustification.LEFT
-      });
-      list.addColumn({
-        id: 'column_sku',
-        type: serverWidget.FieldType.TEXT,
-        label: 'SKU',
-        align: serverWidget.LayoutJustification.LEFT
-      });
-      list.addColumn({
-        id: 'column_name',
-        type: serverWidget.FieldType.TEXT,
-        label: 'Name',
-        align: serverWidget.LayoutJustification.LEFT
-      });
-      list.addColumn({
-        id: 'column_store_qty_available',
-        type: serverWidget.FieldType.TEXT,
-        label: 'Store Qty Available',
-        align: serverWidget.LayoutJustification.LEFT
-      });
-      list.addColumn({
-        id: 'column_store_qty_max',
-        type: serverWidget.FieldType.TEXT,
-        label: 'Store Qty Max',
-        align: serverWidget.LayoutJustification.LEFT
-      });
-      list.addColumn({
-        id: 'column_warehouse_qty_available',
-        type: serverWidget.FieldType.TEXT,
-        label: 'Warehouse Qty Available',
-        align: serverWidget.LayoutJustification.LEFT
-      });
-      list.addColumn({
-        id: 'column_qty_needed',
-        type: serverWidget.FieldType.TEXT,
-        label: 'Quantity Needed',
-        align: serverWidget.LayoutJustification.LEFT
+      form.addSubmitButton({
+        label: 'Create Transfer Order'
       });
 
-      for (i in items) {
-        let item = items[i];
-        list.addRow({
-          row: {
-            column_id: item.id,
-            column_sku: item.sku,
-            column_name: item.name,
-            column_store_qty_available: String(item.storeQuantityAvailable),
-            column_store_qty_max: String(item.storeQuantityMax),
-            column_warehouse_qty_available: String(item.warehouseQuantityAvailable),
-            column_qty_needed: String(item.quantityNeeded)
-          }
+      const sublist = form.addSublist({
+        id: 'custpage_retial_replenishment_sublist',
+        type: serverWidget.SublistType.LIST,
+        label: 'Retail Replenishment'
+      });
+
+      const fieldID = sublist.addField({
+        id: 'custpage_field_id',
+        type: serverWidget.FieldType.TEXT,
+        label: 'ID'
+      });
+      const fieldSku = sublist.addField({
+        id: 'custpage_field_sku',
+        type: serverWidget.FieldType.TEXT,
+        label: 'SKU'
+      });
+      const fieldName = sublist.addField({
+        id: 'custpage_field_name',
+        type: serverWidget.FieldType.TEXT,
+        label: 'Name'
+      });
+      const fieldStoreQtyAvailable = sublist.addField({
+        id: 'custpage_field_store_qty_available',
+        type: serverWidget.FieldType.TEXT,
+        label: 'Store Qty Available'
+      });
+      const fieldStoreQtyMax = sublist.addField({
+        id: 'custpage_field_store_qty_max',
+        type: serverWidget.FieldType.TEXT,
+        label: 'Store Qty Max'
+      });
+      const fieldWarehouseQtyAvailbable = sublist.addField({
+        id: 'custpage_field_warehouse_qty_available',
+        type: serverWidget.FieldType.TEXT,
+        label: 'Warehouse Qty Available'
+      });
+      const fieldQtyNeeded = sublist.addField({
+        id: 'custpage_field_qty_needed',
+        type: serverWidget.FieldType.TEXT,
+        label: 'Qty Needed'
+      });
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        log.debug({
+          title: 'Item: ' + i,
+          details: item.id
+        });
+        sublist.setSublistValue({
+          id: 'custpage_field_id',
+          line: i,
+          value: item.id
+        });
+        sublist.setSublistValue({
+          id: 'custpage_field_sku',
+          line: i,
+          value: item.sku
+        });
+        sublist.setSublistValue({
+          id: 'custpage_field_name',
+          line: i,
+          value: item.name
+        });
+        sublist.setSublistValue({
+          id: 'custpage_field_store_qty_available',
+          line: i,
+          value: String(item.storeQuantityAvailable)
+        });
+        sublist.setSublistValue({
+          id: 'custpage_field_store_qty_max',
+          line: i,
+          value: String(item.storeQuantityMax)
+        });
+        sublist.setSublistValue({
+          id: 'custpage_field_warehouse_qty_available',
+          line: i,
+          value: String(item.warehouseQuantityAvailable)
+        });
+        sublist.setSublistValue({
+          id: 'custpage_field_qty_needed',
+          line: i,
+          value: String(item.quantityNeeded)
         });
       }
 
-      return list;
+      return form;
     }
-
 
     return {
       onRequest: onRequest
