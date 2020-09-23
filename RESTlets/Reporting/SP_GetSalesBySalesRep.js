@@ -58,22 +58,13 @@ define(['N/runtime', 'N/record', 'N/search', 'N/error'],
         formula: "NVL(sum(CASE WHEN {trandate} BETWEEN to_date('" + newStart + "', 'MM/DD/YYYY') AND to_date('" + newEnd + "', 'MM/DD/YYYY') THEN 1 ELSE 0 END),0)",
         summary: search.Summary.MAX
       });
-      // sales growth = current sales - last sales / last sales
-      const salesGrowth = search.createColumn({
-        name: 'formulapercent',
-        // formula: "NVL(sum(CASE WHEN {trandate} BETWEEN to_date('8/31/2020', 'MM/DD/YYYY') AND to_date('9/4/2020', 'MM/DD/YYYY') THEN {amount} END),0)",
-        formula: "((NVL(sum(CASE WHEN {trandate} BETWEEN to_date('" + start + "', 'MM/DD/YYYY') AND to_date('" + end + "', 'MM/DD/YYYY') THEN {amount} END),0) - " +
-          "NVL(sum(CASE WHEN {trandate} BETWEEN to_date('" + newStart + "', 'MM/DD/YYYY') AND to_date('" + newEnd + "', 'MM/DD/YYYY') THEN {amount} END),0)) / " +
-          "NVL(sum(CASE WHEN {trandate} BETWEEN to_date('" + newStart + "', 'MM/DD/YYYY') AND to_date('" + newEnd + "', 'MM/DD/YYYY') THEN {amount} END),1))",
-        summary: search.Summary.MAX
-      });
+
       // add columns to existing columns
       const transactionSearchColumns = transactionSearch.columns;
       transactionSearchColumns.push(lastSales);
       transactionSearchColumns.push(currentSales);
       transactionSearchColumns.push(lastOrderCount);
       transactionSearchColumns.push(currentOrderCount);
-      transactionSearchColumns.push(salesGrowth);
 
       // create filters
       const startDate = search.createFilter({
@@ -105,6 +96,8 @@ define(['N/runtime', 'N/record', 'N/search', 'N/error'],
             details: JSON.stringify(result)
           });
 
+          const totalSales = result.getValue({ name: 'amount', summary: search.Summary.SUM });
+          const totalAvgOrderAmount = result.getValue({ name: 'formulacurrency', summary: search.Summary.MAX });
           const lastSales = result.getValue({ name: 'formulacurrency1', summary: search.Summary.MAX });
           const currentSales = result.getValue({ name: 'formulacurrency2', summary: search.Summary.MAX });
           const lastOrderCount = result.getValue({ name: 'formulanumeric1', summary: search.Summary.MAX });
@@ -112,16 +105,16 @@ define(['N/runtime', 'N/record', 'N/search', 'N/error'],
 
           transactionResults.push({
             salesRep: result.getText({ name: 'salesrep', summary: search.Summary.GROUP }),
-            amount: result.getValue({ name: 'amount', summary: search.Summary.SUM }),
+            amount: formatNumber(parseFloat(totalSales)),
             orderCount: result.getValue({ name: 'internalid', summary: search.Summary.COUNT }),
-            avgOrderAmount: result.getValue({ name: 'formulacurrency', summary: search.Summary.MAX }),
-            salesGrowth: result.getValue({ name: 'formulapercent', summary: search.Summary.MAX }),
-            lastSales,
-            currentSales,
+            avgOrderAmount: formatNumber(parseFloat(totalAvgOrderAmount)),
+            salesGrowth: getSalesGrowth(parseFloat(lastSales), parseFloat(currentSales)),
+            lastSales: formatNumber(parseFloat(lastSales)),
+            currentSales: formatNumber(parseFloat(currentSales)),
             lastOrderCount,
             currentOrderCount,
-            lastAvgOrderAmount: getAvg(lastSales,lastOrderCount),
-            currentAvgOrderAmount: getAvg(currentSales,currentOrderCount)
+            lastAvgOrderAmount: formatNumber(getAvg(lastSales,lastOrderCount)),
+            currentAvgOrderAmount: formatNumber(getAvg(currentSales,currentOrderCount))
           });
         });
       });
@@ -184,7 +177,21 @@ define(['N/runtime', 'N/record', 'N/search', 'N/error'],
       if (divisor !== 0) {
         return round(dividend / divisor, 2);
       } else {
-        return '0';
+        return 0;
+      }
+    }
+
+    /**
+     * Calculates the Sales Growth.
+     * @param {number} lastPeriod - Last Periods Sales
+     * @param {number} currentPeriod - Current Periods Sales
+     * @returns {string} - The Sales Growth percentage
+     */
+    const getSalesGrowth = (lastPeriod, currentPeriod) => {
+      if (lastPeriod > 0) {
+        return String(round((((currentPeriod - lastPeriod) / lastPeriod) * 100), 2)) + '%';
+      } else {
+        return 'N/A';
       }
     }
 
@@ -192,9 +199,19 @@ define(['N/runtime', 'N/record', 'N/search', 'N/error'],
      * Rounds value to 2 decimals
      * @param {decimal} value - the value you want to round to
      * @param {integer} decimals - how many decimal places you want to round to 
+     * @returns {number}
      */
     const round = (value, decimals) => {
-      return String(Number(Math.round(value + 'e' + decimals) + 'e-' + decimals));
+      return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
+    }
+
+    /**
+     * Formats a number and returns a string.
+     * @param {number} num
+     * @returns {string} 
+     */
+    const formatNumber = (num) => {
+      return '$' + num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
     }
 
     return {
