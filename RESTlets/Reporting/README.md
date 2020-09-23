@@ -4,7 +4,7 @@
 ## Get Sales by Sales Rep
 > SP_GetSalesBySalesRep.js
 
-Exucutes a customer search based on a specified date range, groups the results by Sales Rep.
+Executes a customer search based on a specified date range, groups the results by Sales Rep.
 
 Gets the date range. It then calculates the difference in days between the start date and end date. Uses this difference to calculate a previous range to compare.
 
@@ -66,3 +66,40 @@ The results are grouped by Sales Rep and they include:
     <td>The average order amount for the supplied date range.</td>
   </tr>
 </table>
+
+Returns:
+
+```json
+{
+    "lastDateRange": "9/6/2020 - 9/12/2020",
+    "currentDateRange": "9/13/2020 - 9/19/2020",
+    "results": [
+        {
+            "salesRep": "Neil McLean",
+            "amount": "$20,529.08",
+            "orderCount": "56",
+            "avgOrderAmount": "$366.591",
+            "salesGrowth": "19.3%",
+            "lastSales": "$9,361.17",
+            "currentSales": "$11,167.91",
+            "lastOrderCount": "23",
+            "currentOrderCount": "33",
+            "lastAvgOrderAmount": "$407.01",
+            "currentAvgOrderAmount": "$338.42"
+        },
+        {
+            "salesRep": "Liam Reid",
+            "amount": "$224",
+            "orderCount": "1",
+            "avgOrderAmount": "$224",
+            "salesGrowth": "-100%",
+            "lastSales": "$224",
+            "currentSales": "$0",
+            "lastOrderCount": "1",
+            "currentOrderCount": "0",
+            "lastAvgOrderAmount": "$224",
+            "currentAvgOrderAmount": "$0"
+        }
+    ]
+}
+```
