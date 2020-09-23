@@ -44,6 +44,20 @@ define(['N/runtime', 'N/record', 'N/search', 'N/error'],
         formula: "NVL(sum(CASE WHEN {trandate} BETWEEN to_date('" + newStart + "', 'MM/DD/YYYY') AND to_date('" + newEnd + "', 'MM/DD/YYYY') THEN {amount} END),0)",
         summary: search.Summary.MAX
       });
+      // current sales count - date range = supplied dates
+      const currentOrderCount = search.createColumn({
+        name: 'formulanumeric2',
+        label: 'currentOrderCount',
+        formula: "NVL(sum(CASE WHEN {trandate} BETWEEN to_date('" + start + "', 'MM/DD/YYYY') AND to_date('" + end + "', 'MM/DD/YYYY') THEN 1 ELSE 0 END),0)",
+        summary: search.Summary.MAX
+      });
+      // last order count - date range = days between supplied dates - start day and end day
+      const lastOrderCount = search.createColumn({
+        name: 'formulanumeric1',
+        label: 'lastOrderCount',
+        formula: "NVL(sum(CASE WHEN {trandate} BETWEEN to_date('" + newStart + "', 'MM/DD/YYYY') AND to_date('" + newEnd + "', 'MM/DD/YYYY') THEN 1 ELSE 0 END),0)",
+        summary: search.Summary.MAX
+      });
       // sales growth = current sales - last sales / last sales
       const salesGrowth = search.createColumn({
         name: 'formulapercent',
@@ -57,6 +71,8 @@ define(['N/runtime', 'N/record', 'N/search', 'N/error'],
       const transactionSearchColumns = transactionSearch.columns;
       transactionSearchColumns.push(lastSales);
       transactionSearchColumns.push(currentSales);
+      transactionSearchColumns.push(lastOrderCount);
+      transactionSearchColumns.push(currentOrderCount);
       transactionSearchColumns.push(salesGrowth);
 
       // create filters
@@ -89,14 +105,23 @@ define(['N/runtime', 'N/record', 'N/search', 'N/error'],
             details: JSON.stringify(result)
           });
 
+          const lastSales = result.getValue({ name: 'formulacurrency1', summary: search.Summary.MAX });
+          const currentSales = result.getValue({ name: 'formulacurrency2', summary: search.Summary.MAX });
+          const lastOrderCount = result.getValue({ name: 'formulanumeric1', summary: search.Summary.MAX });
+          const currentOrderCount = result.getValue({ name: 'formulanumeric2', summary: search.Summary.MAX });
+
           transactionResults.push({
             salesRep: result.getText({ name: 'salesrep', summary: search.Summary.GROUP }),
             amount: result.getValue({ name: 'amount', summary: search.Summary.SUM }),
             orderCount: result.getValue({ name: 'internalid', summary: search.Summary.COUNT }),
             avgOrderAmount: result.getValue({ name: 'formulacurrency', summary: search.Summary.MAX }),
             salesGrowth: result.getValue({ name: 'formulapercent', summary: search.Summary.MAX }),
-            lastSales: result.getValue({ name: 'formulacurrency1', summary: search.Summary.MAX }),
-            currentSales: result.getValue({ name: 'formulacurrency2', summary: search.Summary.MAX })
+            lastSales,
+            currentSales,
+            lastOrderCount,
+            currentOrderCount,
+            lastAvgOrderAmount: getAvg(lastSales,lastOrderCount),
+            currentAvgOrderAmount: getAvg(currentSales,currentOrderCount)
           });
         });
       });
@@ -145,6 +170,31 @@ define(['N/runtime', 'N/record', 'N/search', 'N/error'],
       const y = date.getFullYear();
 
       return m + '/' + d + '/' + y;
+    }
+
+    /**
+     * Calculates the average.
+     * @param {number} dividend 
+     * @param {number} divisor
+     * @returns {number} 
+     */
+    const getAvg = (dividend, divisor) => {
+      dividend = parseFloat(dividend);
+      divisor = parseFloat(divisor);
+      if (divisor !== 0) {
+        return round(dividend / divisor, 2);
+      } else {
+        return '0';
+      }
+    }
+
+    /**
+     * Rounds value to 2 decimals
+     * @param {decimal} value - the value you want to round to
+     * @param {integer} decimals - how many decimal places you want to round to 
+     */
+    const round = (value, decimals) => {
+      return String(Number(Math.round(value + 'e' + decimals) + 'e-' + decimals));
     }
 
     return {
