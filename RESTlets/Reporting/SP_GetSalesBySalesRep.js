@@ -86,15 +86,22 @@ define(['N/runtime', 'N/record', 'N/search', 'N/error'],
         pageSize: 1000
       });
 
+      log.debug({
+        title: 'PAGED DATA',
+        details: pagedData
+      });
+
       const transactionResults = [];
       pagedData.pageRanges.forEach(pageRange => {
-        const page = pagedData.fetch({ index: pageRange.index });
-        page.data.forEach(result => {
 
-          log.debug({
-            title: 'RESULT',
-            details: JSON.stringify(result)
-          });
+        const page = pagedData.fetch({ index: pageRange.index });
+
+        log.debug({
+          title: 'PAGE: ' + pageRange.index,
+          details: page.data
+        });
+
+        page.data.forEach(result => {
 
           const totalSales = result.getValue({ name: 'amount', summary: search.Summary.SUM });
           const totalAvgOrderAmount = result.getValue({ name: 'formulacurrency', summary: search.Summary.MAX });
@@ -116,6 +123,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/error'],
             lastAvgOrderAmount: formatNumber(getAvg(lastSales,lastOrderCount)),
             currentAvgOrderAmount: formatNumber(getAvg(currentSales,currentOrderCount))
           });
+
         });
       });
 
