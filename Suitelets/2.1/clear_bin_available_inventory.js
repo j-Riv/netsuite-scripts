@@ -16,7 +16,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/log', 'N/record'],
       const response = context.response;
       if (request.method == 'GET') {
         onGet(response);
-      } else if(request.method == 'POST') {
+      } else if (request.method == 'POST') {
         onPost(request, response);
       }
     }
@@ -95,9 +95,17 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/log', 'N/record'],
           value: 213
         });
 
-        for(const item of list) {
+        for (const item of list) {
           const availableQuantity = parseInt(item.values['binOnHand.quantityavailable']);
-          if(availableQuantity > 0) {
+          if (availableQuantity > 0) {
+            // log
+            log.debug({
+              title: 'ADDING ITEM',
+              details: 'ID: ' + item.id + ' | AvailQty: ' + availableQuantity + ' | Location: ' + item.values['binOnHand.location'][0].value +
+                ' | Bin Number: ' + item.values['binOnHand.binnumber'][0].value + ' | InventoryAssignment: ' + availableQuantity * -1
+            });
+
+
             adjustmentRecord.selectNewLine({
               sublistId: 'inventory'
             });
@@ -185,15 +193,15 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/log', 'N/record'],
             <td>Available</td>
             <td> New On Hand</td>
           </tr>
-          ${savedSearchJSON.map(record => 
-            `<tr>
+          ${savedSearchJSON.map(record =>
+        `<tr>
               <td>${record.values.itemid}</td>
               <td>${record.values['binOnHand.quantityonhand']}</td>
               <td>${record.values['binOnHand.quantityavailable']}</td>
               <td>${parseInt(record.values['binOnHand.quantityonhand']) - parseInt(record.values['binOnHand.quantityavailable'])}</td>
              </tr>
             `
-          )}
+      )}
         </table>
       `;
       response.writePage(Form);
