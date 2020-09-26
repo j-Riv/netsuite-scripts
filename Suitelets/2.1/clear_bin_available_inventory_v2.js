@@ -4,8 +4,8 @@
  * @NModuleScope SameAccount
  */
 
-define(['N/runtime', 'N/record', 'N/ui/serverWidget', 'N/ui/message', 'N/search', 'N/redirect', 'N/log'],
-  (runtime, record, serverWidget, message, search, redirect, log) => {
+define(['N/runtime', 'N/record', 'N/ui/serverWidget', 'N/search', 'N/redirect', 'N/log'],
+  (runtime, record, serverWidget, search, redirect, log) => {
 
     /**
      * Handles Suitelet request
@@ -23,12 +23,12 @@ define(['N/runtime', 'N/record', 'N/ui/serverWidget', 'N/ui/message', 'N/search'
     }
 
     /**
-     * Handles Get Request and loads the saved search
+     * Handles the Get Request and displays the Search Form.
      * @param {Object} response 
      */
     const onGet = (response, vt) => {
       const form = serverWidget.createForm({
-        title: `Clear Bin's Available Inventory`
+        title: "Clear Bin's Available Inventory"
       });
 
       form.addField({
@@ -42,10 +42,12 @@ define(['N/runtime', 'N/record', 'N/ui/serverWidget', 'N/ui/message', 'N/search'
       }).defaultValue = 'Type the bin name below to view its contents.';
 
       form.addField({
-        id: 'bin_number',
+        id: 'custpage_bin_number',
         label: 'Bin Number',
-        type: serverWidget.FieldType.TEXT
+        type: serverWidget.FieldType.SELECT,
+        source: 'bin'
       });
+
       form.addSubmitButton({
         label: 'Search'
       });
@@ -53,9 +55,16 @@ define(['N/runtime', 'N/record', 'N/ui/serverWidget', 'N/ui/message', 'N/search'
       response.writePage(form);
     }
 
+    /**
+     * Handles the Post Request based on the parameter.
+     * Creates the search, displays the results and creates
+     * the Inventory Adjustment.
+     * @param {Object} request 
+     * @param {Object} response 
+     */
     const onPost = (request, response) => {
-      if (request.parameters.bin_number) {
-        const binNumber = request.parameters.bin_number;
+      if (request.parameters.custpage_bin_number) {
+        const binNumber = request.parameters.custpage_bin_number;
         log.debug({
           title: 'BIN NUMBER',
           details: binNumber
@@ -75,18 +84,51 @@ define(['N/runtime', 'N/record', 'N/ui/serverWidget', 'N/ui/message', 'N/search'
       }
     }
 
+    /**
+     * Creates the Search
+     * @param {string} binNumber
+     * @returns {Object} - The Results 
+     */
     const getBinItems = binNumber => {
-      const searchID = 'customsearch_sp_bin_inventory_balance';
-      const savedSearch = search.load({
-        id: searchID,
-        type: search.Type.INVENTORY_BALANCE
+      // create search
+      const savedSearch = search.create({
+        type: search.Type.INVENTORY_BALANCE,
+        columns: [
+          search.createColumn({
+            name: 'internalid',
+            join: 'item'
+          }),
+          search.createColumn({
+            name: 'custitem_sp_item_sku',
+            join: 'item'
+          }),
+          search.createColumn({
+            name: 'displayname',
+            join: 'item'
+          }),
+          search.createColumn({
+            name: 'binnumber'
+          }),
+          search.createColumn({
+            name: 'location'
+          }),
+          search.createColumn({
+            name: 'status',
+          }),
+          search.createColumn({
+            name: 'onhand'
+          }),
+          search.createColumn({
+            name: 'available'
+          })
+        ]
       });
 
       const searchFilter = {
         name: 'formulanumeric',
         operator: search.Operator.EQUALTO,
         values: [1],
-        formula: "CASE WHEN {binnumber} = '" + binNumber + "' THEN 1 ELSE 0 END"
+        formula: "CASE WHEN {binnumber.id} = '" + binNumber + "' THEN 1 ELSE 0 END"
       }
       const savedSearchFilters = savedSearch.filters;
       savedSearchFilters.push(searchFilter);
@@ -148,6 +190,10 @@ define(['N/runtime', 'N/record', 'N/ui/serverWidget', 'N/ui/message', 'N/search'
           label: ' '
         }).updateDisplayType({
           displayType: serverWidget.FieldDisplayType.DISABLED
+        }).updateLayoutType({
+          layoutType: serverWidget.FieldLayoutType.OUTSIDE
+        }).updateBreakType({
+          breakType: serverWidget.FieldBreakType.STARTROW
         }).defaultValue = binNumber;
 
         form.addField({
@@ -275,7 +321,9 @@ define(['N/runtime', 'N/record', 'N/ui/serverWidget', 'N/ui/message', 'N/search'
           breakType: serverWidget.FieldBreakType.STARTROW
         }).defaultValue = 'Either the bin does not exist or it is empty.' +
           '<br/>Please select a new bin by pressing the button below.' +
-          '<br/><br/><a style="background-color:#125ab2;color:#fff;padding:3px 5px;border-radius:3px;margin-top:5px;font-size:16px;text-decoration:none;" href="/app/site/hosting/scriptlet.nl?script=828&deploy=1">Back</a>';
+          '<br/><br/><a style="background-color:#125ab2;color:#fff;' + 
+          'padding:3px 5px;border-radius:3px;margin-top:5px;font-size:16px;' + 
+          'text-decoration:none;" href="/app/site/hosting/scriptlet.nl?script=828&deploy=1">Back</a>';
 
       }
 
