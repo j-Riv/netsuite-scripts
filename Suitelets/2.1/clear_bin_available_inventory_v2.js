@@ -15,7 +15,7 @@ define(['N/runtime', 'N/record', 'N/ui/serverWidget', 'N/search', 'N/redirect', 
       const request = context.request;
       const response = context.response;
 
-      if (request.method == 'GET') {
+      if (request.method === 'GET') {
         onGet(response);
       } else {
         onPost(request, response);
@@ -26,7 +26,7 @@ define(['N/runtime', 'N/record', 'N/ui/serverWidget', 'N/search', 'N/redirect', 
      * Handles the Get Request and displays the Search Form.
      * @param {Object} response 
      */
-    const onGet = (response, vt) => {
+    const onGet = response => {
       const form = serverWidget.createForm({
         title: "Clear Bin's Available Inventory"
       });
