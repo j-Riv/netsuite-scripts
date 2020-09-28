@@ -41,12 +41,14 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/redirect', 'N/log'],
         breakType: serverWidget.FieldBreakType.STARTROW
       }).defaultValue = 'Type the bin name below to view its contents.';
 
-      form.addField({
+      const binNumber = form.addField({
         id: 'custpage_bin_number',
         label: 'Bin Number',
         type: serverWidget.FieldType.SELECT,
         source: 'bin'
       });
+
+      binNumber.isMandatory = true;
 
       form.addSubmitButton({
         label: 'Search'
