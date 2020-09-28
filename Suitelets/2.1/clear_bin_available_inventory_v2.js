@@ -4,8 +4,8 @@
  * @NModuleScope SameAccount
  */
 
-define(['N/runtime', 'N/record', 'N/ui/serverWidget', 'N/search', 'N/redirect', 'N/log'],
-  (runtime, record, serverWidget, search, redirect, log) => {
+define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/redirect', 'N/log'],
+  (record, serverWidget, search, redirect, log) => {
 
     /**
      * Handles Suitelet request
