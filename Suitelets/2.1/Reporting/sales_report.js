@@ -97,17 +97,21 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/log', './utils', './getTransactionS
         label: ' '
       }).defaultValue = 'Please select the start date and end date to calculate sales.';
 
-      form.addField({
+      const startDate = form.addField({
         id: 'custpage_start_date',
         type: serverWidget.FieldType.DATE,
         label: 'Start Date'
       });
 
-      form.addField({
+      startDate.isMandatory = true;
+
+      const endDate = form.addField({
         id: 'custpage_end_date',
         type: serverWidget.FieldType.DATE,
         label: 'End Date'
       });
+
+      endDate.isMandatory = true;
 
       return form;
     }
@@ -130,17 +134,21 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/log', './utils', './getTransactionS
         label: 'Re-Calculate'
       });
 
-      form.addField({
+      const startDate = form.addField({
         id: 'custpage_start_date',
         type: serverWidget.FieldType.DATE,
         label: 'Start Date'
       });
 
-      form.addField({
+      startDate.isMandatory = true;
+
+      const endDate = form.addField({
         id: 'custpage_end_date',
         type: serverWidget.FieldType.DATE,
         label: 'End Date'
       });
+
+      endDate.isMandatory = true;
 
       form.addField({
         id: 'custpage_date_message',
