@@ -188,7 +188,7 @@ define([
         layoutType: serverWidget.FieldLayoutType.OUTSIDE
       }).updateBreakType({
         breakType: serverWidget.FieldBreakType.STARTROW
-      }).defaultValue = '<b>Periods:</b> Last <i>(' + dateRangeData.lastDateRange + ')</i> - Current <i>(' + dateRangeData.currentDateRange + ')</i>' +
+      }).defaultValue = '<b>Periods:</b> Previous <i>(' + dateRangeData.lastDateRange + ')</i> - Current <i>(' + dateRangeData.currentDateRange + ')</i>' +
         '<br/>Please select the start date and end date to re-calculate sales.';
       // '<br/><br/><a style="background-color:#125ab2;color:#fff;padding:3px 5px;border-radius:3px;margin-top:5px;font-size:16px;text-decoration:none;" href="/app/site/hosting/scriptlet.nl?script=827&deploy=1">Back</a>';
 

@@ -23,24 +23,24 @@ define(['N/ui/serverWidget'],
         label: '$$ by ' + keyLabel
       });
       sublist.addField({
-        id: 'custpage_field_' + widgetName,
+        id: 'custpage_field_' + widgetName + '_key',
         type: serverWidget.FieldType.TEXT,
         label: keyLabel
       });
       sublist.addField({
-        id: 'custpage_field_' + widgetName + '_last_sales',
+        id: 'custpage_field_' + widgetName + '_prev_sales',
         type: serverWidget.FieldType.TEXT,
-        label: 'Last Sales'
+        label: 'Previous Sales'
       });
       sublist.addField({
-        id: 'custpage_field_' + widgetName + '_last_order_count',
+        id: 'custpage_field_' + widgetName + '_prev_order_count',
         type: serverWidget.FieldType.TEXT,
-        label: 'Last Order Count'
+        label: 'Previous Order Count'
       });
       sublist.addField({
-        id: 'custpage_field_' + widgetName + '_last_avg_order_amount',
+        id: 'custpage_field_' + widgetName + '_prev_avg_order_amount',
         type: serverWidget.FieldType.TEXT,
-        label: 'Last Avg Order Amount'
+        label: 'Previous Avg Order Amount'
       });
       sublist.addField({
         id: 'custpage_field_' + widgetName + '_current_sales',
@@ -67,22 +67,22 @@ define(['N/ui/serverWidget'],
         let result = data.results[i];
 
         sublist.setSublistValue({
-          id: 'custpage_field_' + widgetName,
+          id: 'custpage_field_' + widgetName + '_key',
           line: i,
           value: result[key]
         });
         sublist.setSublistValue({
-          id: 'custpage_field_' + widgetName + '_last_sales',
+          id: 'custpage_field_' + widgetName + '_prev_sales',
           line: i,
           value: result.lastSales
         });
         sublist.setSublistValue({
-          id: 'custpage_field_' + widgetName + '_last_order_count',
+          id: 'custpage_field_' + widgetName + '_prev_order_count',
           line: i,
           value: result.lastOrderCount
         });
         sublist.setSublistValue({
-          id: 'custpage_field_' + widgetName + '_last_avg_order_amount',
+          id: 'custpage_field_' + widgetName + '_prev_avg_order_amount',
           line: i,
           value: result.lastAvgOrderAmount
         });
