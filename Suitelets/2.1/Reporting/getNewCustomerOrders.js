@@ -74,10 +74,14 @@ define(['N/search', 'N/ui/serverWidget', 'N/log', './utils'],
         });
       });
 
+      const totalAvgOrderAmount = totalOrderCount > 0 
+        ? utils.formatNumber(utils.round(totalsOrderAmount / totalOrderCount, 2))
+        : '$0.00';
+
       const totalsRow = {
         salesRep: '<b>TOTAL</b>',
         orderCount: '<b>' + totalOrderCount + '</b>',
-        avgOrderAmount: '<b>' + utils.formatNumber(utils.round(totalsOrderAmount / totalOrderCount, 2)) + '</b>',
+        avgOrderAmount: '<b>' + totalAvgOrderAmount + '</b>',
         totalOrderAmount: '<b>' + utils.formatNumber(utils.round(totalsOrderAmount, 2)) + '</b>'
       }
       // push

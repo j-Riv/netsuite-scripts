@@ -41,7 +41,7 @@ define(['N/search', 'N/ui/serverWidget', 'N/log', './utils'],
 
       const transactionResults = [];
       let totalOrderCount = 0;
-      let totalAllAmount = 0;
+      let totalsOrderAmount = 0;
       pagedData.pageRanges.forEach(pageRange => {
 
         const page = pagedData.fetch({ index: pageRange.index });
@@ -68,15 +68,19 @@ define(['N/search', 'N/ui/serverWidget', 'N/log', './utils'],
 
           // totals
           totalOrderCount += parseInt(orderCount);
-          totalAllAmount += totalAmount;
+          totalsOrderAmount += totalAmount;
         });
       });
+
+      const totalAvgOrderAmount = totalOrderCount > 0
+        ? utils.formatNumber(utils.round(totalsOrderAmount / totalOrderCount, 2))
+        : '$0.00';
 
       const totalsRow = {
         salesRep: '<b>TOTAL</b>',
         orderCount: '<b>' + totalOrderCount + '</b>',
-        avgAmount: '<b>' + utils.formatNumber(utils.round(totalAllAmount / totalOrderCount, 2)) + '</b>',
-        totalAmount: '<b>' + utils.formatNumber(totalAllAmount) + '</b>'
+        avgAmount: '<b>' + totalAvgOrderAmount + '</b>',
+        totalAmount: '<b>' + utils.formatNumber(totalsOrderAmount) + '</b>'
       }
       // push row
       transactionResults.push(totalsRow);

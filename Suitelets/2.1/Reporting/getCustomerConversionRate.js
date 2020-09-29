@@ -4,8 +4,8 @@
  * @NModuleScope Public
  */
 
-define(['N/search', 'N/ui/serverWidget', 'N/log'],
-  (search, serverWidget, log) => {
+define(['N/search', 'N/ui/serverWidget', 'N/log', './utils'],
+  (search, serverWidget, log, utils) => {
 
     const execute = (form, start, end) => {
       const data = getCustomerSearchResults(start, end);
@@ -40,6 +40,9 @@ define(['N/search', 'N/ui/serverWidget', 'N/log'],
       });
 
       const customerResults = [];
+      let totalAllLeads = 0;
+      let totalAllConvertedLeads = 0;
+      let totalAllAvgDaysToClose = 0;
       pagedData.pageRanges.forEach(pageRange => {
 
         const page = pagedData.fetch({ index: pageRange.index });
@@ -51,17 +54,44 @@ define(['N/search', 'N/ui/serverWidget', 'N/log'],
             details: result
           });
 
+          const totalLeads = parseInt(result.getValue({ name: 'formulanumeric', summary: search.Summary.COUNT }));
+          const convertedLeads = parseInt(result.getValue({ name: 'formulanumeric', summary: search.Summary.SUM }));
+          const avgDaysToClose = parseFloat(result.getValue({ name: 'formulanumeric', summary: search.Summary.AVG }));
+
           const row = {
             salesRep: result.getText({ name: 'salesrep', summary: search.Summary.GROUP }),
-            totalLeads: result.getValue({ name: 'formulanumeric', summary: search.Summary.COUNT }),
-            convertedLeads: result.getValue({ name: 'formulanumeric', summary: search.Summary.SUM }),
+            totalLeads,
+            convertedLeads,
             conversionRate: result.getValue({ name: 'formulapercent', summary: search.Summary.MAX }),
-            avgDaysToClose: result.getValue({ name: 'formulanumeric', summary: search.Summary.AVG })
+            avgDaysToClose
           };
           // push row
           customerResults.push(row);
+          
+          // totals
+          totalAllLeads += totalLeads;
+          totalAllConvertedLeads += convertedLeads;
+          totalAllAvgDaysToClose += avgDaysToClose;
         });
       });
+
+      const totalAllConversionRate = totalAllConvertedLeads > 0 
+        ? utils.round((totalAllConvertedLeads / totalAllLeads) * 100, 2)
+        : '0.0';
+
+      const totalAvgDaysToClose = customerResults.length > 0
+        ? utils.round(totalAllAvgDaysToClose / customerResults.length, 2)
+        : '0.0';
+
+      const totalsRow = {
+        salesRep: '<b>TOTAL</b>',
+        totalLeads: '<b>' + totalAllLeads + '</b>',
+        convertedLeads: '<b>' + totalAllConvertedLeads + '</b>',
+        conversionRate: '<b>' + totalAllConversionRate + '%</b>',
+        avgDaysToClose: '<b>' + totalAvgDaysToClose + '</b>'
+      }
+      // push totals
+      customerResults.push(totalsRow);
 
       return {
         results: customerResults

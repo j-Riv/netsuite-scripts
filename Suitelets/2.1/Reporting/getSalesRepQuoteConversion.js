@@ -74,11 +74,15 @@ define(['N/search', 'N/ui/serverWidget', 'N/log', './utils'],
         });
       });
 
+      const totalConversionRate = totalQuoteCount > 0
+        ? utils.round((totalConvertedQuotes / totalQuoteCount) * 100, 2)
+        : 0;
+
       const totalsRow = {
         salesRep: '<b>TOTAL</b>',
         totalQuotes: '<b>' + totalQuoteCount + '</b>',
         convertedQuotes: '<b>' + totalConvertedQuotes + '</b>',
-        conversionRate: '<b>' +  utils.round((totalConvertedQuotes / totalQuoteCount) * 100, 2) +'%</b>',
+        conversionRate: '<b>' +  totalConversionRate +'%</b>',
         amount: '<b>' + utils.formatNumber(utils.round(totalAmount, 2)) + '</b>'
       }
       // push totals
