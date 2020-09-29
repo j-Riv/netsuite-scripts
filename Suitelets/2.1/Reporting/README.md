@@ -1,5 +1,23 @@
 # REPORTING
 
+## Dependencies
+### Saved Searches
+- <b>Sales</b>
+  - SP - Sales by Rep
+  - SP - Sales by Region
+  - SP - Sales by Customer Category
+  - SP - Sales by Marketplace
+- <b>Leads</b>
+  - SP - Leads Created
+- <b>Customer Conversion</b>
+  - SP - Customer Conversion Rate
+- <b>New Customer Orders</b>
+  - SP - New Customer Orders
+- <b>Customer Retention</b>
+  - SP - Customer Re-Orders
+- <b>Quote Conversion</b>
+  - SP - Sales Rep Quote Conversion Rate
+
 ```bash
 Reporting
 ── sales_report/
