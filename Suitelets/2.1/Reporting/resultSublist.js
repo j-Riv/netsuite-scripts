@@ -20,7 +20,7 @@ define(['N/ui/serverWidget'],
       const sublist = form.addSublist({
         id: 'custpage_sales_by_' + widgetName + '_sublist',
         type: serverWidget.SublistType.LIST,
-        label: 'Sales by ' + keyLabel
+        label: '$$ by ' + keyLabel
       });
       sublist.addField({
         id: 'custpage_field_' + widgetName,

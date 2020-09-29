@@ -4,8 +4,34 @@
  * @NModuleScope SameAccount
  */
 
-define(['N/runtime', 'N/ui/serverWidget', 'N/log', './utils', './getTransactionSearch', './getCustomerSearch', './resultSublist'],
-  (runtime, serverWidget, log, utils, transactionSearch, customerSearch, resultSublist) => {
+define([
+  'N/runtime', 
+  'N/ui/serverWidget', 
+  'N/log', 
+  './utils', 
+  './getTransactionSearch', 
+  './getCustomerSearch', 
+  './resultSublist',
+  './getSalesRepQuoteConversion',
+  './getLeadsCreated',
+  './getCustomerConversionRate',
+  './getNewCustomerOrders',
+  './getCustomerReOrders'
+  ],
+  (
+    runtime, 
+    serverWidget, 
+    log, 
+    utils, 
+    transactionSearch, 
+    customerSearch, 
+    resultSublist,
+    salesRepQuoteConversion,
+    leadsCreated,
+    customerConversionRate,
+    newCustomerOrders,
+    customerReOrders
+  ) => {
 
     /**
      * Handles Suitelet request
@@ -71,7 +97,11 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/log', './utils', './getTransactionS
 
       const dateRangeData = {
         lastDateRange: newStart + ' - ' + newEnd,
-        currentDateRange: start + ' - ' + end
+        currentDateRange: start + ' - ' + end,
+        start,
+        end,
+        newStart,
+        newEnd
       }
 
       const resultsPage = createResultsPage(dateRangeData, repData, regionData, categoryData, marketData);
@@ -171,6 +201,16 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/log', './utils', './getTransactionS
       form = resultSublist._create(form, categoryData, 'category', 'category', 'Category');
       // Marketplace
       form = resultSublist._create(form, marketData, 'marketplace', 'marketplace', 'Marketplace');
+      // Leads Created
+      form = leadsCreated._create(form, dateRangeData.start, dateRangeData.end);
+      // Customer Conversion
+      form = customerConversionRate._create(form, dateRangeData.start, dateRangeData.end);
+      // New Customer Orders
+      form = newCustomerOrders._create(form, dateRangeData.start, dateRangeData.end);
+      // Customer Re-Orders
+      form = customerReOrders._create(form, dateRangeData.start, dateRangeData.end);
+      // Sales Rep - Quote Conversion Rate
+      form = salesRepQuoteConversion._create(form, dateRangeData.start, dateRangeData.end);
 
       return form;
     }
