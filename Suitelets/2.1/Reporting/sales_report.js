@@ -16,7 +16,8 @@ define([
   './getLeadsCreated',
   './getCustomerConversionRate',
   './getNewCustomerOrders',
-  './getCustomerReOrders'
+  './getCustomerReOrders',
+  './getOnlineSalesByRegion'
   ],
   (
     runtime, 
@@ -30,7 +31,8 @@ define([
     leadsCreated,
     customerConversionRate,
     newCustomerOrders,
-    customerReOrders
+    customerReOrders,
+    onlineSalesByRegion
   ) => {
 
     /**
@@ -77,6 +79,7 @@ define([
 
       const repData = transactionSearch._get(repSearchID, start, end, newStart, newEnd, 'salesRep', 'salesrep');
       const regionData = customerSearch._get(regionSearchID, start, end, newStart, newEnd, 'territory', 'territory');
+      const onlineRegionData = onlineSalesByRegion._get(start, end, newStart, newEnd);
       const categoryData = customerSearch._get(categorySearchID, start, end, newStart, newEnd, 'category', 'category');
       const marketData = transactionSearch._get(marketplaceSearchID, start, end, newStart, newEnd, 'marketplace', 'salesrep');
 
@@ -104,7 +107,7 @@ define([
         newEnd
       }
 
-      const resultsPage = createResultsPage(dateRangeData, repData, regionData, categoryData, marketData);
+      const resultsPage = createResultsPage(dateRangeData, repData, regionData, onlineRegionData, categoryData, marketData);
 
       response.writePage(resultsPage);
 
@@ -151,11 +154,12 @@ define([
      * @param {Object} dateRangeData - The Date Ranges
      * @param {Object} repData - The Sales by Sales Rep Data
      * @param {Object} regionData - The Sales by Region Data
+     * @param {Object} OnlineRegionData - The Online Sales by Region Data
      * @param {Object} categoryData - The Sales by Category Data
      * @param {Object} marketData - The Sales by Marketplace Data
      * @returns {Object} - The Form Object
      */
-    const createResultsPage = (dateRangeData, repData, regionData, categoryData, marketData) => {
+    const createResultsPage = (dateRangeData, repData, regionData, onlineRegionData, categoryData, marketData) => {
 
       let form = serverWidget.createForm({ title: 'Sales Report: ' + dateRangeData.currentDateRange });
 
@@ -197,14 +201,16 @@ define([
       form = resultSublist._create(form, repData, 'sales_rep', 'salesRep', 'Sales Rep');
       // Region
       form = resultSublist._create(form, regionData, 'region', 'territory', 'Territory / Region');
+      // Online Sales by Region
+      form = resultSublist._create(form, onlineRegionData, 'online_region', 'region', 'Online Territory / Region');
       // Category
       form = resultSublist._create(form, categoryData, 'category', 'category', 'Category');
       // Marketplace
       form = resultSublist._create(form, marketData, 'marketplace', 'marketplace', 'Marketplace');
       // Leads Created
-      form = leadsCreated._create(form, dateRangeData.start, dateRangeData.end);
+      form = leadsCreated._create(form, dateRangeData.start, dateRangeData.end, dateRangeData.newStart, dateRangeData.newEnd);
       // Customer Conversion
-      form = customerConversionRate._create(form, dateRangeData.start, dateRangeData.end);
+      form = customerConversionRate._create(form, dateRangeData.start, dateRangeData.end, dateRangeData.newStart, dateRangeData.end);
       // New Customer Orders
       form = newCustomerOrders._create(form, dateRangeData.start, dateRangeData.end);
       // Customer Re-Orders
