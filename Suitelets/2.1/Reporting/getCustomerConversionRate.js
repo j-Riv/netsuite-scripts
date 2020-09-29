@@ -108,7 +108,7 @@ define(['N/search', 'N/ui/serverWidget', 'N/log', './utils'],
       sublist.addField({
         id: 'custpage_field_' + widgetName + '_sales_rep',
         type: serverWidget.FieldType.TEXT,
-        label: 'Sales Rep'
+        label: 'Assigned Sales Rep'
       });
       sublist.addField({
         id: 'custpage_field_' + widgetName + '_num_of_leads',
