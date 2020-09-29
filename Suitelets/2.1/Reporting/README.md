@@ -1,5 +1,4 @@
-# SALES REPORTING
-> sales_report.js
+# REPORTING
 
 ```bash
 Reporting
