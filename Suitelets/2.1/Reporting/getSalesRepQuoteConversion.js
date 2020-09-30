@@ -134,19 +134,19 @@ define(['N/search', 'N/ui/serverWidget', 'N/log', './utils'],
           const currentConvertedQuotes = parseInt(result.getValue({ name: 'formulanumeric4', summary: search.Summary.MAX }));
           const lastConversionRate = parseFloat(result.getValue({ name: 'formulapercent1', summary: search.Summary.MAX }));
           const currentConversionRate = parseFloat(result.getValue({ name: 'formulapercent2', summary: search.Summary.MAX }));
-          const lastTotalAmount = parseInt(result.getValue({ name: 'formulanumeric5', summary: search.Summary.MAX }));
-          const currentTotalAmount = parseInt(result.getValue({ name: 'formulanumeric6', summary: search.Summary.MAX }));
+          const lastTotalAmount = parseFloat(result.getValue({ name: 'formulanumeric5', summary: search.Summary.MAX }));
+          const currentTotalAmount = parseFloat(result.getValue({ name: 'formulanumeric6', summary: search.Summary.MAX }));
 
           const row = {
             salesRep: result.getText({ name: 'salesrep', summary: search.Summary.GROUP }),
             lastTotalQuotes,
             lastConvertedQuotes,
             lastConversionRate: utils.round(lastConversionRate, 2) + '%',
-            lastTotalAmount: utils.formatNumber(utils.round(lastTotalAmount, 2)),
+            lastTotalAmount: utils.formatNumber(lastTotalAmount),
             currentTotalQuotes,
             currentConvertedQuotes,
             currentConversionRate: utils.round(currentConversionRate, 2) + '%',
-            currentTotalAmount: utils.formatNumber(utils.round(currentTotalAmount, 2))
+            currentTotalAmount: utils.formatNumber(currentTotalAmount)
           };
           // push row
           transactionResults.push(row);
@@ -173,11 +173,11 @@ define(['N/search', 'N/ui/serverWidget', 'N/log', './utils'],
         lastTotalQuotes: '<b>' + totalLastQuoteCount + '</b>',
         lastConvertedQuotes: '<b>' + totalLastConvertedQuotes + '</b>',
         lastConversionRate: '<b>' + totalLastConversionRate + '%</b>',
-        lastTotalAmount: '<b>' + utils.formatNumber(utils.round(totalLastAmount, 2)) + '</b>',
+        lastTotalAmount: '<b>' + utils.formatNumber(totalLastAmount) + '</b>',
         currentTotalQuotes: '<b>' + totalCurrentQuoteCount + '</b>',
         currentConvertedQuotes: '<b>' + totalCurrentConvertedQuotes + '</b>',
         currentConversionRate: '<b>' + totalCurrentConversionRate + '%</b>',
-        currentTotalAmount: '<b>' + utils.formatNumber(utils.round(totalCurrentAmount, 2)) + '</b>'
+        currentTotalAmount: '<b>' + utils.formatNumber(totalCurrentAmount) + '</b>'
       }
       // push totals
       transactionResults.push(totalsRow);
