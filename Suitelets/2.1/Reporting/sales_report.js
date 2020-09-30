@@ -70,18 +70,18 @@ define([
       });
 
       // calculate previous period
-      const { newStart, newEnd } = utils.dateDiff(start, end);
+      const { prevStart, prevEnd } = utils.dateDiff(start, end);
 
       const repSearchID = runtime.getCurrentScript().getParameter('custscript_sp_sales_s_let_sales_by_rep');
       const marketplaceSearchID = runtime.getCurrentScript().getParameter('custscript_sp_sales_s_let_sales_by_mark');
       const regionSearchID = runtime.getCurrentScript().getParameter('custscript_sp_sales_s_let_sales_by_reg');
       const categorySearchID = runtime.getCurrentScript().getParameter('custscript_sp_sales_s_let_sales_by_cat');
 
-      const repData = transactionSearch._get(repSearchID, start, end, newStart, newEnd, 'salesRep', 'salesrep');
-      const regionData = customerSearch._get(regionSearchID, start, end, newStart, newEnd, 'territory', 'territory');
-      const onlineRegionData = onlineSalesByRegion._get(start, end, newStart, newEnd);
-      const categoryData = customerSearch._get(categorySearchID, start, end, newStart, newEnd, 'category', 'category');
-      const marketData = transactionSearch._get(marketplaceSearchID, start, end, newStart, newEnd, 'marketplace', 'salesrep');
+      const repData = transactionSearch._get(repSearchID, start, end, prevStart, prevEnd, 'salesRep', 'salesrep');
+      const regionData = customerSearch._get(regionSearchID, start, end, prevStart, prevEnd, 'territory', 'territory');
+      const onlineRegionData = onlineSalesByRegion._get(start, end, prevStart, prevEnd);
+      const categoryData = customerSearch._get(categorySearchID, start, end, prevStart, prevEnd, 'category', 'category');
+      const marketData = transactionSearch._get(marketplaceSearchID, start, end, prevStart, prevEnd, 'marketplace', 'salesrep');
 
       log.debug({
         title: 'REP RESULTS',
@@ -99,12 +99,12 @@ define([
       });
 
       const dateRangeData = {
-        lastDateRange: newStart + ' - ' + newEnd,
+        prevDateRange: prevStart + ' - ' + prevEnd,
         currentDateRange: start + ' - ' + end,
         start,
         end,
-        newStart,
-        newEnd
+        prevStart,
+        prevEnd
       }
 
       const resultsPage = createResultsPage(dateRangeData, repData, regionData, onlineRegionData, categoryData, marketData);
@@ -161,7 +161,7 @@ define([
      */
     const createResultsPage = (dateRangeData, repData, regionData, onlineRegionData, categoryData, marketData) => {
 
-      let form = serverWidget.createForm({ title: 'Sales Report: ' + dateRangeData.currentDateRange });
+      let form = serverWidget.createForm({ title: 'Sales Report: (' + dateRangeData.prevDateRange + ') - (' + dateRangeData.currentDateRange  + ')'});
 
       // form
       form.addSubmitButton({
@@ -192,7 +192,7 @@ define([
         layoutType: serverWidget.FieldLayoutType.OUTSIDE
       }).updateBreakType({
         breakType: serverWidget.FieldBreakType.STARTROW
-      }).defaultValue = '<b>Periods:</b> Previous <i>(' + dateRangeData.lastDateRange + ')</i> - Current <i>(' + dateRangeData.currentDateRange + ')</i>' +
+      }).defaultValue = '<b>Periods:</b> Previous <i>(' + dateRangeData.prevDateRange + ')</i> - Current <i>(' + dateRangeData.currentDateRange + ')</i>' +
         '<br/>Please select the start date and end date to re-calculate sales.';
       // '<br/><br/><a style="background-color:#125ab2;color:#fff;padding:3px 5px;border-radius:3px;margin-top:5px;font-size:16px;text-decoration:none;" href="/app/site/hosting/scriptlet.nl?script=827&deploy=1">Back</a>';
 
@@ -208,15 +208,15 @@ define([
       // Marketplace
       form = resultSublist._create(form, marketData, 'marketplace', 'marketplace', 'Marketplace');
       // Leads Created
-      form = leadsCreated._create(form, dateRangeData.start, dateRangeData.end, dateRangeData.newStart, dateRangeData.newEnd);
+      form = leadsCreated._create(form, dateRangeData.start, dateRangeData.end, dateRangeData.prevStart, dateRangeData.prevEnd);
       // Customer Conversion
-      form = customerConversionRate._create(form, dateRangeData.start, dateRangeData.end, dateRangeData.newStart, dateRangeData.end);
+      form = customerConversionRate._create(form, dateRangeData.start, dateRangeData.end, dateRangeData.prevStart, dateRangeData.end);
       // New Customer Orders
-      form = newCustomerOrders._create(form, dateRangeData.start, dateRangeData.end);
+      form = newCustomerOrders._create(form, dateRangeData.start, dateRangeData.end, dateRangeData.prevStart, dateRangeData.prevEnd);
       // Customer Re-Orders
-      form = customerReOrders._create(form, dateRangeData.start, dateRangeData.end);
+      form = customerReOrders._create(form, dateRangeData.start, dateRangeData.end, dateRangeData.prevStart, dateRangeData.prevEnd);
       // Sales Rep - Quote Conversion Rate
-      form = salesRepQuoteConversion._create(form, dateRangeData.start, dateRangeData.end);
+      form = salesRepQuoteConversion._create(form, dateRangeData.start, dateRangeData.end, dateRangeData.prevStart, dateRangeData.prevEnd);
 
       return form;
     }

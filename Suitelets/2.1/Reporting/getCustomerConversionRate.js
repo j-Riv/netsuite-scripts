@@ -7,12 +7,12 @@
 define(['N/search', 'N/ui/serverWidget', 'N/log', './utils'],
   (search, serverWidget, log, utils) => {
 
-    const execute = (form, start, end, newStart, newEnd) => {
-      const data = getCustomerSearchResults(start, end, newStart, newEnd);
+    const execute = (form, start, end, prevStart, prevEnd) => {
+      const data = getCustomerSearchResults(start, end, prevStart, prevEnd);
       return createSublist(form, data, 'customer_conversion');
     }
 
-    const getCustomerSearchResults = (start, end, newStart, newEnd) => {
+    const getCustomerSearchResults = (start, end, prevStart, prevEnd) => {
 
       // load search
       const customerSearch = search.load({
@@ -23,7 +23,7 @@ define(['N/search', 'N/ui/serverWidget', 'N/log', './utils'],
       const lastTotalLeads = search.createColumn({
         name: 'formulanumeric1',
         label: 'lastTotalLeads',
-        formula: "NVL(sum(CASE WHEN {datecreated} BETWEEN to_date('" + newStart + "', 'MM/DD/YYYY') AND to_date('" + newEnd + "', 'MM/DD/YYYY') THEN 1 ELSE 0 END),0)",
+        formula: "NVL(sum(CASE WHEN {datecreated} BETWEEN to_date('" + prevStart + "', 'MM/DD/YYYY') AND to_date('" + prevEnd + "', 'MM/DD/YYYY') THEN 1 ELSE 0 END),0)",
         summary: search.Summary.MAX
       });
 
@@ -37,7 +37,7 @@ define(['N/search', 'N/ui/serverWidget', 'N/log', './utils'],
       const lastLeadsConverted = search.createColumn({
         name: 'formulanumeric3',
         label: 'lastLeadsCreated',
-        formula: "NVL(sum(CASE WHEN {datecreated} BETWEEN to_date('" + newStart + "', 'MM/DD/YYYY') AND to_date('" + newEnd + "', 'MM/DD/YYYY') AND {status} = 'CUSTOMER-Closed Won' THEN 1 ELSE 0 END),0)",
+        formula: "NVL(sum(CASE WHEN {datecreated} BETWEEN to_date('" + prevStart + "', 'MM/DD/YYYY') AND to_date('" + prevEnd + "', 'MM/DD/YYYY') AND {status} = 'CUSTOMER-Closed Won' THEN 1 ELSE 0 END),0)",
         summary: search.Summary.MAX
       });
 
@@ -50,7 +50,7 @@ define(['N/search', 'N/ui/serverWidget', 'N/log', './utils'],
 
       const lastLeadsAvgDaysToClose = search.createColumn({
         name: 'formulanumeric5',
-        formula: "NVL(ROUND(SUM(CASE WHEN {datecreated} BETWEEN to_date('" + newStart + "', 'MM/DD/YYYY') AND to_date('" + newEnd + "', 'MM/DD/YYYY') THEN {dateclosed} - {leaddate} END),2),0)",
+        formula: "NVL(ROUND(SUM(CASE WHEN {datecreated} BETWEEN to_date('" + prevStart + "', 'MM/DD/YYYY') AND to_date('" + prevEnd + "', 'MM/DD/YYYY') THEN {dateclosed} - {leaddate} END),2),0)",
         summary: search.Summary.AVG
       });
 
@@ -63,8 +63,8 @@ define(['N/search', 'N/ui/serverWidget', 'N/log', './utils'],
       const lastLeadsConversionRate = search.createColumn({
         name: 'formulapercent1',
         label: 'currentLeadConversionRate',
-        formula: "CASE WHEN SUM(CASE WHEN {datecreated} BETWEEN to_date('" + newStart + "', 'MM/DD/YYYY') AND to_date('" + newEnd + "', 'MM/DD/YYYY') THEN 1 ELSE 0 END) = 0 THEN 0 ELSE SUM(CASE WHEN {datecreated} BETWEEN to_date('" + newStart + "', 'MM/DD/YYYY') AND to_date('" + newEnd + "', 'MM/DD/YYYY') " +
-          "AND {status} = 'CUSTOMER-Closed Won' THEN 1 ELSE 0 END)/SUM(CASE WHEN {datecreated} BETWEEN to_date('" + newStart + "', 'MM/DD/YYYY') AND to_date('" + newEnd + "', 'MM/DD/YYYY') THEN 1 ELSE 0 END) END",
+        formula: "CASE WHEN SUM(CASE WHEN {datecreated} BETWEEN to_date('" + prevStart + "', 'MM/DD/YYYY') AND to_date('" + prevEnd + "', 'MM/DD/YYYY') THEN 1 ELSE 0 END) = 0 THEN 0 ELSE SUM(CASE WHEN {datecreated} BETWEEN to_date('" + prevStart + "', 'MM/DD/YYYY') AND to_date('" + prevEnd + "', 'MM/DD/YYYY') " +
+          "AND {status} = 'CUSTOMER-Closed Won' THEN 1 ELSE 0 END)/SUM(CASE WHEN {datecreated} BETWEEN to_date('" + prevStart + "', 'MM/DD/YYYY') AND to_date('" + prevEnd + "', 'MM/DD/YYYY') THEN 1 ELSE 0 END) END",
         summary: search.Summary.MAX
       });
 
@@ -90,7 +90,7 @@ define(['N/search', 'N/ui/serverWidget', 'N/log', './utils'],
       const startDate = search.createFilter({
         name: 'datecreated',
         operator: search.Operator.ONORAFTER,
-        values: [newStart]
+        values: [prevStart]
       });
       const endDate = search.createFilter({
         name: 'datecreated',

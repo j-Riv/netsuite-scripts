@@ -7,23 +7,74 @@
 define(['N/search', 'N/ui/serverWidget', 'N/log', './utils'],
   (search, serverWidget, log, utils) => {
 
-    const execute = (form, start, end) => {
-      const data = getTransactionSearchResults(start, end);
+    const execute = (form, start, end, prevStart, prevEnd) => {
+      const data = getTransactionSearchResults(start, end, prevStart, prevEnd);
       return createSublist(form, data, 'customer_reorder');
     }
 
-    const getTransactionSearchResults = (start, end) => {
+    const getTransactionSearchResults = (start, end, prevStart, prevEnd) => {
 
       // load search
       const transactionSearch = search.load({
         id: 'customsearch_sp_customer_re_orders'
       });
 
+      // create columns
+      const lastOrderCount = search.createColumn({
+        name: 'formulanumeric1',
+        label: 'lastOrderCount',
+        formula: "NVL(SUM(CASE WHEN {trandate} BETWEEN to_date('" + prevStart + "', 'MM/DD/YYYY') AND to_date('" + prevEnd + "', 'MM/DD/YYYY') THEN 1 ELSE 0 END),0)",
+        summary: search.Summary.MAX
+      });
+
+      const currentOrderCount = search.createColumn({
+        name: 'formulanumeric2',
+        label: 'currentOrderCount',
+        formula: "NVL(SUM(CASE WHEN {trandate} BETWEEN to_date('" + start + "', 'MM/DD/YYYY') AND to_date('" + end + "', 'MM/DD/YYYY') THEN 1 ELSE 0 END),0)",
+        summary: search.Summary.MAX
+      });
+
+      const lastOrderAverage = search.createColumn({
+        name: 'formulanumeric3',
+        label: 'lastOrderAverage',
+        formula: "NVL(SUM(CASE WHEN {trandate} BETWEEN to_date('" + prevStart + "', 'MM/DD/YYYY') AND to_date('" + prevEnd + "', 'MM/DD/YYYY') THEN {amount} END),0)",
+        summary: search.Summary.AVG
+      });
+
+      const currentOrderAverage = search.createColumn({
+        name: 'formulanumeric4',
+        label: 'currentOrderAverage',
+        formula: "NVL(SUM(CASE WHEN {trandate} BETWEEN to_date('" + start + "', 'MM/DD/YYYY') AND to_date('" + end + "', 'MM/DD/YYYY') THEN {amount} END),0)",
+        summary: search.Summary.AVG
+      });
+
+      const lastOrderAmount = search.createColumn({
+        name: 'formulanumeric5',
+        label: 'lastOrderAmount',
+        formula: "NVL(SUM(CASE WHEN {trandate} BETWEEN to_date('" + prevStart + "', 'MM/DD/YYYY') AND to_date('" + prevEnd + "', 'MM/DD/YYYY') THEN {amount} END),0)",
+        summary: search.Summary.MAX
+      });
+
+      const currentOrderAmount = search.createColumn({
+        name: 'formulanumeric6',
+        label: 'currentOrderAmount',
+        formula: "NVL(SUM(CASE WHEN {trandate} BETWEEN to_date('" + start + "', 'MM/DD/YYYY') AND to_date('" + end + "', 'MM/DD/YYYY') THEN {amount} END),0)",
+        summary: search.Summary.MAX
+      });
+
+      const transactionSearchColumns = transactionSearch.columns;
+      transactionSearchColumns.push(lastOrderCount);
+      transactionSearchColumns.push(currentOrderCount);
+      transactionSearchColumns.push(lastOrderAverage);
+      transactionSearchColumns.push(currentOrderAverage);
+      transactionSearchColumns.push(lastOrderAmount);
+      transactionSearchColumns.push(currentOrderAmount);
+
       // create filters
       const startDate = search.createFilter({
         name: 'trandate',
         operator: search.Operator.ONORAFTER,
-        values: [start]
+        values: [prevStart]
       });
       const endDate = search.createFilter({
         name: 'trandate',
@@ -40,8 +91,10 @@ define(['N/search', 'N/ui/serverWidget', 'N/log', './utils'],
       });
 
       const transactionResults = [];
-      let totalOrderCount = 0;
-      let totalsOrderAmount = 0;
+      let totalLastOrderCount = 0;
+      let totalLastOrderAmount = 0;
+      let totalCurrentOrderCount = 0;
+      let totalCurrentOrderAmount = 0;
       pagedData.pageRanges.forEach(pageRange => {
 
         const page = pagedData.fetch({ index: pageRange.index });
@@ -53,34 +106,49 @@ define(['N/search', 'N/ui/serverWidget', 'N/log', './utils'],
             details: result
           });
 
-          const orderCount = result.getValue({ name: 'tranid', summary: search.Summary.COUNT });
-          const avgAmount = parseFloat(result.getValue({ name: 'amount', summary: search.Summary.AVG }));
-          const totalAmount = parseFloat(result.getValue({ name: 'amount', summary: search.Summary.SUM }));;
+          const lastOrderCount = parseInt(result.getValue({ name: 'formulanumeric1', summary: search.Summary.MAX }));
+          const currentOrderCount = parseInt(result.getValue({ name: 'formulanumeric2', summary: search.Summary.MAX }));
+          const lastAvgOrder = parseFloat(result.getValue({ name: 'formulanumeric3', summary: search.Summary.AVG }));
+          const currentAvgOrder = parseFloat(result.getValue({ name: 'formulanumeric4', summary: search.Summary.AVG }));
+          const lastOrderAmount = parseFloat(result.getValue({ name: 'formulanumeric5', summary: search.Summary.MAX }));
+          const currentOrderAmount = parseFloat(result.getValue({ name: 'formulanumeric6', summary: search.Summary.MAX }));
+
 
           const row = {
             salesRep: result.getText({ name: 'salesrep', summary: search.Summary.GROUP }),
-            orderCount,
-            avgAmount: utils.formatNumber(utils.round(avgAmount, 2)),
-            totalAmount: utils.formatNumber(utils.round(totalAmount, 2))
+            lastOrderCount,
+            lastAvgOrderAmount: utils.formatNumber(utils.round(lastAvgOrder, 2)),
+            lastOrderAmount: utils.formatNumber(utils.round(lastOrderAmount, 2)),
+            currentOrderCount,
+            currentAvgOrderAmount: utils.formatNumber(utils.round(currentAvgOrder, 2)),
+            currentOrderAmount: utils.formatNumber(utils.round(currentOrderAmount, 2)),
           };
           // push row
           transactionResults.push(row);
-
           // totals
-          totalOrderCount += parseInt(orderCount);
-          totalsOrderAmount += totalAmount;
+          totalLastOrderCount += lastOrderCount;
+          totalLastOrderAmount += lastOrderAmount;
+          totalCurrentOrderCount += currentOrderCount;
+          totalCurrentOrderAmount += currentOrderAmount;
         });
       });
 
-      const totalAvgOrderAmount = totalOrderCount > 0
-        ? utils.formatNumber(utils.round(totalsOrderAmount / totalOrderCount, 2))
+      const totalLastAvgOrderAmount = totalLastOrderCount > 0
+        ? utils.formatNumber(utils.round(totalLastOrderAmount / totalLastOrderCount, 2))
+        : '$0.00';
+
+      const totalCurrentAvgOrderAmount = totalCurrentOrderCount > 0
+        ? utils.formatNumber(utils.round(totalCurrentOrderAmount / totalCurrentOrderCount, 2))
         : '$0.00';
 
       const totalsRow = {
         salesRep: '<b>TOTAL</b>',
-        orderCount: '<b>' + totalOrderCount + '</b>',
-        avgAmount: '<b>' + totalAvgOrderAmount + '</b>',
-        totalAmount: '<b>' + utils.formatNumber(totalsOrderAmount) + '</b>'
+        lastOrderCount: '<b>' + totalLastOrderCount + '</b>',
+        lastAvgOrderAmount: '<b>' + totalLastAvgOrderAmount + '</b>',
+        lastOrderAmount: '<b>' + utils.formatNumber(utils.round(totalLastOrderAmount, 2)) + '</b>',
+        currentOrderCount: '<b>' + totalCurrentOrderCount + '</b>',
+        currentAvgOrderAmount: '<b>' + totalCurrentAvgOrderAmount + '</b>',
+        currentOrderAmount: '<b>' + utils.formatNumber(utils.round(totalCurrentOrderAmount, 2)) + '</b>'
       }
       // push row
       transactionResults.push(totalsRow);
@@ -103,19 +171,34 @@ define(['N/search', 'N/ui/serverWidget', 'N/log', './utils'],
         label: 'Sales Rep'
       });
       sublist.addField({
-        id: 'custpage_field_' + widgetName + '_num_of_orders',
+        id: 'custpage_field_' + widgetName + '_prev_num_of_orders',
         type: serverWidget.FieldType.TEXT,
-        label: '# of Orders'
+        label: 'Prev. # of Orders'
       });
       sublist.addField({
-        id: 'custpage_field_' + widgetName + '_avg_amount',
+        id: 'custpage_field_' + widgetName + '_prev_avg_order_amount',
         type: serverWidget.FieldType.TEXT,
-        label: 'Avg $$'
+        label: 'Prev. Avg Order $'
       });
       sublist.addField({
-        id: 'custpage_field_' + widgetName + '_total_amount',
+        id: 'custpage_field_' + widgetName + '_prev_total_order_amount',
         type: serverWidget.FieldType.TEXT,
-        label: 'Total $$'
+        label: 'Prev. Total Order $'
+      });
+      sublist.addField({
+        id: 'custpage_field_' + widgetName + '_current_num_of_orders',
+        type: serverWidget.FieldType.TEXT,
+        label: 'Current # of Orders'
+      });
+      sublist.addField({
+        id: 'custpage_field_' + widgetName + '_current_avg_order_amount',
+        type: serverWidget.FieldType.TEXT,
+        label: 'Current Avg Order $'
+      });
+      sublist.addField({
+        id: 'custpage_field_' + widgetName + '_current_total_order_amount',
+        type: serverWidget.FieldType.TEXT,
+        label: 'Current Total Order $'
       });
 
       for (let i = 0; i < data.results.length; i++) {
@@ -127,25 +210,40 @@ define(['N/search', 'N/ui/serverWidget', 'N/log', './utils'],
           value: result.salesRep
         });
         sublist.setSublistValue({
-          id: 'custpage_field_' + widgetName + '_num_of_orders',
+          id: 'custpage_field_' + widgetName + '_prev_num_of_orders',
           line: i,
-          value: result.orderCount
+          value: result.lastOrderCount
         });
         sublist.setSublistValue({
-          id: 'custpage_field_' + widgetName + '_avg_amount',
+          id: 'custpage_field_' + widgetName + '_prev_avg_order_amount',
           line: i,
-          value: result.avgAmount
+          value: result.lastAvgOrderAmount
         });
         sublist.setSublistValue({
-          id: 'custpage_field_' + widgetName + '_total_amount',
+          id: 'custpage_field_' + widgetName + '_prev_total_order_amount',
           line: i,
-          value: result.totalAmount
+          value: result.lastOrderAmount
+        });
+        sublist.setSublistValue({
+          id: 'custpage_field_' + widgetName + '_current_num_of_orders',
+          line: i,
+          value: result.currentOrderCount
+        });
+        sublist.setSublistValue({
+          id: 'custpage_field_' + widgetName + '_current_avg_order_amount',
+          line: i,
+          value: result.currentAvgOrderAmount
+        });
+        sublist.setSublistValue({
+          id: 'custpage_field_' + widgetName + '_current_total_order_amount',
+          line: i,
+          value: result.currentOrderAmount
         });
       }
 
       return form;
 
-    }
+    } 
 
     return {
       _create: execute

@@ -7,12 +7,12 @@
 define(['N/search', 'N/ui/serverWidget', 'N/log'],
   (search, serverWidget, log) => {
 
-    const execute = (form, start, end, newStart, newEnd) => {
-      const data = getCustomerSearchResults(start, end, newStart, newEnd);
+    const execute = (form, start, end, prevStart, prevEnd) => {
+      const data = getCustomerSearchResults(start, end, prevStart, prevEnd);
       return createSublist(form, data, 'leads_created');
     }
 
-    const getCustomerSearchResults = (start, end, newStart, newEnd) => {
+    const getCustomerSearchResults = (start, end, prevStart, prevEnd) => {
 
       // load search
       const customerSearch = search.load({
@@ -30,7 +30,7 @@ define(['N/search', 'N/ui/serverWidget', 'N/log'],
       const lastLeadsCreated = search.createColumn({
         name: 'formulanumeric1',
         label: 'lastLeadsCreated',
-        formula: "NVL(sum(CASE WHEN {datecreated} BETWEEN to_date('" + newStart + "', 'MM/DD/YYYY') AND to_date('" + newEnd + "', 'MM/DD/YYYY') THEN 1 ELSE 0 END),0)",
+        formula: "NVL(sum(CASE WHEN {datecreated} BETWEEN to_date('" + prevStart + "', 'MM/DD/YYYY') AND to_date('" + prevEnd + "', 'MM/DD/YYYY') THEN 1 ELSE 0 END),0)",
         summary: search.Summary.MAX
       });
 
@@ -42,7 +42,7 @@ define(['N/search', 'N/ui/serverWidget', 'N/log'],
       const startDate = search.createFilter({
         name: 'datecreated',
         operator: search.Operator.ONORAFTER,
-        values: [newStart]
+        values: [prevStart]
       });
       const endDate = search.createFilter({
         name: 'datecreated',

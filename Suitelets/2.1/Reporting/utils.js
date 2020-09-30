@@ -21,8 +21,8 @@ define(['N/log'],
       const diffDays = diffTime / (1000 * 3600 * 24) + 1;
 
       return {
-        newStart: formatDate(new Date(date1.setDate(date1.getDate() - diffDays))),
-        newEnd: formatDate(new Date(date2.setDate(date2.getDate() - diffDays)))
+        prevStart: formatDate(new Date(date1.setDate(date1.getDate() - diffDays))),
+        prevEnd: formatDate(new Date(date2.setDate(date2.getDate() - diffDays)))
       }
     }
 

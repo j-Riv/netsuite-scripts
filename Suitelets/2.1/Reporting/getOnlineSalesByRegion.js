@@ -7,13 +7,13 @@
 define(['N/search', 'N/log', './utils'],
   (search, log, utils) => {
 
-    const execute = (start, end, newStart, newEnd) => {
+    const execute = (start, end, prevStart, prevEnd) => {
       const westernID = 'customsearch_sp_ol_sales_by_reg_west';
       const centralID = 'customsearch_sp_ol_sales_by_reg_central';
       const easternID = 'customsearch_sp_ol_sales_by_reg_east';
-      const westernData = getTransactionSearchResults(westernID, 'Western', start, end, newStart, newEnd);
-      const centralData = getTransactionSearchResults(centralID, 'Central', start, end, newStart, newEnd);
-      const easternData = getTransactionSearchResults(easternID, 'Eastern', start, end, newStart, newEnd);
+      const westernData = getTransactionSearchResults(westernID, 'Western', start, end, prevStart, prevEnd);
+      const centralData = getTransactionSearchResults(centralID, 'Central', start, end, prevStart, prevEnd);
+      const easternData = getTransactionSearchResults(easternID, 'Eastern', start, end, prevStart, prevEnd);
       // combine
       const data = westernData.results.concat(centralData.results).concat(easternData.results);
       // totals
@@ -57,7 +57,7 @@ define(['N/search', 'N/log', './utils'],
       // return createSublist(form, data, 'online_sales');
     }
 
-    const getTransactionSearchResults = (searchID, region, start, end, newStart, newEnd) => {
+    const getTransactionSearchResults = (searchID, region, start, end, prevStart, prevEnd) => {
 
       // load search
       const transactionSearch = search.load({
@@ -76,7 +76,7 @@ define(['N/search', 'N/log', './utils'],
       const lastSales = search.createColumn({
         name: 'formulacurrency1',
         label: 'lastSales',
-        formula: "NVL(sum(CASE WHEN {trandate} BETWEEN to_date('" + newStart + "', 'MM/DD/YYYY') AND to_date('" + newEnd + "', 'MM/DD/YYYY') THEN {amount} END),0)",
+        formula: "NVL(sum(CASE WHEN {trandate} BETWEEN to_date('" + prevStart + "', 'MM/DD/YYYY') AND to_date('" + prevEnd + "', 'MM/DD/YYYY') THEN {amount} END),0)",
         summary: search.Summary.MAX
       });
       // current sales count - date range = supplied dates
@@ -90,7 +90,7 @@ define(['N/search', 'N/log', './utils'],
       const lastOrderCount = search.createColumn({
         name: 'formulanumeric1',
         label: 'lastOrderCount',
-        formula: "NVL(sum(CASE WHEN {trandate} BETWEEN to_date('" + newStart + "', 'MM/DD/YYYY') AND to_date('" + newEnd + "', 'MM/DD/YYYY') THEN 1 ELSE 0 END),0)",
+        formula: "NVL(sum(CASE WHEN {trandate} BETWEEN to_date('" + prevStart + "', 'MM/DD/YYYY') AND to_date('" + prevEnd + "', 'MM/DD/YYYY') THEN 1 ELSE 0 END),0)",
         summary: search.Summary.MAX
       });
 
@@ -105,7 +105,7 @@ define(['N/search', 'N/log', './utils'],
       const startDate = search.createFilter({
         name: 'trandate',
         operator: search.Operator.ONORAFTER,
-        values: [newStart]
+        values: [prevStart]
       });
       const endDate = search.createFilter({
         name: 'trandate',
