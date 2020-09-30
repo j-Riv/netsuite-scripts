@@ -12,13 +12,13 @@ define(['N/search', './utils'],
      * @param {string} searchID - The Search ID
      * @param {string} start - The Supplied Start Date
      * @param {string} end - The Supplied End Date
-     * @param {string} newStart - The Calculated Start Date
-     * @param {string} newEnd - The Calculated End Date
+     * @param {string} prevStart - The Calculated Start Date
+     * @param {string} prevEnd - The Calculated End Date
      * @param {string} key - The Key To Sort By
      * @param {string} fieldName - The Keys Label (Display)
      * @returns - The Search Results
      */
-    const getTransactionSearchResults = (searchID, start, end, newStart, newEnd, key, fieldName) => {
+    const getTransactionSearchResults = (searchID, start, end, prevStart, prevEnd, key, fieldName) => {
 
       // load search
       const transactionSearch = search.load({
@@ -37,7 +37,7 @@ define(['N/search', './utils'],
       const lastSales = search.createColumn({
         name: 'formulacurrency1',
         label: 'lastSales',
-        formula: "NVL(sum(CASE WHEN {trandate} BETWEEN to_date('" + newStart + "', 'MM/DD/YYYY') AND to_date('" + newEnd + "', 'MM/DD/YYYY') THEN {amount} END),0)",
+        formula: "NVL(sum(CASE WHEN {trandate} BETWEEN to_date('" + prevStart + "', 'MM/DD/YYYY') AND to_date('" + prevEnd + "', 'MM/DD/YYYY') THEN {amount} END),0)",
         summary: search.Summary.MAX
       });
       // current sales count - date range = supplied dates
@@ -51,7 +51,7 @@ define(['N/search', './utils'],
       const lastOrderCount = search.createColumn({
         name: 'formulanumeric1',
         label: 'lastOrderCount',
-        formula: "NVL(sum(CASE WHEN {trandate} BETWEEN to_date('" + newStart + "', 'MM/DD/YYYY') AND to_date('" + newEnd + "', 'MM/DD/YYYY') THEN 1 ELSE 0 END),0)",
+        formula: "NVL(sum(CASE WHEN {trandate} BETWEEN to_date('" + prevStart + "', 'MM/DD/YYYY') AND to_date('" + prevEnd + "', 'MM/DD/YYYY') THEN 1 ELSE 0 END),0)",
         summary: search.Summary.MAX
       });
 
@@ -66,7 +66,7 @@ define(['N/search', './utils'],
       const startDate = search.createFilter({
         name: 'trandate',
         operator: search.Operator.ONORAFTER,
-        values: [newStart]
+        values: [prevStart]
       });
       const endDate = search.createFilter({
         name: 'trandate',
