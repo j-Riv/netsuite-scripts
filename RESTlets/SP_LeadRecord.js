@@ -35,7 +35,7 @@ define(['N/record', 'N/error', 'N/email', 'N/log'],
           isDynamic: true
         });
         // Loop through fields
-        for (let fldName in context) {
+        for (const fldName in context) {
           if (context.hasOwnProperty(fldName)) {
             if (fldName !== 'recordtype') {
               rec.setValue(fldName, context[fldName]);
