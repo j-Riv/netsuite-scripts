@@ -11,7 +11,7 @@ define(['N/record', 'N/error', 'N/email', 'N/log'],
      * @param {string} methodName (GET, DELETE, POST, PUT)
      */
     const doValidation = (args, argNames, methodName) => {
-      for (var i = 0; i < args.length; i++) {
+      for (let i = 0; i < args.length; i++) {
         if (!args[i] && args[i] !== 0) {
           throw error.create({
             name: 'MISSING_REQ_ARG',
