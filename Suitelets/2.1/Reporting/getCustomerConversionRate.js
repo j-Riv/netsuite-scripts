@@ -139,11 +139,11 @@ define(['N/search', 'N/ui/serverWidget', 'N/log', './utils'],
             salesRep: result.getText({ name: 'salesrep', summary: search.Summary.GROUP }),
             lastTotalLeads,
             lastConvertedLeads,
-            lastConversionRate,
+            lastConversionRate: utils.round(lastConversionRate, 2),
             lastAvgDaysToClose,
             currentTotalLeads,
             currentConvertedLeads,
-            currentConversionRate,
+            currentConversionRate: utils.round(currentConversionRate, 2),
             currentAvgDaysToClose
           };
           // push row
