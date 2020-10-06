@@ -5,6 +5,8 @@
 > post_item_to_shopify.js
 
 ### Setup
+This script will create an item / product in Shopify.
+
 #### Script Deployment
 
 Script requires 2 paramaters.
@@ -33,6 +35,8 @@ Depends on [Forge](https://github.com/digitalbazaar/forge) for HMAC creation.
 > get_retail_replenishment_items.js
 
 ### Setup
+This script will create a Transfer Order based on min and max stock for the Retail Store Location.
+
 #### Script Deployment
 
 Script requires 2 paramaters.
@@ -250,9 +254,11 @@ A CSV file containing all transfer order import data will be generated and saved
 > clear_bin_available_inventory.js
 
 ### Setup
+This script will display all items currently in the given bin. It will then create an inventory adjustment and "zero" them out.
+
 #### Script Deployment
 
-Script requires a paramater.
+Script requires a parameter.
 
 <table>
   <tr>
@@ -335,6 +341,9 @@ Create a saved (item) search and make sure you make it public. Use the following
 > discontinue_items.js
 
 ### Setup
+This script will search for items based on a partial SKU. It will then create an inventory adjustment and "zero" out all available inventory for the given SKUs. Lastly 
+it will mark the items inactive.
+
 The search depends on a custom item field <i>(custitem_sp_item_sku)</i>. This is because the item name / number field <i>(itemid)</i> 
 for a matrix item during a search will show up as <i>parent item name / number : child item name / number</i> for example: 
 <i>og-black-tee : S001BS</i>.
@@ -346,3 +355,27 @@ CASE WHEN INSTR({itemid},' : ') != 0 THEN SUBSTR({itemid}, INSTR({itemid},' : ')
 
 
 Searches for all SKU(s) that match the provided partial SKU. It then creates a "zero" inventory adjustment and sets the item to inactive.
+
+## SET FARAPP SHOPIFY SYNC
+> set_farapp_shopify_sync.js
+
+### Setup
+The script will search for items based on a partial SKU. It will display all mandatory fields for posting to Shopify. It will also update the 
+FarApp Shopify Flag fields.
+
+#### Script Deployment
+
+Script requires 1 parameter.
+
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Type</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>custscript_sp_set_farapp_shpfy_sync_ur</td>
+    <td>Free-Form-Text</td>
+    <td>The Deployment URL</td>
+  </tr>
+</table>
