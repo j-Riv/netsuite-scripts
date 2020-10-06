@@ -138,7 +138,7 @@ define(['N/search', './utils'],
         currentAvgOrderAmount: '<b>' + utils.formatNumber(utils.getAvg(currentSalesTotal, currentTotalOrderCount)) + '</b>'
       }
       // add key
-      totalsRow[key] = '<b>TOTAL</b>'
+      totalsRow[key] = '<b>TOTAL</b>';
       // push row
       transactionResults.push(totalsRow);
 
