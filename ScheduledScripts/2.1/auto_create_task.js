@@ -96,7 +96,7 @@ define(['N/runtime', 'N/search', 'N/record', 'N/email'],
       const defaultEasternRep = runtime.getCurrentScript().getParameter('custscript_auto_create_task_def_er_rep');
       const defaultCentralRep = runtime.getCurrentScript().getParameter('custscript_auto_create_task_def_cr_rep');
       const defaultEnterpriseRep = runtime.getCurrentScript().getParameter('custscript_auto_create_task_def_ent_rep');
-      const defaultFranchiseRep = runtime.getCurrentScript().getParameter('custscript_auto_create_task_def_fra_rep');
+      const defaultFranchiseRep = runtime.getCurrentScript().getParameter('custscript_auto_create_task_def_fran_rep');
       const regions = {
         "International": {
           id: defaultInternationalRep,

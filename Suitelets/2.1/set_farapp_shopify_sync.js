@@ -204,7 +204,7 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
         const name = item.getValue('displayname');
         const type = item.getText('type');
         const weight = item.getValue('weight');
-        const weightUnit = item.getValue('weightunit');
+        const weightUnit = item.getText('weightunit');
         const retailPrice = item.getValue('baseprice');
         const wholesalePrice = item.getValue('price2');
         const retailShopifyFlag = item.getText('custitem_fa_shopify_flag01');

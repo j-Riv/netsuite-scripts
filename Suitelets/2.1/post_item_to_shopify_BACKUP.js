@@ -23,8 +23,6 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
       }
     }
 
-    const scriptURL = '/app/site/hosting/scriptlet.nl?script=782&deploy=1&whence=';
-
     /**
      * Generates the product form.
      * @param {Object} response 
@@ -89,118 +87,34 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
      * @param {Object} response 
      */
     const onPost = (request, response) => {
-      let store;
-      let SKU;
-      let results;
-      let itemObj;
-      // original post - set store & sku
-      if (request.parameters.custpage_shopify_store && request.parameters.custpage_product_sku) {
-        store = request.parameters.custpage_shopify_store;
-        SKU = request.parameters.custpage_product_sku;
-        // search & get results
-        results = getItemData(SKU);
-        if (results.length > 0) {
-          // process results & build item object
-          itemObj = buildItemObject(response, store, results[0]);
-          // if item object created
-          if (itemObj) {
-            // create form & display item object
-            const form = serverWidget.createForm({
-              title: 'Post Product to Shopify'
-            });
-            // parse variants array
-            if (itemObj.hasVariants) {
-              itemObj.variants = JSON.parse(itemObj.variants);
-            }
+      const store = request.parameters.custpage_shopify_store;
+      const SKU = request.parameters.custpage_product_sku;
 
-            form.addSubmitButton({
-              label: 'Post to Shopify'
-            });
+      // search
+      const results = getItemData(SKU);
 
-            form.addField({
-              id: 'custpage_set_shopify_store',
-              type: serverWidget.FieldType.TEXT,
-              label: 'Store'
-            }).updateDisplayType({
-              displayType: serverWidget.FieldDisplayType.DISABLED
-            }).updateLayoutType({
-              layoutType: serverWidget.FieldLayoutType.OUTSIDEABOVE
-            }).updateBreakType({
-              breakType: serverWidget.FieldBreakType.STARTROW
-            }).defaultValue = store;
-
-            form.addField({
-              id: 'custpage_set_product_sku',
-              type: serverWidget.FieldType.TEXT,
-              label: 'SKU'
-            }).updateDisplayType({
-              displayType: serverWidget.FieldDisplayType.DISABLED
-            }).updateLayoutType({
-              layoutType: serverWidget.FieldLayoutType.OUTSIDEABOVE
-            }).defaultValue = SKU;
-
-            form.addField({
-              id: 'custpage_message',
-              type: serverWidget.FieldType.INLINEHTML,
-              label: ' '
-            }).updateLayoutType({
-              layoutType: serverWidget.FieldLayoutType.OUTSIDEABOVE
-            }).updateBreakType({
-              breakType: serverWidget.FieldBreakType.STARTROW
-            }).defaultValue = '<p><br/><b>If everything looks ok below, press the "Post to Shopify" button above.</b></p>';
-
-            form.addField({
-              id: 'custpage_item_obj',
-              type: serverWidget.FieldType.INLINEHTML,
-              label: ' '
-            }).updateLayoutType({
-              layoutType: serverWidget.FieldLayoutType.OUTSIDEABOVE
-            }).updateBreakType({
-              breakType: serverWidget.FieldBreakType.STARTROW
-            }).defaultValue = '<br/><pre>' + JSON.stringify(itemObj, undefined, 4) + '</pre>';
-
-            form.addPageLink({
-              type: serverWidget.FormPageLinkType.CROSSLINK,
-              title: 'Go Back',
-              url: scriptURL
-            });
-
-            response.writePage(form);
-          }
-        } else {
-          // no results, sku not found, create form & display error
-          const errorForm = serverWidget.createForm({
-            title: 'Post Product to Shopify'
-          });
-          errorForm.addPageInitMessage({
-            type: message.Type.ERROR,
-            title: 'ERROR!',
-            message: 'SKU (' + SKU + ') not found!',
-          });
-          errorForm.addField({
-            id: 'custpage_message',
-            type: serverWidget.FieldType.INLINEHTML,
-            label: ' '
-          }).defaultValue = 'Please ty again <a href="/app/site/hosting/scriptlet.nl?script=782&deploy=1&whence=">here!</a>';
-
-          errorForm.addPageLink({
-            type: serverWidget.FormPageLinkType.CROSSLINK,
-            title: 'Go Back',
-            url: scriptURL
-          });
-
-          response.writePage(errorForm);
+      if (results.length > 0) {
+        // process results
+        const itemObj = buildItemObject(response, store, results[0]);
+        if (itemObj) {
+          postItemToShopify(response, store, itemObj);
         }
       } else {
-        // second post set store & sku
-        store = request.parameters.custpage_set_shopify_store;
-        SKU = request.parameters.custpage_set_product_sku;
-        // search
-        results = getItemData(SKU);
-        // process results & rebuild item object
-        itemObj = buildItemObject(response, store, results[0]);
-        // post to server ---> shopify
-        postItemToShopify(response, store, itemObj);
+        const errorForm = serverWidget.createForm({
+          title: 'Post Product to Shopify'
+        });
+        errorForm.addPageInitMessage({
+          type: message.Type.ERROR,
+          title: 'ERROR!',
+          message: 'SKU (' + SKU + ') not found!',
+        });
+        errorForm.addField({
+          id: 'custpage_message',
+          type: serverWidget.FieldType.INLINEHTML,
+          label: ' '
+        }).defaultValue = 'Please ty again <a href="/app/site/hosting/scriptlet.nl?script=782&deploy=1&whence=">here!</a>';
+
+        response.writePage(errorForm);
       }
     }
 
@@ -314,12 +228,6 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
           type: serverWidget.FieldType.INLINEHTML,
           label: ' '
         }).defaultValue = 'Please update the item record <a href="/app/common/item/item.nl?id=' + item.id + '&e=T" target="_blank">here!</a>';
-
-        itemErrorForm.addPageLink({
-          type: serverWidget.FormPageLinkType.CROSSLINK,
-          title: 'Go Back',
-          url: scriptURL
-        });
 
         response.writePage(itemErrorForm);
         return false;
@@ -484,12 +392,6 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
           }).defaultValue = 'Product Created/Updated in Shopify (<a href="' +
           storeURL + newProduct.product.id + '" target="_blank">' +
           newProduct.product.id + '</a>).<br/>Please make sure the description is formatted correctly.';
-
-          successForm.addPageLink({
-            type: serverWidget.FormPageLinkType.CROSSLINK,
-            title: 'Go Back',
-            url: scriptURL
-          });
 
           response.writePage(successForm);
 
