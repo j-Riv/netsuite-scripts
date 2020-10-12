@@ -3,8 +3,8 @@
  * @NScriptType MapReduceScript
  * @NModuleScope SameAccount
  */
-define(['N/error', 'N/runtime', 'N/record', 'N/search'],
-  (error, runtime, record, search) => {
+define(['N/error', 'N/runtime', 'N/record', 'N/search', 'N/email'],
+  (error, runtime, record, search, email) => {
 
     /**
      * Marks the beginning of the Map/Reduce process and generates input data.
@@ -52,6 +52,9 @@ define(['N/error', 'N/runtime', 'N/record', 'N/search'],
       const updatedCustomerId = updateCustomer(customerId);
 
       log.debug('UPDATED CUSTOMER (' + updatedCustomerId + ')', 'Customer: ' + name);
+
+      // write to context
+      context.write(taskId, JSON.stringify({ name: name, salesRep: salesRep }));
     }
 
     /**
@@ -72,10 +75,20 @@ define(['N/error', 'N/runtime', 'N/record', 'N/search'],
       //Grab Map errors
       summary.mapSummary.errors.iterator().each(function (key, value) {
         log.error(key, 'ERROR String: ' + value);
-
-
         return true;
       });
+
+      // email
+      let contents = '<h3>Auto created Follow-Up Tasks for Customers who have not ordered in 90+ days.</h3>';
+      summary.output.iterator().each(function (key, value) {
+        value = JSON.parse(value);
+        contents += '<p><b>TASK CREATED</b> (' + key + ') - <b>CUSTOMER:</b> ' + value.name + ' | <b>SALES REP:</b> ' + value.salesRep + '</p>'
+        return true;
+      });
+
+      log.debug('SUMMARY EMAIL CONTENTS', contents);
+
+      sendEmail(contents);
 
     }
 
@@ -232,6 +245,28 @@ define(['N/error', 'N/runtime', 'N/record', 'N/search'],
       const today = new Date();
       const dateDue = new Date(today.getFullYear(), today.getMonth(), today.getDate() + days);
       return dateDue;
+    }
+
+    /**
+     * Sends an email with a list of tasks created.
+     * @param {Array} tasksCreated - Task Data
+     */
+    const sendEmail = tasksCreated => {
+      let html = tasksCreated;
+
+      log.debug({
+        title: 'SENDING EMAIL',
+        details: html
+      });
+
+      email.send({
+        author: 207,
+        recipients: 207,
+        bcc: ['206'],
+        replyTo: 'jriv@suavecito.com',
+        subject: 'Auto Created Tasks Created',
+        body: html
+      });
     }
 
     return {

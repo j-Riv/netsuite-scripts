@@ -61,6 +61,10 @@ define(['N/currentRecord', 'N/record', 'N/ui/dialog'],
           fieldId: 'custentity_sp_follow_up_scheduled',
           value: false
         });
+        customerRecord.setValue({
+          fieldId: 'custentity_sp_last_follow_up_date',
+          value: new Date()
+        });
       }
 
       var customerId = customerRecord.save({

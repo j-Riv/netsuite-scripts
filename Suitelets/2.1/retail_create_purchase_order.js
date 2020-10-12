@@ -262,6 +262,12 @@ define(['N/runtime', 'N/record', 'N/ui/serverWidget', 'N/ui/message', 'N/search'
           fieldId: 'quantity',
           value: item.qtyNeeded
         });
+        // set location
+        purchaseOrder.setCurrentSublistValue({
+          sublistId: 'item',
+          fieldId: 'location',
+          value: 3
+        });
         // commit line
         purchaseOrder.commitLine({
           sublistId: 'item'
