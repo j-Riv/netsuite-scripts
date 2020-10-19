@@ -80,15 +80,22 @@ define(['N/error', 'N/runtime', 'N/record', 'N/search', 'N/email'],
 
       // email
       let contents = '<h3>Auto created Follow-Up Tasks for Customers who have not ordered in 90+ days.</h3>';
+      let tasksCount = 0;
       summary.output.iterator().each(function (key, value) {
         value = JSON.parse(value);
-        contents += '<p><b>TASK CREATED</b> (' + key + ') - <b>CUSTOMER:</b> ' + value.name + ' | <b>SALES REP:</b> ' + value.salesRep + '</p>'
+        contents += '<p><b>TASK CREATED</b> (' + key + ') - <b>CUSTOMER:</b> ' + value.name + ' | <b>SALES REP:</b> ' + value.salesRep + '</p>';
+        tasksCount++;
         return true;
       });
 
       log.debug('SUMMARY EMAIL CONTENTS', contents);
 
-      sendEmail(contents);
+      if (tasksCount === 0) {
+        contents = '<h3>Auto created Follow-Up Tasks for Customers who have not ordered in 90+ days.</h3>' +
+          '<p>No Tasks Were Created.</p>';
+      }
+
+      sendEmail(tasksCount, contents);
 
     }
 
@@ -249,10 +256,10 @@ define(['N/error', 'N/runtime', 'N/record', 'N/search', 'N/email'],
 
     /**
      * Sends an email with a list of tasks created.
-     * @param {Array} tasksCreated - Task Data
+     * @param {Array} content - Task Data
      */
-    const sendEmail = tasksCreated => {
-      let html = tasksCreated;
+    const sendEmail = (tasksCount, content) => {
+      let html = content;
 
       log.debug({
         title: 'SENDING EMAIL',
@@ -264,7 +271,7 @@ define(['N/error', 'N/runtime', 'N/record', 'N/search', 'N/email'],
         recipients: 207,
         bcc: ['206'],
         replyTo: 'jriv@suavecito.com',
-        subject: 'Auto Created Tasks Created',
+        subject: 'Auto Created Follow-Up Tasks (' + tasksCount + ')',
         body: html
       });
     }
