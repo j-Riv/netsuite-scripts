@@ -2,8 +2,8 @@
  *@NApiVersion 2.1
  *@NScriptType Portlet
  */
-define([],
-  () => {
+define(['N/ui/serverWidget'],
+  (serverWidget) => {
 
     /**
      * Creates a simple form Portlet
@@ -20,6 +20,10 @@ define([],
         id: 'custpage_message',
         type: 'inlinehtml',
         label: ' '
+      }).updateLayoutType({
+        layoutType: serverWidget.FieldLayoutType.OUTSIDEABOVE
+      }).updateBreakType({
+        breakType: serverWidget.FieldBreakType.STARTROW
       }).defaultValue = 'Please select the start date and end date to calculate sales.';
 
       const startDate = portlet.addField({

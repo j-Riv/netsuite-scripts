@@ -16,7 +16,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
       const request = context.request;
       const response = context.response;
 
-      if (request.method == 'GET') {
+      if (request.method === 'GET') {
         onGet(response);
       } else { // Post
         onPost(request, response);
