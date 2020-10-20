@@ -73,12 +73,13 @@ define(['N/search', 'N/ui/serverWidget', 'N/log'],
             details: result
           });
 
+          const createdBy = result.getText({ name: 'name', join: 'systemnotes', summary: search.Summary.GROUP });
           const leadsCreated = result.getValue({ name: 'entityid', summary: search.Summary.COUNT });
           const lastLeadsCreated = result.getValue({ name: 'formulanumeric1', summary: search.Summary.MAX });
           const currentLeadsCreated = result.getValue({ name: 'formulanumeric2', summary: search.Summary.MAX });
 
           const row = {
-            createdBy: result.getText({ name: 'name', join: 'systemnotes', summary: search.Summary.GROUP }),
+            createdBy: createdBy === 'José A Rivera' ? 'Wholesale Application' : createdBy,
             leadsCreated,
             lastLeadsCreated,
             currentLeadsCreated
