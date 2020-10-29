@@ -523,7 +523,7 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
           }
           if (wholesaleFlag !== '') {
             itemRecord.setValue('custitem_fa_shopify_flag02', wholesaleFlag);
-            if (wholesaleFlagFlag === 1) {
+            if (wholesaleFlag === 1) {
               itemRecord.setValue('custitem_sp_shopify_wholesale', true);
             } else {
               itemRecord.setValue('custitem_sp_shopify_wholesale', false);
