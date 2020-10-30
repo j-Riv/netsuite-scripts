@@ -177,7 +177,7 @@ define(
               layoutType: serverWidget.FieldLayoutType.OUTSIDEABOVE
             }).updateBreakType({
               breakType: serverWidget.FieldBreakType.STARTROW
-            }).defaultValue = '<br/><pre>' + JSON.stringify(itemObj, undefined, 4) + '</pre>';
+            }).defaultValue = '<br/>' + prettyPrintJson(itemObj);
 
             form.addPageLink({
               type: serverWidget.FormPageLinkType.CROSSLINK,
@@ -619,6 +619,44 @@ define(
       } else {
         return null;
       }
+    }
+
+    /**
+     * Colorizes and pretty prints JSON.
+     * @param {Object} thing
+     * @returns {string} 
+     */
+    const prettyPrintJson = thing => {
+      const htmlEntities = (string) => {
+        // Makes text displayable in browsers
+        return string
+          .replace(/&/g, '&amp;')
+          .replace(/\\"/g, '&bsol;&quot;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+      };
+      const replacer = (match, p1, p2, p3, p4) => {
+        // Converts the four parenthesized capture groups into HTML
+        const part = { indent: p1, key: p2, value: p3, end: p4 };
+        const key = '<span class=json-key>';
+        const val = '<span class=json-value>';
+        const bool = '<span class=json-boolean>';
+        const str = '<span class=json-string>';
+        const isBool = ['true', 'false'].includes(part.value);
+        const valSpan = /^"/.test(part.value) ? str : isBool ? bool : val;
+        const findName = /"([\w]+)": |(.*): /;
+        const indentHtml = part.indent || '';
+        const keyName = part.key && part.key.replace(findName, '$1$2');
+        const keyHtml = part.key ? key + keyName + '</span>: ' : '';
+        const valueHtml = part.value ? valSpan + part.value + '</span>' : '';
+        const endHtml = part.end || '';
+        return indentHtml + keyHtml + valueHtml + endHtml;
+      };
+      const jsonLine = /^( *)("[^"]+": )?("[^"]*"|[\w.+-]*)?([{}[\],]*)?$/mg;
+      const styles = '<style>.json-key { color: brown; } .json-value { color: navy; } .json-boolean { color: teal; } .json-string  { color: olive; }</style>';
+      return styles + '<pre>' + 
+        htmlEntities(JSON.stringify(thing, null, 3))
+          .replace(jsonLine, replacer) + '</pre>';
     }
 
     return {
