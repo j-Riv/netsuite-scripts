@@ -4,8 +4,27 @@
  * @NModuleScope SameAccount
  */
 
-define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message', 'N/https', 'N/log', './libs/forge.min.js'],
-  (runtime, record, search, serverWidget, message, https, log, forge) => {
+define(
+  [
+    'N/runtime', 
+    'N/record', 
+    'N/search', 
+    'N/ui/serverWidget', 
+    'N/ui/message', 
+    'N/https', 
+    'N/log', 
+    './libs/forge.min.js'
+  ],
+  (
+    runtime, 
+    record, 
+    search, 
+    serverWidget, 
+    message, 
+    https, 
+    log, 
+    forge
+  ) => {
 
     /**
      * Creates the product form on a GET request.
@@ -23,7 +42,8 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
       }
     }
 
-    const scriptURL = '/app/site/hosting/scriptlet.nl?script=782&deploy=1&whence=';
+    const scriptURL = '/app/site/hosting/scriptlet.nl?script=957&deploy=1';
+    const formTitle = 'Post Item to Shopify';
 
     /**
      * Generates the product form.
@@ -32,7 +52,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
     const onGet = response => {
       // create product form
       const productForm = serverWidget.createForm({
-        title: 'Post Product to Shopify'
+        title: formTitle
       });
 
       productForm.addFieldGroup({
@@ -106,7 +126,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
           if (itemObj) {
             // create form & display item object
             const form = serverWidget.createForm({
-              title: 'Post Product to Shopify'
+              title: formTitle
             });
             // parse variants array
             if (itemObj.hasVariants) {
@@ -170,7 +190,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
         } else {
           // no results, sku not found, create form & display error
           const errorForm = serverWidget.createForm({
-            title: 'Post Product to Shopify'
+            title: formTitle
           });
           errorForm.addPageInitMessage({
             type: message.Type.ERROR,
@@ -181,7 +201,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
             id: 'custpage_message',
             type: serverWidget.FieldType.INLINEHTML,
             label: ' '
-          }).defaultValue = 'Please ty again <a href="/app/site/hosting/scriptlet.nl?script=782&deploy=1&whence=">here!</a>';
+          }).defaultValue = 'Please ty again <a href="' + scriptURL + '">here!</a>';
 
           errorForm.addPageLink({
             type: serverWidget.FormPageLinkType.CROSSLINK,
@@ -283,16 +303,16 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
 
       // create item obj for shopify
       let itemObj = {
-        brand: itemRecord.getText('custitem_sp_brand'),
+        vendor: itemRecord.getText('custitem_sp_brand'),
         title: itemRecord.getValue('displayname'),
         sku: itemRecord.getValue('itemid'),
         barcode: itemRecord.getValue('upccode'),
-        weight: itemRecord.getValue('weight'),
-        weight_unit: itemRecord.getText('weightunit'),
-        product_type: itemRecord.getText('custitem_fa_shpfy_prodtype'),
+        weight: itemRecord.getValue('weight') !== '' ? parseFloat(itemRecord.getValue('weight')) : '',
+        weightUnit: convertWeightUnit(itemRecord.getText('weightunit')),
+        productType: itemRecord.getText('custitem_fa_shpfy_prodtype'),
         tags: itemRecord.getValue(shopifyTags),
-        compare_at_price: itemRecord.getValue(compareAtPrice).toString(),
-        description: stripInlineStyles(itemRecord.getValue(productDescription))
+        compareAtPrice: itemRecord.getValue(compareAtPrice).toString(),
+        descriptionHtml: stripInlineStyles(itemRecord.getValue(productDescription))
       }
 
       // check required for all required fields
@@ -301,7 +321,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
       if (itemErrors.length > 0) {
         // exit and display error message
         const itemErrorForm = serverWidget.createForm({
-          title: 'Post Product to Shopify'
+          title: formTitle
         });
 
         itemErrorForm.addPageInitMessage({
@@ -331,6 +351,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
         } else { // single item
           // set has variants field to false
           itemObj.hasVariants = false;
+          itemObj.options = ['Default'];
           itemObj.price = item.getValue(priceLevel);
         }
 
@@ -403,20 +424,26 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
           itemObj.option = 'Options';
         }
 
-        variants.push({
-          option1: optionName,
+        const variantObj = {
+          barcode: item.getValue('upccode'),
+          inventoryManagement: 'SHOPIFY',
+          options: [optionName],
           price: item.getValue(priceLevel),
           sku: sku[1],
-          weight: item.getValue('weight'),
-          weight_unit: item.getText('weightunit'),
-          barcode: item.getValue('upccode'),
-          inventory_management: 'Shopify',
-          compare_at_price: item.getValue(compareAtPrice).toString()
-        });
+          weight: parseFloat(item.getValue('weight')),
+          weightUnit: convertWeightUnit(item.getText('weightunit')),
+        }
+
+        if (item.getValue(compareAtPrice)) {
+          variantObj.compareAtPrice = item.getValue(compareAtPrice).toString()
+        }
+
+        variants.push(variantObj);
       });
 
       itemObj.hasVariants = true;
       // stringify variant array of object
+      // dont know if I need to do this?
       itemObj.variants = JSON.stringify(variants);
 
       return itemObj;
@@ -429,7 +456,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
      * @param {Object} itemObj - The Item Object
      */
     const postItemToShopify = (response, store, itemObj) => {
-      const serverURL = runtime.getCurrentScript().getParameter('custscript_servername');
+      const serverURL = runtime.getCurrentScript().getParameter('custscript_sp_ns_to_shpfy_server_v2');
       const storeURL = store === 'retail' 
         ? 'https://suavecito.myshopify.com/admin/products/' 
         : 'https://suavecito-wholesale.myshopify.com/admin/products/';
@@ -461,16 +488,16 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
 
         const newProduct = JSON.parse(res.body);
         // if success
-        if ('product' in newProduct.data.productCreate) {
+        if ('product' in newProduct) {
 
           const successForm = serverWidget.createForm({
-            title: 'Post Product to Shopify (' + store + ')'
+            title: formTitle + ' (' + store.toUpperCase() + ')'
           });
 
           successForm.addPageLink({
             type: serverWidget.FormPageLinkType.CROSSLINK,
             title: 'View Product',
-            url: storeURL + newProduct.product.id
+            url: storeURL + newProduct.product.legacyResourceId
           });
           successForm.addPageInitMessage({
             type: message.Type.CONFIRMATION,
@@ -482,8 +509,8 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
             type: serverWidget.FieldType.INLINEHTML,
             label: ' '
           }).defaultValue = 'Product Created/Updated in Shopify (<a href="' +
-          storeURL + newProduct.product.id + '" target="_blank">' +
-          newProduct.product.id + '</a>).<br/>Please make sure the description is formatted correctly.';
+          storeURL + newProduct.product.legacyResourceId + '" target="_blank">' +
+          newProduct.product.legacyResourceId + '</a>).<br/>Please make sure the description is formatted correctly.';
 
           successForm.addPageLink({
             type: serverWidget.FormPageLinkType.CROSSLINK,
@@ -503,13 +530,19 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
         });
 
         const shopifyErrorForm = serverWidget.createForm({
-          title: 'Post Product to Shopify'
+          title: formTitle
         });
 
         shopifyErrorForm.addPageInitMessage({
           type: message.Type.ERROR,
           title: 'ERROR!',
           message: e.message,
+        });
+
+        shopifyErrorForm.addPageLink({
+          type: serverWidget.FormPageLinkType.CROSSLINK,
+          title: 'Go Back',
+          url: scriptURL
         });
 
         response.writePage(shopifyErrorForm);
@@ -524,7 +557,7 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
     const checkRequiredFields = itemObj => {
       const itemObjKeys = Object.keys(itemObj);
       const itemObjErrors = [];
-      const exclude = ['barcode', 'compare_at_price', 'tags'];
+      const exclude = ['barcode', 'compareAtPrice', 'tags'];
       itemObjKeys.forEach(key => {
         if (!exclude.includes(key)) {
           if (itemObj[key] === '' || key === 'weight' && itemObj[key] === 0) {
@@ -562,11 +595,30 @@ define(['N/runtime', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/ui/message'
         itemObj.weight_unit +
         itemObj.product_type +
         itemObj.tags;
-      const secret = runtime.getCurrentScript().getParameter('custscript_netsuite_to_shopify_secret');
+      const secret = runtime.getCurrentScript().getParameter('custscript_sp_ns_to_shpfy_secret_v2');
       const hmac = forge.hmac.create();
       hmac.start('sha256', secret);
       hmac.update(item);
       return hmac.digest().toHex();
+    }
+
+    /**
+     * Converts the weight name value
+     * @param {string} w
+     * @returns {string} 
+     */
+    const convertWeightUnit = w => {
+      if (w = 'lb') {
+        return 'POUNDS';
+      } else if (w = 'oz') {
+        return 'OUNCES';
+      } else if (w = 'kg') {
+        return 'KILOGRAMS';
+      } else if (w = 'g') {
+        return 'GRAMS';
+      } else {
+        return null;
+      }
     }
 
     return {
