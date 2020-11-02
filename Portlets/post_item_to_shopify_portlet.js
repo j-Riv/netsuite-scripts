@@ -56,7 +56,7 @@ define([],
       productSku.isMandatory = true;
 
       portlet.setSubmitButton({
-        url: '/app/site/hosting/scriptlet.nl?script=782&deploy=1',
+        url: '/app/site/hosting/scriptlet.nl?script=957&deploy=1',
         label: 'Submit',
         target: '_top'
       });

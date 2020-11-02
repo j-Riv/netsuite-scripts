@@ -60,6 +60,19 @@ define(
         label: 'Product Info'
       });
 
+      productForm.addField({
+        id: 'custpage_message',
+        type: serverWidget.FieldType.INLINEHTML,
+        label: ' ',
+        container: 'custpage_product_info'
+      }).updateLayoutType({
+        layoutType: serverWidget.FieldLayoutType.OUTSIDEABOVE
+      }).updateBreakType({
+        breakType: serverWidget.FieldBreakType.STARTROW
+      }).defaultValue = '<p><br/><b>To post an item to Shopify, please select a store below. ' + 
+        'Then type the SKU into the Product SKU field. If the item is of type <i>matrix</i> ' + 
+        'please use the parents sku.</b></p>';
+
       const storeSelect = productForm.addField({
         id: 'custpage_shopify_store',
         label: 'Shopify Store',
