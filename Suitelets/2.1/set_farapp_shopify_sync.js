@@ -31,7 +31,7 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
     const onGet = response => {
       // create search form
       const searchForm = serverWidget.createForm({
-        title: 'Set FarApp Shopify Sync'
+        title: 'Set FarApp Sync'
       });
 
       searchForm.addField({
@@ -99,10 +99,11 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
         const partialSku = request.parameters.custpage_set_partial_sku;
         const retailShopifyFlag = request.parameters.custpage_retail_shopify_flag;
         const wholesaleShopifyFlag = request.parameters.custpage_wholesale_shopify_flag;
+        const ebayFlag = request.parameters.custpage_ebay_flag;
         // process
         let items = getItems(partialSku);
 
-        const updatedItems = updateItems(items, retailShopifyFlag, wholesaleShopifyFlag);
+        const updatedItems = updateItems(items, retailShopifyFlag, wholesaleShopifyFlag, ebayFlag);
 
         items = getItems(partialSku);
 
@@ -113,7 +114,7 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
         successForm.addPageInitMessage({
           type: message.Type.CONFIRMATION,
           title: 'SUCCESS!',
-          message: 'FarApp Shopify Flags Updated!'
+          message: 'FarApp Sync Flags Updated!'
         });
 
         successForm.addField({
@@ -177,12 +178,13 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
           values: [1],
           formula: "CASE WHEN {custitem_sp_item_sku} LIKE '%" + partialSku + "%' THEN 1 ELSE 0 END"
         }),
-        search.createFilter({
-          name: 'formulanumeric',
-          operator: search.Operator.EQUALTO,
-          values: [1],
-          formula: "CASE WHEN {inventorylocation} = 'Main Warehouse' AND NVL({locationquantityavailable},0) > 0 THEN 1 ELSE 0 END"
-        }),
+        // If item has inventory
+        // search.createFilter({
+        //   name: 'formulanumeric',
+        //   operator: search.Operator.EQUALTO,
+        //   values: [1],
+        //   formula: "CASE WHEN {inventorylocation} = 'Main Warehouse' AND NVL({locationquantityavailable},0) > 0 THEN 1 ELSE 0 END"
+        // }),
       ];
 
       const resultSet = itemSearch.run();
@@ -207,8 +209,10 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
         const weightUnit = item.getText('weightunit');
         const retailPrice = item.getValue('baseprice');
         const wholesalePrice = item.getValue('price2');
+        const ebayPrice = item.getValue('custitem_fa_ebay_price');
         const retailShopifyFlag = item.getText('custitem_fa_shopify_flag01');
         const wholesaleShopifyFlag = item.getText('custitem_fa_shopify_flag02');
+        const ebayFlag = item.getText('custitem_fa_ebay_flag');
         const retailDescription = item.getValue('custitem_fa_shpfy_prod_description');
         const wholesaleDescription = item.getValue('custitem_fa_shpfy_prod_description_ws');
         const shopifyProductType = item.getText('custitem_fa_shpfy_prodtype');
@@ -226,8 +230,10 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
           weightUnit: weightUnit ? weightUnit : 'N/A',
           retailPrice: retailPrice ? retailPrice : 'N/A',
           wholesalePrice: wholesalePrice ? wholesalePrice : 'N/A',
+          ebayPrice: ebayPrice ? ebayPrice : 'N/A',
           retailShopifyFlag: retailShopifyFlag ? retailShopifyFlag : 'N/A',
           wholesaleShopifyFlag: wholesaleShopifyFlag ? wholesaleShopifyFlag : 'N/A',
+          ebayFlag: ebayFlag ? ebayFlag : 'N/A',
           retailDescription: retailDescription ? retailDescription : 'N/A',
           wholesaleDescription: wholesaleDescription ? wholesaleDescription : 'N/A',
           shopifyProductType: shopifyProductType ? shopifyProductType : 'N/A',
@@ -253,7 +259,7 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
         details: 'There are ' + items.length
       });
 
-      let form = serverWidget.createForm({ title: 'Update FarApp Shopify Flag' });
+      let form = serverWidget.createForm({ title: 'Update FarApp Sync Flag' });
 
       form.addField({
         id: 'custpage_set_partial_sku',
@@ -289,6 +295,17 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
         breakType: serverWidget.FieldBreakType.STARTROW
       });
 
+      const ebayFlag = form.addField({
+        id: 'custpage_ebay_flag',
+        type: serverWidget.FieldType.SELECT,
+        label: 'eBay Flag',
+        source: 'customlist_fa_ebay_flag'
+      }).updateLayoutType({
+        layoutType: serverWidget.FieldLayoutType.OUTSIDEABOVE
+      }).updateBreakType({
+        breakType: serverWidget.FieldBreakType.STARTROW
+      });
+
       // disable fields or add submit depending on results
       if (items.length < 1) {
         retailShopifyFlag.updateDisplayType({
@@ -297,9 +314,12 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
         wholesaleShopifyFlag.updateDisplayType({
           displayType: serverWidget.FieldDisplayType.DISABLED
         });
+        ebayFlag.updateDisplayType({
+          displayType: serverWidget.FieldDisplayType.DISABLED
+        });
       } else {
         form.addSubmitButton({
-          label: 'Update Shopify Flag'
+          label: 'Update Sync Flags'
         });
       }
 
@@ -360,6 +380,11 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
         label: 'Wholesale $'
       });
       sublist.addField({
+        id: 'custpage_field_ebay_price',
+        type: serverWidget.FieldType.TEXT,
+        label: 'eBay $'
+      });
+      sublist.addField({
         id: 'custpage_field_retail_flag',
         type: serverWidget.FieldType.TEXT,
         label: 'Retail Flag'
@@ -368,6 +393,11 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
         id: 'custpage_field_wholesale_flag',
         type: serverWidget.FieldType.TEXT,
         label: 'Wholesale Flag'
+      });
+      sublist.addField({
+        id: 'custpage_field_ebay_flag',
+        type: serverWidget.FieldType.TEXT,
+        label: 'eBay Flag'
       });
       sublist.addField({
         id: 'custpage_field_retail_description',
@@ -443,6 +473,11 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
           value: item.wholesalePrice
         });
         sublist.setSublistValue({
+          id: 'custpage_field_ebay_price',
+          line: i,
+          value: item.ebayPrice
+        });
+        sublist.setSublistValue({
           id: 'custpage_field_retail_flag',
           line: i,
           value: item.retailShopifyFlag
@@ -451,6 +486,11 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
           id: 'custpage_field_wholesale_flag',
           line: i,
           value: item.wholesaleShopifyFlag
+        });
+        sublist.setSublistValue({
+          id: 'custpage_field_ebay_flag',
+          line: i,
+          value: item.ebayFlag
         });
         sublist.setSublistValue({
           id: 'custpage_field_retail_description',
@@ -499,7 +539,7 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
      * @param {string} wholesaleFlag - The Wholesale Shopify Flag to Set
      * @returns {Array} - The IDs of the Updated Items.
      */
-    const updateItems = (items, retailFlag, wholesaleFlag) => {
+    const updateItems = (items, retailFlag, wholesaleFlag, ebayFlag) => {
       const types = {
         'Inventory Item': 'INVENTORY_ITEM',
         'Assembly/Bill of Materials': 'ASSEMBLY_ITEM'
@@ -528,6 +568,9 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
             } else {
               itemRecord.setValue('custitem_sp_shopify_wholesale', false);
             }
+          }
+          if (ebayFlag !== '') {
+            itemRecord.setValue('custitem_fa_ebay_flag', ebayFlag);
           }
 
           updatedItems.push(itemRecord.save());
