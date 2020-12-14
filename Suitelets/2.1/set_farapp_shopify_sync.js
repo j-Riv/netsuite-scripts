@@ -178,13 +178,19 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
           values: [1],
           formula: "CASE WHEN {custitem_sp_item_sku} LIKE '%" + partialSku + "%' THEN 1 ELSE 0 END"
         }),
+        search.createFilter({
+          name: 'formulanumeric',
+          operator: search.Operator.EQUALTO,
+          values: [1],
+          formula: "CASE WHEN {inventorylocation} = 'Main Warehouse' THEN 1 ELSE 0 END"
+        })
         // If item has inventory
         // search.createFilter({
         //   name: 'formulanumeric',
         //   operator: search.Operator.EQUALTO,
         //   values: [1],
         //   formula: "CASE WHEN {inventorylocation} = 'Main Warehouse' AND NVL({locationquantityavailable},0) > 0 THEN 1 ELSE 0 END"
-        // }),
+        // })
       ];
 
       const resultSet = itemSearch.run();
