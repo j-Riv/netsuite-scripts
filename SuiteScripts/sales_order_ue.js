@@ -11,6 +11,7 @@ define(['N/record', 'N/log'], function (record, log) {
    */
   function beforeSubmit(context) {
     var currentRecord = context.newRecord;
+    // marketplace
     var marketplace = currentRecord.getValue({ fieldId: 'custbody_fa_channel' });
     if (marketplace !== '') {
       var salesRep;

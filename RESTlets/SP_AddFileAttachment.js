@@ -58,7 +58,7 @@ define(['N/file', 'N/record', 'N/error'],
         }
       });
 
-      return String(id);
+      return fileID;
     }
 
     return {

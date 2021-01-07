@@ -91,6 +91,10 @@ define(
         value: 'wholesale',
         text: 'WHOLESALE'
       });
+      storeSelect.addSelectOption({
+        value: 'warehouse',
+        text: 'WAREHOUSE'
+      });
       storeSelect.setHelpText({
         help: 'The Shopify store to create the product in.'
       });
@@ -257,6 +261,7 @@ define(
           'weightunit',
           'baseprice',
           'price2',
+          'custitem_fa_shpfy_warehouse_price',
           'description',
           'custitem_sp_brand'
         ]
@@ -298,11 +303,17 @@ define(
         productDescription = 'custitem_fa_shpfy_prod_description';
         shopifyTags = 'custitem_fa_shpfy_tags';
         compareAtPrice = 'custitem_fa_shpfy_compare_at_price';
-      } else {
+      } else if (store === 'wholesale') {
         priceLevel = 'price2';
         productDescription = 'custitem_fa_shpfy_prod_description_ws';
         shopifyTags = 'custitem_fa_shpfy_tags_ws';
         compareAtPrice = 'custitem_fa_shpfy_compare_at_price_ws';
+      } else {
+        priceLevel = 'custitem_fa_shpfy_warehouse_price';
+        productDescription = 'custitem_fa_shpfy_prod_description';
+        shopifyTags = 'custitem_fa_shpfy_tags_wh';
+        compareAtPrice = 'custitem_fa_shpfy_compare_at_price_wh';
+        // compareAtPrice = 'baseprice';
       }
 
       const isMatrix = item.getValue('matrix');
@@ -470,9 +481,14 @@ define(
      */
     const postItemToShopify = (response, store, itemObj) => {
       const serverURL = runtime.getCurrentScript().getParameter('custscript_sp_ns_to_shpfy_server_v2');
-      const storeURL = store === 'retail' 
-        ? 'https://suavecito.myshopify.com/admin/products/' 
-        : 'https://suavecito-wholesale.myshopify.com/admin/products/';
+      let storeURL;
+      if (store === 'retail') {
+        storeURL = 'https://suavecito.myshopify.com/admin/products/';
+      } else if (store === 'wholesale') {
+        storeURL = 'https://suavecito-wholesale.myshopify.com/admin/products/';
+      } else {
+        storeURL = 'https://suavecito-warehouse.myshopify.com/admin/products/';
+      }i 
 
       // https - send data to server
       const url = 'https://' + serverURL + '/api/shopify/' + store + '/create-item';
