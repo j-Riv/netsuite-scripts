@@ -97,14 +97,17 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
           details: 'IS NOT SET'
         });
         const partialSku = request.parameters.custpage_set_partial_sku;
-        const retailShopifyFlag = request.parameters.custpage_retail_shopify_flag;
-        const wholesaleShopifyFlag = request.parameters.custpage_wholesale_shopify_flag;
-        const warehouseShopifyFlag = request.parameters.custpage_warehouse_shopify_flag;
-        const ebayFlag = request.parameters.custpage_ebay_flag;
+        const flags = {
+          retail: request.parameters.custpage_retail_shopify_flag ? request.parameters.custpage_retail_shopify_flag : false,
+          wholesale: request.parameters.custpage_wholesale_shopify_flag ? request.parameters.custpage_wholesale_shopify_flag : false,
+          warehouse: request.parameters.custpage_warehouse_shopify_flag ? request.parameters.custpage_warehouse_shopify_flag : false,
+          professional: request.parameters.custpage_professional_shopify_flag ? request.parameters.custpage_professional_shopify_flag : false,
+          ebay: request.parameters.custpage_ebay_flag ? request.parameters.custpage_ebay_flag : false
+        }
         // process
         let items = getItems(partialSku);
 
-        const updatedItems = updateItems(items, retailShopifyFlag, wholesaleShopifyFlag, warehouseShopifyFlag, ebayFlag);
+        const updatedItems = updateItems(items, flags);
 
         items = getItems(partialSku);
 
@@ -155,14 +158,21 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
           'weightunit',
           'baseprice',
           'price2',
+          'custitem_fa_shpfy_warehouse_price',
+          'custitem_fa_shpfy_professional_price',
           'custitem_fa_shopify_flag01',
           'custitem_fa_shopify_flag02',
           'custitem_fa_shopify_flag03',
+          'custitem_fa_shopify_flag04',
           'custitem_fa_shpfy_prod_description',
           'custitem_fa_shpfy_prod_description_ws',
+          'custitem_fa_shpfy_prod_description_wh',
+          'custitem_fa_shpfy_prod_description_pro',
           'custitem_fa_shpfy_prodtype',
           'custitem_fa_shpfy_tags',
           'custitem_fa_shpfy_tags_ws',
+          'custitem_fa_shpfy_tags_wh',
+          'custitem_fa_shpfy_tags_pro',
           'inventorylocation',
           'locationquantityavailable'
         ]
@@ -218,14 +228,18 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
         const retailPrice = item.getValue('baseprice');
         const wholesalePrice = item.getValue('price2');
         const warehousePrice = item.getValue('custitem_fa_shpfy_warehouse_price');
+        const professionalPrice = item.getValue('custitem_fa_shpfy_professional_price');
         const ebayPrice = item.getValue('custitem_fa_ebay_price');
         const retailShopifyFlag = item.getText('custitem_fa_shopify_flag01');
         const wholesaleShopifyFlag = item.getText('custitem_fa_shopify_flag02');
         const warehouseShopifyFlag = item.getText('custitem_fa_shopify_flag03');
+        const professionalShopifyFlag = item.getText('custitem_fa_shopify_flag04');
         const ebayFlag = item.getText('custitem_fa_ebay_flag');
         const shopifyProductType = item.getText('custitem_fa_shpfy_prodtype');
         const retailShopifyTags = item.getValue('custitem_fa_shpfy_tags');
         const wholesaleShopifyTags = item.getValue('custitem_fa_shpfy_tags_ws');
+        const warehouseShopifyTags = item.getValue('custitem_fa_shpfy_tags_wh');
+        const professionalShopifyTags = item.getValue('custitem_fa_shpfy_tags_pro');
         const inventoryLocation = item.getText('inventorylocation');
         const locationQuantityAvailable = item.getValue('locationquantityavailable');
 
@@ -239,14 +253,18 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
           retailPrice: retailPrice ? retailPrice : 'N/A',
           wholesalePrice: wholesalePrice ? wholesalePrice : 'N/A',
           warehousePrice: warehousePrice ? warehousePrice : 'N/A',
+          professionalPrice: professionalPrice ? professionalPrice : 'N/A',
           ebayPrice: ebayPrice ? ebayPrice : 'N/A',
           retailShopifyFlag: retailShopifyFlag ? retailShopifyFlag : 'N/A',
           wholesaleShopifyFlag: wholesaleShopifyFlag ? wholesaleShopifyFlag : 'N/A',
           warehouseShopifyFlag: warehouseShopifyFlag ? warehouseShopifyFlag : 'N/A',
+          professionalShopifyFlag: professionalShopifyFlag ? professionalShopifyFlag : 'N/A',
           ebayFlag: ebayFlag ? ebayFlag : 'N/A',
           shopifyProductType: shopifyProductType ? shopifyProductType : 'N/A',
           retailShopifyTags: retailShopifyTags ? retailShopifyTags : 'N/A',
           wholesaleShopifyTags: wholesaleShopifyTags ? wholesaleShopifyTags : 'N/A',
+          warehouseShopifyTags: warehouseShopifyTags ? warehouseShopifyTags : 'N/A',
+          professionalShopifyTags: professionalShopifyTags ? wprofessionalhopifyTags : 'N/A',
           inventoryLocation: inventoryLocation ? inventoryLocation : 'N/A',
           locationQuantityAvailable: locationQuantityAvailable ? locationQuantityAvailable : 'N/A'
         });
@@ -314,6 +332,17 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
         breakType: serverWidget.FieldBreakType.STARTROW
       });
 
+      const professionalShopifyFlag = form.addField({
+        id: 'custpage_professional_shopify_flag',
+        type: serverWidget.FieldType.SELECT,
+        label: 'Professional Shopify Flag',
+        source: 'customlist_fa_shopify_flag03'
+      }).updateLayoutType({
+        layoutType: serverWidget.FieldLayoutType.OUTSIDEABOVE
+      }).updateBreakType({
+        breakType: serverWidget.FieldBreakType.STARTROW
+      });
+
       const ebayFlag = form.addField({
         id: 'custpage_ebay_flag',
         type: serverWidget.FieldType.SELECT,
@@ -336,6 +365,9 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
         warehouseShopifyFlag.updateDisplayType({
           displayType: serverWidget.FieldDisplayType.DISABLED
         });
+        professionalShopifyFlag.updateDisplayType({
+          displayType: serverWidget.FieldDisplayType.DISABLED
+        });
         ebayFlag.updateDisplayType({
           displayType: serverWidget.FieldDisplayType.DISABLED
         });
@@ -347,7 +379,6 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
 
       form = createSublist(form, partialSku, items);
      
-
       return form;
     }
 
@@ -407,6 +438,11 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
         label: 'Warehouse $'
       });
       sublist.addField({
+        id: 'custpage_field_professional_price',
+        type: serverWidget.FieldType.TEXT,
+        label: 'Professional $'
+      });
+      sublist.addField({
         id: 'custpage_field_ebay_price',
         type: serverWidget.FieldType.TEXT,
         label: 'eBay $'
@@ -425,6 +461,11 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
         id: 'custpage_field_warehouse_flag',
         type: serverWidget.FieldType.TEXT,
         label: 'Warehouse Flag'
+      });
+      sublist.addField({
+        id: 'custpage_field_professional_flag',
+        type: serverWidget.FieldType.TEXT,
+        label: 'Professional Flag'
       });
       sublist.addField({
         id: 'custpage_field_ebay_flag',
@@ -500,6 +541,11 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
           value: item.warehousePrice
         });
         sublist.setSublistValue({
+          id: 'custpage_field_professional_price',
+          line: i,
+          value: item.professionalPrice
+        });
+        sublist.setSublistValue({
           id: 'custpage_field_ebay_price',
           line: i,
           value: item.ebayPrice
@@ -518,6 +564,11 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
           id: 'custpage_field_warehouse_flag',
           line: i,
           value: item.warehouseShopifyFlag
+        });
+        sublist.setSublistValue({
+          id: 'custpage_field_professional_flag',
+          line: i,
+          value: item.professionalShopifyFlag
         });
         sublist.setSublistValue({
           id: 'custpage_field_ebay_flag',
@@ -557,11 +608,15 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
     /**
      * Updates the FarApp Shopify Flag on the Item Record.
      * @param {Array} items - The Search Results
-     * @param {string} retailFlag - The Retail Shopify Flag to Set
-     * @param {string} wholesaleFlag - The Wholesale Shopify Flag to Set
+     * @param {Object} flags
+     * @param {string} flags.retail
+     * @param {string} flags.wholesale
+     * @param {string} flags.warehouse
+     * @param {string} flags.professional
+     * @param {string} flags.ebay
      * @returns {Array} - The IDs of the Updated Items.
      */
-    const updateItems = (items, retailFlag, wholesaleFlag, warehouseFlag, ebayFlag) => {
+    const updateItems = (items, flags) => {
       const types = {
         'Inventory Item': 'INVENTORY_ITEM',
         'Assembly/Bill of Materials': 'ASSEMBLY_ITEM'
@@ -575,27 +630,30 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
             isDynamic: true
           });
 
-          if (retailFlag !== '') {
-            itemRecord.setValue('custitem_fa_shopify_flag01', retailFlag);
-            if (retailFlag === 1) {
+          if (flags.retail) {
+            itemRecord.setValue('custitem_fa_shopify_flag01', flags.retail);
+            if (flags.retail === 1) {
               itemRecord.setValue('custitem_sp_shopify_retail', true);
             } else {
               itemRecord.setValue('custitem_sp_shopify_retail', false);
             }
           }
-          if (wholesaleFlag !== '') {
-            itemRecord.setValue('custitem_fa_shopify_flag02', wholesaleFlag);
-            if (wholesaleFlag === 1) {
+          if (flags.wholesale) {
+            itemRecord.setValue('custitem_fa_shopify_flag02', flags.wholesale);
+            if (flags.wholesale === 1) {
               itemRecord.setValue('custitem_sp_shopify_wholesale', true);
             } else {
               itemRecord.setValue('custitem_sp_shopify_wholesale', false);
             }
           }
-          if (warehouseFlag !== '') {
-            itemRecord.setValue('custitem_fa_shopify_flag03', warehouseFlag);
+          if (flags.warehouse) {
+            itemRecord.setValue('custitem_fa_shopify_flag03', flags.warehouse);
           }
-          if (ebayFlag !== '') {
-            itemRecord.setValue('custitem_fa_ebay_flag', ebayFlag);
+          if (flags.professional) {
+            itemRecord.setValue('custitem_fa_shopify_flag04', flags.professional);
+          }
+          if (flags.ebay) {
+            itemRecord.setValue('custitem_fa_ebay_flag', flags.ebay);
           }
 
           updatedItems.push(itemRecord.save());
