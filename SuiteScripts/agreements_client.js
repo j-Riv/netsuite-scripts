@@ -10,6 +10,7 @@ define(['N/currentRecord', 'N/record', 'N/log'],
      * @param {Object} context 
      */
     function pageInit(context) {
+      var currentRecord = context.currentRecord;
       console.log('Agreements Client Script Loaded...');
     }
 
@@ -26,7 +27,7 @@ define(['N/currentRecord', 'N/record', 'N/log'],
         // check if is a valid internal id (number)
         if (isNaN(value)) {
           alert(value + ' is not a valid internal id.');
-          currentRecord.settValue(fieldName, '');
+          currentRecord.setValue(fieldName, '');
         } else { // load record
           try {
             var customer = record.load({
@@ -66,9 +67,21 @@ define(['N/currentRecord', 'N/record', 'N/log'],
           files.push(fileId);
         }
       }
-      console.log('Setting custpage_files: ' + files.toString());
-      cr.setValue('custpage_files', files.toString());
-      return true;
+      var customer = cr.getValue('custpage_customer');
+      if (customer !== '' && files.length > 0) {
+        console.log('Setting custpage_files: ' + files.toString());
+        cr.setValue('custpage_files', files.toString());
+        return true;
+      } else {
+        if (files.length === 0 && customer) {
+          alert('Please select at least one file to attach.');
+        } else if (customer === '' && files.length > 0) {
+          alert('Please enter the customers internal id to continue.');
+        } else {
+          alert ('Please enter the customers internal id and select at least one file to attach.');
+        }
+        return false;
+      }
     }
  
     return {

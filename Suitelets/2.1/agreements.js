@@ -4,8 +4,8 @@
  * @NModuleScope SameAccount
  */
 
-define(['N/search', 'N/file', 'N/record', 'N/ui/serverWidget', 'N/log'],
-  (search, file, record, serverWidget, log) => {
+define(['N/search', 'N/file', 'N/record', 'N/ui/serverWidget', 'N/ui/message', 'N/log'],
+  (search, file, record, serverWidget, message, log) => {
 
     /**
      * Handles Suitelet request
@@ -37,16 +37,16 @@ define(['N/search', 'N/file', 'N/record', 'N/ui/serverWidget', 'N/log'],
       const files = request.parameters.custpage_files;
       const customerID = request.parameters.custpage_customer;
 
-      response.write('Moving file(s): ' + files + ' and attaching to customer: ' + customerID);
       const fileIDs = files.split(',');
+      let body = '<p>Moving file(s): ' + files + ' and attaching to customer: ' + customerID + '</p>';
       fileIDs.forEach(fileID => {
         // load and change dir
         const fileObj = file.load({ id: Number(fileID) });
-        response.write('Moving file: ' + fileID);
+        body += '<p>Moving file: ' + fileID + '</p>';
         fileObj.folder = Number(folderID);
         fileObj.save();
         // attach to customer
-        response.write('Attaching file: ' + fileID + ' to ' + customerID);
+        body += '<p>Attaching file: ' + fileID + ' to ' + customerID + '</p>';
         record.attach({
           record: {
             type: 'file',
@@ -58,7 +58,28 @@ define(['N/search', 'N/file', 'N/record', 'N/ui/serverWidget', 'N/log'],
           }
         });
       });
-      response.write('DONE!');
+      body += '<p>DONE!</p>';
+      // updated
+      const form = serverWidget.createForm({ title: 'MAP Agremeents' });
+      form.addPageInitMessage({
+        type: message.Type.CONFIRMATION,
+        title: 'SUCCESS!',
+        message: 'File(s): ' + files + ' have been attached to customer record (' + customerID + ')'
+      });
+
+      form.addField({
+        id: 'custpage_main_body',
+        type: serverWidget.FieldType.INLINEHTML,
+        label: ' ',
+      }).defaultValue = body;
+
+      form.addPageLink({
+        type: serverWidget.FormPageLinkType.CROSSLINK,
+        title: 'Go Back',
+        url: '/app/site/hosting/scriptlet.nl?script=1062&deploy=1'
+      });
+
+      response.writePage(form);
     }
 
     const getFiles = () => {
@@ -99,34 +120,29 @@ define(['N/search', 'N/file', 'N/record', 'N/ui/serverWidget', 'N/log'],
       pagedData.pageRanges.forEach(function (pageRange) {
         var page = pagedData.fetch({ index: pageRange.index });
         page.data.forEach(function (result) {
-          log.debug({
-            title: 'RESTULT',
-            details: result
-          });
-          fileResults.push({
-            'id': result.getValue({ name: 'internalid' }),
-            'fileid': result.getValue({ name: 'internalid', join: 'file' }),
-            'filename': result.getValue({ name: 'name', join: 'file' }),
-            'url': result.getValue({ name: 'url', join: 'file' })
-          });
+          if (result.getValue({ name: 'internalid', join: 'file' })) {
+            fileResults.push({
+              'id': result.getValue({ name: 'internalid' }),
+              'fileid': result.getValue({ name: 'internalid', join: 'file' }),
+              'filename': result.getValue({ name: 'name', join: 'file' }),
+              'url': result.getValue({ name: 'url', join: 'file' })
+            });
+          }
         })
       });
 
-      log.debug({
-        title: 'FILE RESULTS',
-        details: JSON.stringify(fileResults)
-      });
+      if (fileResults.length > 0) {
+        return fileResults;
+      } else {
+        return false;
+      }
 
-      return fileResults;
     }
 
     const createPage = results => {
-      const form = serverWidget.createForm({ title: 'Map Agreements' });
-      log.debug({
-        title: 'RESULTS LENGTH',
-        details: results.length
-      });
-      if (results.length > 1) {
+      const form = serverWidget.createForm({ title: 'MAP Agreements' });
+
+      if (results) {
         form.clientScriptModulePath = 'SuiteScripts/agreements_client.js';
         form.addSubmitButton({
           label: 'Attach'
