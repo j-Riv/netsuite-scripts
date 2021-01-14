@@ -40,23 +40,25 @@ define(['N/file', 'N/record', 'N/error'],
         fileType: fileType,
         contents: context.fileContents,
         encoding: file.Encoding.UTF8,
-        folder: Number(context.folder), // 752 zoho attachments
+        folder: Number(context.folder),
         isOnline: false
       });
 
       var fileID = fileRecord.save();
-
-      // Attach record
-      var id = record.attach({
-        record: {
-          type: 'file',
-          id: fileID
-        },
-        to: {
-          type: context.parentRecordType,
-          id: context.parentId
-        }
-      });
+      
+      if (context.parentId !== null) {
+        // Attach record
+        record.attach({
+          record: {
+            type: 'file',
+            id: fileID
+          },
+          to: {
+            type: context.parentRecordType,
+            id: context.parentId
+          }
+        });
+      }
 
       return fileID;
     }
