@@ -2,8 +2,8 @@
  *@NApiVersion 2.1
  *@NScriptType Restlet
  */
-define(['N/record', 'N/email', 'N/file', 'N/error', 'N/log'],
-  (record, email, file, error, log) => {
+define(['N/record', 'N/error', 'N/log', './attachFileToRecord.js', './sendErrorEmail.js'],
+  (record, error, log, file, email) => {
     /**
      * Validates arguments
      * @param {Array} args The record type and optional record id
@@ -29,6 +29,16 @@ define(['N/record', 'N/email', 'N/file', 'N/error', 'N/log'],
     const createLead = context => {
       doValidation([context.recordtype], ['recordtype'], 'POST');
 
+      log.debug({
+        title: 'CONTEXT',
+        details: context
+      });
+
+      log.debug({
+        title: 'CONTEXT STRING',
+        details: JSON.stringify(context)
+      });
+
       try {
         const rec = record.create({
           type: context.recordtype,
@@ -49,12 +59,16 @@ define(['N/record', 'N/email', 'N/file', 'N/error', 'N/log'],
         // Save record and return id
         const recordID = rec.save();
         // file name
-        const fileName = context.firstname + ' ' + context.lastname + ' - ' + recordID + ' - Drivers License';
-        const fileID = attachFile(recordID, fileName, context.filedata);
+        const fileName = context.firstname + ' ' + context.lastname + ' : Drivers License : ' + recordID;
+        // const fileID = attachFile(recordID, fileName, context.filedata);
+        const folderID = 760;
+        const recordType = 'lead';
+        const fileID = file.attach(folderID, recordType, recordID, fileName, context.filedata);
         log.debug({
           title: 'FILE: ' + fileID,
           details: 'File created and attached to: ' + recordID
         });
+        // return String(recordID);
         return { id: recordID };
       } catch (e) {
         // send notification email
@@ -62,78 +76,9 @@ define(['N/record', 'N/email', 'N/file', 'N/error', 'N/log'],
           title: 'ERROR CREATING LEAD',
           details: e.message
         });
-        sendEmail(e.message, context);
+        email.send('Error Professional Creating Lead', e.message, context);
         return { error: e.message };
       }
-    }
-
-    const attachFile = (leadID, fileName, fileData) => {
-
-      let fileType;
-      if (fileData.type === 'jpg' || fileData.type === 'jpeg') {
-        fileType = file.Type.JPGIMAGE;
-      } else if (fileData.type === 'png') {
-        fileType = file.Type.PNGIMAGE;
-      } else {
-        fileType = file.Type.PDF;
-      }
-
-      const fileRecord = file.create({
-        name: fileName,
-        fileType: fileType,
-        contents: fileData.contents,
-        encoding: file.Encoding.UTF8,
-        folder: 760, // 760
-        isOnline: false
-      });
-
-      var fileID = fileRecord.save();
-
-      log.debug({
-        title: 'FILE SAVE',
-        details: fileID
-      });
-
-      if (leadID !== null) {
-        // Attach record
-        record.attach({
-          record: {
-            type: 'file',
-            id: fileID
-          },
-          to: {
-            type: 'lead',
-            id: leadID
-          }
-        });
-      }
-
-      return fileID;
-    }
-
-    /**
-     * Sends an email to Admin with Error Message + Original Post Data
-     * @param {string} errorMsg - The Error Message
-     * @param {Object} data - Post Data from Wholesale Application
-     */
-    const sendEmail = (errorMsg, data) => {
-
-      const html = '<p><b>ERROR:</b> ' + errorMsg + '</p>' +
-        '<p><b>DATA: </b></p>' +
-        '<p>' + JSON.stringify(data, null, 4) + '</p>';
-
-      log.debug({
-        title: 'SENDING EMAIL HTML',
-        details: html
-      });
-
-      email.send({
-        author: 207,
-        recipients: 207,
-        replyTo: 'jriv@suavecito.com',
-        subject: 'ERROR CREATING LEAD',
-        body: html
-      });
     }
 
     // Export Functions

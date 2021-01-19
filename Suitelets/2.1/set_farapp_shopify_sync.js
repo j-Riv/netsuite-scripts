@@ -264,7 +264,7 @@ define(['N/record', 'N/runtime', 'N/ui/serverWidget', 'N/search', 'N/ui/message'
           retailShopifyTags: retailShopifyTags ? retailShopifyTags : 'N/A',
           wholesaleShopifyTags: wholesaleShopifyTags ? wholesaleShopifyTags : 'N/A',
           warehouseShopifyTags: warehouseShopifyTags ? warehouseShopifyTags : 'N/A',
-          professionalShopifyTags: professionalShopifyTags ? wprofessionalhopifyTags : 'N/A',
+          professionalShopifyTags: professionalShopifyTags ? professionalShopifyTags : 'N/A',
           inventoryLocation: inventoryLocation ? inventoryLocation : 'N/A',
           locationQuantityAvailable: locationQuantityAvailable ? locationQuantityAvailable : 'N/A'
         });
