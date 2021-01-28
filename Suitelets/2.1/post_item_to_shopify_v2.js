@@ -95,6 +95,10 @@ define(
         value: 'warehouse',
         text: 'WAREHOUSE'
       });
+      storeSelect.addSelectOption({
+        value: 'professional',
+        text: 'PROFESSIONAL'
+      });
       storeSelect.setHelpText({
         help: 'The Shopify store to create the product in.'
       });
@@ -261,9 +265,12 @@ define(
           'weightunit',
           'baseprice',
           'price2',
-          'custitem_fa_shpfy_warehouse_price',
           'description',
-          'custitem_sp_brand'
+          'custitem_sp_brand',
+          'custitem_fa_shpfy_warehouse_price',
+          'custitem_fa_shpfy_prod_description_wh',
+          'custitem_fa_shpfy_professional_price',
+          'custitem_fa_shpfy_prod_description_pro'
         ]
       });
 
@@ -308,12 +315,16 @@ define(
         productDescription = 'custitem_fa_shpfy_prod_description_ws';
         shopifyTags = 'custitem_fa_shpfy_tags_ws';
         compareAtPrice = 'custitem_fa_shpfy_compare_at_price_ws';
-      } else {
+      } else if (store === 'warehouse') {
         priceLevel = 'custitem_fa_shpfy_warehouse_price';
-        productDescription = 'custitem_fa_shpfy_prod_description';
+        productDescription = 'custitem_fa_shpfy_prod_description_wh';
         shopifyTags = 'custitem_fa_shpfy_tags_wh';
         compareAtPrice = 'custitem_fa_shpfy_compare_at_price_wh';
-        // compareAtPrice = 'baseprice';
+      } else {
+        priceLevel = 'custitem_fa_shpfy_professional_price';
+        productDescription = 'custitem_fa_shpfy_prod_description_pro';
+        shopifyTags = 'custitem_fa_shpfy_tags_pro';
+        compareAtPrice = 'custitem_fa_shpfy_compare_at_price_pro';
       }
 
       const isMatrix = item.getValue('matrix');
@@ -409,8 +420,10 @@ define(
           'description',
           'custitem_sp_size',
           'custitem_sp_color',
-          'custitem_fa_shpfy_compare_at_price',
-          'custitem_fa_shpfy_compare_at_price_ws'
+          'custitem_fa_shpfy_warehouse_price',
+          'custitem_fa_shpfy_prod_description_wh',
+          'custitem_fa_shpfy_professional_price',
+          'custitem_fa_shpfy_prod_description_pro'
         ]
       });
 
@@ -486,12 +499,15 @@ define(
         storeURL = 'https://suavecito.myshopify.com/admin/products/';
       } else if (store === 'wholesale') {
         storeURL = 'https://suavecito-wholesale.myshopify.com/admin/products/';
-      } else {
+      } else if (store === 'warehouse') {
         storeURL = 'https://suavecito-warehouse.myshopify.com/admin/products/';
-      }i 
+      } else {
+        storeURL = 'https://suavecito-professionals.myshopify.com/admin/products/'
+      }
 
       // https - send data to server
-      const url = 'https://' + serverURL + '/api/shopify/' + store + '/create-item';
+      // const url = 'https://' + serverURL + '/api/shopify/' + store + '/create-item';
+      const url = 'https://' + serverURL + '/api/shopify/create-item/' + store;
       try {
         const itemObjHmac = createHmac(itemObj);
         const headersObj = {
@@ -637,13 +653,13 @@ define(
      * @returns {string} 
      */
     const convertWeightUnit = w => {
-      if (w = 'lb') {
+      if (w === 'lb') {
         return 'POUNDS';
-      } else if (w = 'oz') {
+      } else if (w === 'oz') {
         return 'OUNCES';
-      } else if (w = 'kg') {
+      } else if (w === 'kg') {
         return 'KILOGRAMS';
-      } else if (w = 'g') {
+      } else if (w === 'g') {
         return 'GRAMS';
       } else {
         return null;
