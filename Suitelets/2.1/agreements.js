@@ -79,6 +79,12 @@ define(['N/search', 'N/file', 'N/record', 'N/ui/serverWidget', 'N/ui/message', '
         url: '/app/site/hosting/scriptlet.nl?script=1062&deploy=1'
       });
 
+      form.addPageLink({
+        type: serverWidget.FormPageLinkType.CROSSLINK,
+        title: 'Generate MAP Agreement',
+        url: '/app/site/hosting/scriptlet.nl?script=1065&deploy=1'
+      });
+
       response.writePage(form);
     }
 
@@ -141,6 +147,11 @@ define(['N/search', 'N/file', 'N/record', 'N/ui/serverWidget', 'N/ui/message', '
 
     const createPage = results => {
       const form = serverWidget.createForm({ title: 'MAP Agreements' });
+      form.addPageLink({
+        type: serverWidget.FormPageLinkType.CROSSLINK,
+        title: 'Generate MAP Agreement',
+        url: '/app/site/hosting/scriptlet.nl?script=1065&deploy=1'
+      });
 
       if (results) {
         form.clientScriptModulePath = 'SuiteScripts/agreements_client.js';

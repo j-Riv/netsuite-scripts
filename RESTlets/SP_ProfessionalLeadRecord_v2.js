@@ -59,9 +59,8 @@ define(['N/record', 'N/error', 'N/log', './attachFileToRecord.js', './sendErrorE
         // Save record and return id
         const recordID = rec.save();
         // file name
-        const fileName = context.firstname + ' ' + context.lastname + ' : Drivers License : ' + recordID;
-        // const fileID = attachFile(recordID, fileName, context.filedata);
-        const folderID = 760;
+        const fileName = context.firstname + ' ' + context.lastname + ' : Barber / Cosmo License : ' + recordID;
+        const folderID = 758;
         const recordType = 'lead';
         const fileID = file.attach(folderID, recordType, recordID, fileName, context.filedata);
         log.debug({

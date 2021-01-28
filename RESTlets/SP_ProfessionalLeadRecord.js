@@ -49,7 +49,7 @@ define(['N/record', 'N/email', 'N/file', 'N/error', 'N/log'],
         // Save record and return id
         const recordID = rec.save();
         // file name
-        const fileName = context.firstname + ' ' + context.lastname + ' - ' + recordID + ' - Drivers License';
+        const fileName = context.firstname + ' ' + context.lastname + ' : Barber / Cosmo License : ' + recordID;
         const fileID = attachFile(recordID, fileName, context.filedata);
         log.debug({
           title: 'FILE: ' + fileID,
@@ -83,7 +83,7 @@ define(['N/record', 'N/email', 'N/file', 'N/error', 'N/log'],
         fileType: fileType,
         contents: fileData.contents,
         encoding: file.Encoding.UTF8,
-        folder: 760, // 760
+        folder: 758, // Barber License
         isOnline: false
       });
 

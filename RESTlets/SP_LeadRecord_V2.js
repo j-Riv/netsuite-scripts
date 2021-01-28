@@ -2,8 +2,8 @@
  *@NApiVersion 2.1
  *@NScriptType Restlet
  */
-define(['N/record', 'N/error', 'N/email', 'N/log'],
-  (record, error, email, log) => {
+define(['N/record', 'N/error', 'N/log', './attachFileToRecord.js', './sendErrorEmail.js'],
+  (record, error, log, file, email) => {
     /**
      * Validates arguments
      * @param {Array} args The record type and optional record id
@@ -99,43 +99,30 @@ define(['N/record', 'N/error', 'N/email', 'N/log'],
           }
         }
         // Save record and return id
-
-        const recordId = rec.save();
-        return String(recordId);
+        const recordID = rec.save();
+        // Attach file if it exists
+        if (context.filedata) {
+          // file name
+          const fileName = context.companyname + ' : MAP Agreement : ' + recordID;
+          const folderID = 753;
+          const recordType = 'lead';
+          const fileID = file.attach(folderID, recordType, recordID, fileName, context.filedata);
+          log.debug({
+            title: 'FILE: ' + fileID,
+            details: 'File created and attached to: ' + recordID
+          });
+        }
+        // return String(recordID);
+        return String(recordID);
       } catch (e) {
         // send notification email
         log.error({
           title: 'ERROR CREATING LEAD',
           details: e.message
         });
-        sendEmail(e.message, context);
+        email.send('Error Wholesale Creating Lead', e.message, context);
         return { error: e.message };
       }
-    }
-
-    /**
-     * Sends an email to Admin with Error Message + Original Post Data
-     * @param {string} errorMsg - The Error Message
-     * @param {Object} data - Post Data from Wholesale Application
-     */
-    const sendEmail = (errorMsg, data) => {
-
-      const html = '<p><b>ERROR:</b> ' + errorMsg + '</p>' +
-        '<p><b>DATA: </b></p>' +
-        '<p>' + JSON.stringify(data, null, 4) + '</p>';
-
-      log.debug({
-        title: 'SENDING EMAIL HTML',
-        details: html
-      });
-
-      email.send({
-        author: 207,
-        recipients: 207,
-        replyTo: 'jriv@suavecito.com',
-        subject: 'ERROR CREATING LEAD',
-        body: html
-      });
     }
 
     // Export Functions

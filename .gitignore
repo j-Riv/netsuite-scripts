@@ -40,3 +40,6 @@ ManualTools/public/csv/*
 !ManualTools/public/csv/README.md
 ManualTools/public/pdf/*
 !ManualTools/public/pdf/README.md
+
+# exclude files
+SuiteLets/2.1/generate_map_agreement.js
