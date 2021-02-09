@@ -14,14 +14,14 @@ define(['N/record'],
     function addComb(context) {
       var salesRecord = context.newRecord;
       // ebay
-      if (salesRecord.getValue('custbody_fa_channel') == 'eBay') {
+      if (salesRecord.getValue('custbody_fa_channel') === 'eBay') {
         // check if already in order production: 30457 / SB: 30559
         var lines = salesRecord.getLineCount({ sublistId: 'item' });
         var add_comb = true;
         var quantity = 0;
         for (var i = 0; i < lines; i++) {
           var id = salesRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_sp_item_id', line: i });
-          if (Number(id) == 30457) {
+          if (Number(id) === 30457) {
             add_comb = false;
           } else {
             quantity = quantity + Number(salesRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i }));
@@ -72,6 +72,7 @@ define(['N/record'],
 
         return true;
       }
+      return false;
     }
     return {
       onAction: addComb

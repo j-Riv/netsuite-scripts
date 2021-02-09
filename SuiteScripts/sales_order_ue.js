@@ -15,11 +15,11 @@ define(['N/record', 'N/log'], function (record, log) {
     var marketplace = currentRecord.getValue({ fieldId: 'custbody_fa_channel' });
     if (marketplace !== '') {
       var salesRep;
-      if (marketplace == 'Shopify') {
+      if (marketplace === 'Shopify') {
         // salesRep = 'Online Store';
         salesRep = 73559;
       }
-      if (marketplace == 'Shopify-WholesaleShopify') {
+      if (marketplace === 'Shopify-WholesaleShopify') {
         // salesRep = 'Partner Store';
         salesRep = 73560;
       }
@@ -27,9 +27,15 @@ define(['N/record', 'N/log'], function (record, log) {
         // salesRep = 'Amazon Store';
         salesRep = 73562;
       }
-      if (marketplace == 'eBay') {
+      if (marketplace === 'eBay') {
         // salesRep = 'eBay Store';
         salesRep = 73561;
+      }
+      if (marketplace === 'Professional') {
+        salesRep = 2064179;
+      }
+      if (marketplace === 'Warehouse') {
+        salesRep = 2064180;
       }
       // set sales rep
       currentRecord.setValue({ fieldId: 'salesrep', value: salesRep });

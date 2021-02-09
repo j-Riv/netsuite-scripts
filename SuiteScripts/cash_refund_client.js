@@ -56,29 +56,62 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log', 'N/runtime'],
 
       if (isTaxable) {
         var total = parseFloat(cashRefund.getValue('total'));
+        var subTotal = parseFloat(cashRefund.getValue('subtotal'));
         var totalTax = parseFloat(cashRefund.getValue('taxtotal'));
         var discount = parseFloat(cashRefund.getValue('discounttotal'));
+        var shipCost = parseFloat(cashRefund.getValue('shippingcost'));
         // get FarApp Data
         var faData = cashRefund.getValue('custbody_fa_order_total');
         if (faData != '') {
           faData = JSON.parse(faData);
-          var faShipTaxRate = parseFloat(cashRefund.getValue('custbody_fa_shipping_tax'));
+          var faItemTotal = parseFloat(faData.itemTotal);
+          var faOrderTotal = parseFloat(faData.orderTotal);
+          var faShipCost = parseFloat(faData.shippingCost);
+          var faDiscountCost = parseFloat(faData.discountCost);
           var faShipTax = parseFloat(faData.shippingTax);
+          var faTaxTotal = parseFloat(faData.taxTotal);
+          var faShipTaxRate = parseFloat(cashRefund.getValue('custbody_fa_shipping_tax'));
+          var itemTaxRate = (faTaxTotal / faItemTotal) * 100;
+          
+          logger(faOrder, subtotal, discount, totalTax, shipCost, total);
+          // set tax rate for all line items
+          var lines = cashRefund.getLineCount({ sublistId: 'item' });
+          for (var i = 0; i < lines; i++) {
+            var itemTaxCode = cashRefund.getSublistText({ sublistId: 'item', fieldId: 'taxcode', line: i });
+            if (itemTaxCode !== '-Not Taxable-') {              
+              cashRefund.selectLine({ sublistId: 'item', line: i });
+              cashRefund.setCurrentSublistValue({ sublistId: 'item', fieldId: 'taxrate1', value: itemTaxRate, ignoreFieldChange: true });
+              cashRefund.commitLine({ sublistId: 'item' });
+            }
+          }
 
           if (!isNaN(faShipTaxRate)) {
-            if (parseFloat(cashRefund.getValue('shippingtax1rate')) != faShipTaxRate) {
+            var taxRate;
+            if (cashRefund.getValue('shippingtax1rate') === '') {
+              taxRate = 0;
+            } else {
+              taxRate = cashRefund.getValue('shippingtax1rate');
+            }
+            if (parseFloat(taxRate) !== faShipTaxRate) {
+              console.log('Shipping Tax (' + cashRefund.getValue('shippingtax1rate') + ') !== (' + faShipTaxRate + ')');
               var taxCode = cashRefund.getSublistValue({ sublistId: 'item', fieldId: 'taxcode', line: 0 });
               cashRefund.setValue({ fieldId: 'shippingtaxcode', value: taxCode, ignoreFieldChange: true });
               cashRefund.setValue({ fieldId: 'shippingtax1rate', value: faShipTaxRate });
-              cashRefund.setValue({ fieldId: 'taxtotal', value: totalTax + faShipTax });
-              var updatedTotal = (total + faShipTax) - discount;
+              cashRefund.setValue({ fieldId: 'taxtotal', value: faTaxTotal + faShipTax, ignoreFieldChange: true });
+              var updatedTotal = (subTotal + faShipTax + faTaxTotal) - discount;
+              cashRefund.setValue({ fieldId: 'total', value: updatedTotal });
+            } else {
+              console.log('Updating Tax Total: ' + totalTax);
+              cashRefund.setValue({ fieldId: 'taxtotal', value: faTaxTotal });
+              var updatedTotal = subTotal - discount + faTaxTotal;
               cashRefund.setValue({ fieldId: 'total', value: updatedTotal });
             }
             // log & display dialog
-            logger(faOrder, total, updatedTotal, faShipTaxRate);
+            logger(faOrder, subtotal, faDiscountCost, faTaxTotal + faShipTax, faShipCost, updatedTotal);
             dialog.alert({
               title: 'Tax / Total Updated',
-              message: 'If your processing a full refund, please make sure the Cash Refund total matches the Cash Sale and or Sales Order attached before saving.'
+              message: 'If your processing a full refund, please make sure the Cash Refund total matches the Cash Sale and or Sales Order attached before saving. ' +
+                ''
             });
           } else {
             dialog.alert({
@@ -97,10 +130,10 @@ define(['N/currentRecord', 'N/ui/dialog', 'N/log', 'N/runtime'],
       }
     }
 
-    function logger(orderNumber, total, updatedTotal, shipTaxRate) {
+    function logger(orderNumber, subTotal, discount, taxTotal, shipCost, total) {
       var currentUser = runtime.getCurrentUser();
-      var details = 'USER: ' + currentUser.email + ' | ORDER: ' + orderNumber + ' | TOTAL: ' + total + 
-        ' | UPDATED TOTAL: ' + updatedTotal + ' | SHIP TAX RATE: ' + shipTaxRate;
+      var details = 'USER: ' + currentUser.email + ' | ORDER: ' + orderNumber + ' | SUBTOTAL: ' + subTotal + 
+        ' | DISCOUNT: ' + discount + ' | TAX TOTAL: ' + taxTotal + ' | SHIP COST: ' + shipCost + ' | TOTAL: ' + total;
       console.log(details);
       log.debug({
         title: 'UPDATED ' + orderNumber,
